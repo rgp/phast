@@ -7,6 +7,8 @@
 
 [ \t]*  //Omitir tabs y espacios
 [\n]  { yylineno++; }
+<\? { return PH_OT; }
+\?> { return PH_CT; }
 
 [a-zA-Z_][_|a-zA-Z|0-9]* { return ID; }
 [0-9]+ { yylval.int_val = atoi(yytext); return INT; }
