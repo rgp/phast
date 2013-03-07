@@ -16,8 +16,8 @@ extern char *yytext;
 }
 
 %start	phast 
+%error-verbose
 
-%token <string*> COMENTARIO 
 %token <string*> VERBOSE_BLOCK 
 
 %token <string*> ID 
@@ -63,7 +63,7 @@ extern char *yytext;
 */
 %%
 
-phast : PH_OT estatuto PH_CT
+phast :  estatuto 
 estatuto : definicion_variable
          | definicion_arreglo
          | bloque
