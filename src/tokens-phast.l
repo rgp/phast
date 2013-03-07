@@ -1,12 +1,22 @@
 %{
 #include "../../src/heading.h"
 #include "../../bison/src/bison.h"
+/*
+
+//.*[^\n] { return COMMENT; }
+#.*[^\n] { return COMMENT; }
+*/
 %}
 %option noyywrap
 %%
 
 [ \t]*  //Omitir tabs y espacios
 [\n]  { yylineno++; }
+
+\<\? { return PH_OT; }
+\?\> { return PH_CT; }
+
+[/]\*[/] { return COMMENT; }
 
 [0-9]+ { yylval.int_val = atoi(yytext); return INT; }
 [0-9]+\.[0-9]+ { yylval.float_val = atof(yytext); return FLOAT; }
@@ -40,7 +50,7 @@ throw { return WORD_THROW; }
 class { return WORD_CLASS; }
 [a-zA-Z_][_|a-zA-Z|0-9]* { return ID; }
 ['\"].*[\"'] { return STRING; }
-[=\+\-\*/><;:,\{\}\(\)\.]	{ return yytext[0];  /*TODO Operadores */ } 
+[=\+\-\*/><;:,\{\}\(\)\.\[\]]	{ return yytext[0];  /*TODO Operadores */ } 
 . { return VERBOSE_BLOCK;  /* printf("Unknown or invalid token: %s\n",yytext); TODO */  }
 %%
 

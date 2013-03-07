@@ -16,9 +16,9 @@ extern char *yytext;
 }
 
 %start	phast 
-%error-verbose
 
 %token <string*> VERBOSE_BLOCK 
+%token <string*> COMMENT
 
 %token <string*> ID 
 %token <int> INT 
@@ -57,13 +57,15 @@ extern char *yytext;
 %token <string*> PH_OT 
 %token <string*> PH_CT
 
+%error-verbose
+
 /* TODO Operators 
 %left '-' '+'
 %left '*' '/'
 */
 %%
 
-phast :  estatuto 
+phast :  PH_OT estatuto PH_CT
 estatuto : definicion_variable
          | definicion_arreglo
          | bloque
@@ -77,6 +79,7 @@ _arr_elems: ',' _arr_elem
 _arr_elem: arreglo
          | _arr_key '=' '>' _arr_val
          | _arr_val
+         |
 _arr_key: ID
         | STRING
         | INT
