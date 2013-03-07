@@ -63,20 +63,53 @@ extern char *yytext;
 phast : PHOT estatuto PH_CT
 estatuto : definicion_varible | definicion_arreglo | bloque | estatuto
 estatuto : 
-definicion_variable : ID "=" expresion ";"
-definicion_arreglo : ID "=" "[" expresion (("," expresion)*)? "]" ";"
-expresion : TRUE | FALSE | ID | STRING | operacion | arreglo | cte
-operacion : expresion "+" expresion | expresion "-" expresion | expresion "*" expresion | expresion "/" expresion | expresion AND expresion | expresion OR expresion | expresion  "++" | expresion "--"
-bloque : bloque_while | bloque_do | bloque_verbose | bloque_if | bloque_for | bloque_fun
-bloque_while : "while" "(" expresion ")" "{" estatuto "}"
-bloque_do : "do" "{" estatuto "}" "while" "(" expresion ")" ";" 
-bloque_verbose : "verbose" "{" (.)* "}"
-bloque_if : "if"  "(" expresion ")" "{" estatuto "}"
-bloque_for : "for" "("definicion_variables? ";" expresion ";" operacion ")" "{" estatuto "}"
-bloque_fun : "fun" ID "(" ID (("," ID)*)? ")" "{" estatuto "}"
-arreglo: ID "[" expresion "]" ";"
-cte : INT | FLOAT
-
+definicion_variable : ID '=' expresion ';'
+definicion_arreglo : ID '=' _arr
+arreglo: '[' _arr_elem _arr_elems ']'
+_arr_elems: ',' _arr_elem
+          |
+_arr_elem: arreglo
+         | _arr_key '=' '>' _arr_val
+         | _arr_val
+_arr_key: ID
+        | STRING
+        | INT
+_arr_val: ID
+        | STRING
+        | INT
+        | FLOAT
+expresion : TRUE
+          | FALSE
+          | ID
+          | STRING
+          | operacion
+          | arreglo | cte
+operacion : expresion '+' expresion
+          | expresion '-' expresion
+          | expresion '*' expresion 
+          | expresion '/' expresion 
+          | expresion AND expresion 
+          | expresion OR expresion
+          | expresion  '++'
+          | expresion '--'
+bloque : bloque_while
+       | bloque_do 
+       | bloque_verbose
+       | bloque_if
+       | bloque_for
+       | bloque_fun
+bloque_while : 'while' '(' expresion ')' '{' estatuto '}'
+bloque_do : 'do' '{' estatuto '}' 'while' '(' expresion ')' ';' 
+bloque_verbose : 'verbose' '{' (.)* '}'
+bloque_if : 'if'  '(' expresion ')' '{' estatuto '}'
+bloque_for : 'for' '('_for_var_def_aux ';' expresion ';' operacion ')' '{' estatuto '}'
+_for_var_def_aux: ID '=' expresion
+                |
+bloque_fun : 'fun' ID '(' _params ')' '{' estatuto '}'
+_params: ID _params_aux
+       |
+_params_aux: ',' ID _params_aux
+           |
 %%
 
 int yyerror(char* s) 
