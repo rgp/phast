@@ -11,7 +11,7 @@ edad = 3;
 /* definicion de arreglos */
 patos = []; /* arreglo vacío */
 animales = [patos, perro_gato];
-construcciones = ["edificio" => "empire state","casas" => ["los pinos"], "puente" => "golden gate"]
+construcciones = ["edificio" => "empire state","casas" => ["los pinos"], "puente" => "golden gate"];
 
 /* ciclos */
 while( a = 8 )

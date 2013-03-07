@@ -7,7 +7,7 @@ edad = 3;
 
 patos = [];
 animales = [patos, perro_gato];
-construcciones = ["edificio" => "empire state","casas" => ["los pinos"], "puente" => "golden gate"]
+construcciones = ["edificio" => "empire state","casas" => ["los pinos"], "puente" => "golden gate"];
 
 while( a = 8 )
 {
