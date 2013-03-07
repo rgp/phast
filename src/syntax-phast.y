@@ -64,10 +64,11 @@ extern char *yytext;
 */
 %%
 
-phast :  PH_OT estatuto PH_CT
+phast :  PH_OT estatutos PH_CT
+estatutos: estatuto estatutos
+         |
 estatuto : asignacion ';'
          | bloque
-         | estatuto estatuto
          | _fun_call ';'
          |
 asignacion: ID '=' expresion
@@ -76,28 +77,31 @@ expresion : WORD_TRUE
           | ID
           | STRING
           | operacion
-          | arreglo
+          /*| arreglo*/
           | numero
           | _fun_call
+/*
 arreglo: '[' _arr_elem _arr_elems ']'
-_arr_elems: ',' _arr_elem
+_arr_elems: ',' _arr_elem _arr_elems
           |
 _arr_elem: /*_arr_key '=' '>' _arr_val
-         | */ _arr_val
+         | */ /*_arr_val
          |
+*/
 /*
 _arr_key: ID
         | STRING
         | INT
 */
+/*
 _arr_val: ID
         | STRING
         | INT
         | FLOAT
         | arreglo
-arreglo: ID '[' expresion ']'
+*/
 numero : INT 
-    | FLOAT
+       | FLOAT
 operacion : expresion '+' expresion
           | expresion '-' expresion
           | expresion '*' expresion 
@@ -119,7 +123,7 @@ bloque_do : WORD_DO '{' estatuto '}' WORD_WHILE '(' expresion ')' ';'
 bloque_verbose : WORD_VERBOSE '{' VERBOSE_BLOCK '}'
 bloque_if : WORD_IF  '(' expresion ')' '{' estatuto '}'
 bloque_for : WORD_FOR '('_for_var_def_aux ';' expresion ';' operacion ')' '{' estatuto '}'
-_for_var_def_aux: ID '=' expresion
+_for_var_def_aux: asignacion
                 |
 bloque_fun : WORD_FUN ID '(' _params ')' '{' estatuto '}'
 _fun_call: ID '('expresion ')' 

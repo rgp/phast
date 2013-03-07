@@ -16,7 +16,7 @@
 \<\? { return PH_OT; }
 \?\> { return PH_CT; }
 
-"//".*\n { /* Comete los comentarios */ }
+"//".*\n { yylineno++; /* Comete los comentarios */ }
 
 [0-9]+ { yylval.int_val = atoi(yytext); return INT; }
 [0-9]+\.[0-9]+ { yylval.float_val = atof(yytext); return FLOAT; }
