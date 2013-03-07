@@ -70,6 +70,7 @@ estatuto : definicion_variable
          | definicion_arreglo
          | bloque
          | estatuto estatuto
+         | _fun_call ';'
          |
 definicion_variable : ID '=' expresion ';'
 definicion_arreglo : ID '=' arreglo
@@ -94,6 +95,7 @@ expresion : WORD_TRUE
           | operacion
           | arreglo
           | cte
+          | _fun_call
 arreglo: ID '[' expresion ']'
 cte : INT 
     | FLOAT
@@ -101,6 +103,7 @@ operacion : expresion '+' expresion
           | expresion '-' expresion
           | expresion '*' expresion 
           | expresion '/' expresion 
+          | expresion '=' expresion 
           | expresion WORD_AND expresion 
           | expresion WORD_OR expresion
           | expresion _op
@@ -120,6 +123,7 @@ bloque_for : WORD_FOR '('_for_var_def_aux ';' expresion ';' operacion ')' '{' es
 _for_var_def_aux: ID '=' expresion
                 |
 bloque_fun : WORD_FUN ID '(' _params ')' '{' estatuto '}'
+_fun_call: ID '('expresion ')' 
 _params: ID _params_aux
        |
 _params_aux: ',' ID _params_aux
