@@ -9,7 +9,7 @@ run: build   #make run f=INPUT_FILE
 
 ### BISON
 bison.c : 
-	bison src/sintax-phast.y -d -v -o bison/src/bison.c
+	bison src/syntax-phast.y -d -v -o bison/src/bison.c
 
 ### LEX
 lex.c : 
