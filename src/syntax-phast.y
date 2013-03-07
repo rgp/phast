@@ -18,7 +18,6 @@ extern char *yytext;
 %start	phast 
 
 %token <string*> VERBOSE_BLOCK 
-%token <string*> COMMENT
 
 %token <string*> ID 
 %token <int> INT 
@@ -66,44 +65,44 @@ extern char *yytext;
 %%
 
 phast :  PH_OT estatuto PH_CT
-estatuto : definicion_variable
-         | definicion_arreglo
+estatuto : asignacion ';'
          | bloque
          | estatuto estatuto
          | _fun_call ';'
          |
-definicion_variable : ID '=' expresion ';'
-definicion_arreglo : ID '=' arreglo
-arreglo: '[' _arr_elem _arr_elems ']'
-_arr_elems: ',' _arr_elem
-          |
-_arr_elem: arreglo
-         | _arr_key '=' '>' _arr_val
-         | _arr_val
-         |
-_arr_key: ID
-        | STRING
-        | INT
-_arr_val: ID
-        | STRING
-        | INT
-        | FLOAT
+asignacion: ID '=' expresion
 expresion : WORD_TRUE
           | WORD_FALSE
           | ID
           | STRING
           | operacion
           | arreglo
-          | cte
+          | numero
           | _fun_call
+arreglo: '[' _arr_elem _arr_elems ']'
+_arr_elems: ',' _arr_elem
+          |
+_arr_elem: /*_arr_key '=' '>' _arr_val
+         | */ _arr_val
+         |
+/*
+_arr_key: ID
+        | STRING
+        | INT
+*/
+_arr_val: ID
+        | STRING
+        | INT
+        | FLOAT
+        | arreglo
 arreglo: ID '[' expresion ']'
-cte : INT 
+numero : INT 
     | FLOAT
 operacion : expresion '+' expresion
           | expresion '-' expresion
           | expresion '*' expresion 
           | expresion '/' expresion 
-          | expresion '=' expresion 
+          | expresion '=''=' expresion 
           | expresion WORD_AND expresion 
           | expresion WORD_OR expresion
           | expresion _op

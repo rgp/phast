@@ -16,7 +16,7 @@
 \<\? { return PH_OT; }
 \?\> { return PH_CT; }
 
-[/]\*[/] { return COMMENT; }
+"//".*\n { /* Comete los comentarios */ }
 
 [0-9]+ { yylval.int_val = atoi(yytext); return INT; }
 [0-9]+\.[0-9]+ { yylval.float_val = atof(yytext); return FLOAT; }
@@ -47,7 +47,6 @@ xor { return WORD_XOR; }
 try { return WORD_TRY; }
 catch { return WORD_CATCH; }
 throw { return WORD_THROW; }
-class { return WORD_CLASS; }
 [a-zA-Z_][_|a-zA-Z|0-9]* { return ID; }
 ['\"].*[\"'] { return STRING; }
 [=\+\-\*/><;:,\{\}\(\)\.\[\]]	{ return yytext[0];  /*TODO Operadores */ } 
