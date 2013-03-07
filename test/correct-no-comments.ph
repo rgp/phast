@@ -12,7 +12,7 @@ construcciones = ["edificio" => "empire state","casas" => ["los pinos"], "puente
 while( a = 8 )
 {
     print(a);
-a++; 
+    a++; 
 }
 
 

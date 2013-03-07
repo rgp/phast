@@ -1,5 +1,7 @@
 <?
-/*definicion de variables "on the fly"*/
+/* 
+definicion de variables "on the fly"
+ */
 a = 3;
 alfa = "string";
 beta = 3.2;
