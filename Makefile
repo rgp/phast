@@ -9,11 +9,11 @@ run: build   #make run f=INPUT_FILE
 
 ### BISON
 bison.c : 
-	bison src/sintax.y -d -v -o bison/src/bison.c
+	bison src/sintax-phast.y -d -v -o bison/src/bison.c
 
 ### LEX
 lex.c : 
-	flex -o flex/src/lex.c src/tokens.l
+	flex -i -o flex/src/lex.c src/tokens-phast.l
 
 ### CLEAN TASKS
 clean: clean_lex_src clean_bis_src
