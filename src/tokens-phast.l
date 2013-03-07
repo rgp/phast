@@ -46,5 +46,5 @@ catch { return WORD_CATCH; }
 throw { return WORD_THROW; }
 class { return WORD_CLASS; }
 [=\+\-\*/><;:,\{\}\(\)\.]	{ return yytext[0]; //TODO Operadores} 
-. { printf("Unknown or invalid token: %s\n",yytext); // TODO }
+. { return VERBOSE_BLOCK; /* printf("Unknown or invalid token: %s\n",yytext);*/ // TODO }
 %%

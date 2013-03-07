@@ -17,11 +17,15 @@ extern char *yytext;
 
 %start	phast 
 
+%token <string*> COMENTARIO 
+%token <string*> VERBOSE_BLOCK 
+
 %token <string*> ID 
 %token <int> INT 
 %token <float> FLOAT 
 %token <string*> STRING 
-%token <string*> COMENTARIO 
+%token <string*> WORD_FALSE 
+%token <string*> WORD_TRUE
 %token <string*> WORD_IF 
 %token <string*> WORD_ELSE 
 %token <string*> WORD_WHILE 
@@ -49,7 +53,6 @@ extern char *yytext;
 %token <string*> WORD_TRY 
 %token <string*> WORD_CATCH 
 %token <string*> WORD_THROW 
-%token <string*> WORD_CLASS 
 
 %token <string*> PH_OT 
 %token <string*> PH_CT
@@ -60,11 +63,14 @@ extern char *yytext;
 */
 %%
 
-phast : PHOT estatuto PH_CT
-estatuto : definicion_varible | definicion_arreglo | bloque | estatuto
-estatuto : 
+phast : PH_OT estatuto PH_CT
+estatuto : definicion_variable
+         | definicion_arreglo
+         | bloque
+         | estatuto estatuto
+         |
 definicion_variable : ID '=' expresion ';'
-definicion_arreglo : ID '=' _arr
+definicion_arreglo : ID '=' arreglo
 arreglo: '[' _arr_elem _arr_elems ']'
 _arr_elems: ',' _arr_elem
           |
@@ -78,34 +84,39 @@ _arr_val: ID
         | STRING
         | INT
         | FLOAT
-expresion : TRUE
-          | FALSE
+expresion : WORD_TRUE
+          | WORD_FALSE
           | ID
           | STRING
           | operacion
-          | arreglo | cte
+          | arreglo
+          | cte
+arreglo: ID '[' expresion ']'
+cte : INT 
+    | FLOAT
 operacion : expresion '+' expresion
           | expresion '-' expresion
           | expresion '*' expresion 
           | expresion '/' expresion 
-          | expresion AND expresion 
-          | expresion OR expresion
-          | expresion  '++'
-          | expresion '--'
+          | expresion WORD_AND expresion 
+          | expresion WORD_OR expresion
+          | expresion _op
+_op: '+''+'
+   | '-''-'
 bloque : bloque_while
        | bloque_do 
        | bloque_verbose
        | bloque_if
        | bloque_for
        | bloque_fun
-bloque_while : 'while' '(' expresion ')' '{' estatuto '}'
-bloque_do : 'do' '{' estatuto '}' 'while' '(' expresion ')' ';' 
-bloque_verbose : 'verbose' '{' (.)* '}'
-bloque_if : 'if'  '(' expresion ')' '{' estatuto '}'
-bloque_for : 'for' '('_for_var_def_aux ';' expresion ';' operacion ')' '{' estatuto '}'
+bloque_while : WORD_WHILE '(' expresion ')' '{' estatuto '}'
+bloque_do : WORD_DO '{' estatuto '}' WORD_WHILE '(' expresion ')' ';' 
+bloque_verbose : WORD_VERBOSE '{' VERBOSE_BLOCK '}'
+bloque_if : WORD_IF  '(' expresion ')' '{' estatuto '}'
+bloque_for : WORD_FOR '('_for_var_def_aux ';' expresion ';' operacion ')' '{' estatuto '}'
 _for_var_def_aux: ID '=' expresion
                 |
-bloque_fun : 'fun' ID '(' _params ')' '{' estatuto '}'
+bloque_fun : WORD_FUN ID '(' _params ')' '{' estatuto '}'
 _params: ID _params_aux
        |
 _params_aux: ',' ID _params_aux
