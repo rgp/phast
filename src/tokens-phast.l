@@ -8,13 +8,18 @@
 */
 %}
 %option noyywrap
+%s comment
 %%
 
-[ \t]*  //Omitir tabs y espacios
-[\n]  { yylineno++; }
 
 \<\? { return PH_OT; }
 \?\> { return PH_CT; }
+
+"/*"         BEGIN(comment);
+<comment>[^*\n]*        /* eat anything that's not a '*' */
+<comment>"*"+[^*/\n]*   /* eat up '*'s not followed by '/'s */
+<comment>\n             ++yylineno;
+<comment>"*"+"/"        BEGIN(INITIAL);
 
 "//".*\n { yylineno++; /* Comete los comentarios */ }
 
@@ -50,6 +55,10 @@ throw { return WORD_THROW; }
 [a-zA-Z_][_|a-zA-Z|0-9]* { return ID; }
 ['\"].*[\"'] { return STRING; }
 [=\+\-\*/><;:,\{\}\(\)\.\[\]]	{ return yytext[0];  /*TODO Operadores */ } 
+
+[ \t]*  //Omitir tabs y espacios
+[\n]  { yylineno++; }
+
 . { return VERBOSE_BLOCK;  /* printf("Unknown or invalid token: %s\n",yytext); TODO */  }
 %%
 
