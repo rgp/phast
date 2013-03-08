@@ -9,35 +9,32 @@ perro_gato = "miau";
 edad = 3;
 
 /* definicion de arreglos */
-patos = []; /* arreglo vacío */
-animales = [patos, perro_gato];
-construcciones = ["edificio" => "empire state","casas" => ["los pinos"], "puente" => "golden gate"];
+construcciones = "lalal";
 
 /* ciclos */
-while( a = 8 )
+while( a)
 {
     print(a);
     /* uso de operadores */
-a++; 
+    a++; 
 }
 
+print("hola");
 
 do{
-	construcciones[“casas”][0][“mascotas”][] = “leon”;
 }while(true);
 
 for(i=0;i < 3; i++)
 {
-print(“hola”);
 }
 
 if (a + 2 > 10)
 {
-print(“yes!”);
+print("yes!");
 }
 else
 {
-print(“no...”);
+print("no...");
 }
 
 verbose { $a = 5; echo $a;}

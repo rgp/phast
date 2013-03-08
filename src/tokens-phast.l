@@ -9,6 +9,7 @@
 %}
 %option noyywrap
 %s comment
+%s verbose
 %%
 
 
@@ -20,6 +21,11 @@
 <comment>"*"+[^*/\n]*   /* eat up '*'s not followed by '/'s */
 <comment>\n             ++yylineno;
 <comment>"*"+"/"        BEGIN(INITIAL);
+
+verbose[ ]*\{  { BEGIN(verbose); return VERBOSE_BLOCK; }
+<verbose>\n             ++yylineno;
+<verbose>.* 
+<verbose>\}        BEGIN(INITIAL);
 
 "//".*\n { yylineno++; /* Comete los comentarios */ }
 
@@ -38,7 +44,6 @@ default { return WORD_DEFAULT; }
 continue { return WORD_CONTINUE; }
 fun { return WORD_FUN; }
 return { return WORD_RETURN; }
-verbose { return WORD_VERBOSE; }
 static { return WORD_STATIC; }
 abstract { return WORD_ABSTRACT; }
 public { return WORD_PUBLIC; }

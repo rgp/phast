@@ -38,7 +38,6 @@ extern char *yytext;
 %token <string*> WORD_CONTINUE 
 %token <string*> WORD_FUN 
 %token <string*> WORD_RETURN 
-%token <string*> WORD_VERBOSE 
 %token <string*> WORD_STATIC 
 %token <string*> WORD_ABSTRACT 
 %token <string*> WORD_PUBLIC 
@@ -70,6 +69,7 @@ estatutos: estatuto estatutos
 estatuto : asignacion ';'
          | bloque
          | _fun_call ';'
+         | operacion ';'
          |
 asignacion: ID '=' expresion
 expresion : WORD_TRUE
@@ -77,29 +77,8 @@ expresion : WORD_TRUE
           | ID
           | STRING
           | operacion
-          /*| arreglo*/
           | numero
           | _fun_call
-/*
-arreglo: '[' _arr_elem _arr_elems ']'
-_arr_elems: ',' _arr_elem _arr_elems
-          |
-_arr_elem: /*_arr_key '=' '>' _arr_val
-         | */ /*_arr_val
-         |
-*/
-/*
-_arr_key: ID
-        | STRING
-        | INT
-*/
-/*
-_arr_val: ID
-        | STRING
-        | INT
-        | FLOAT
-        | arreglo
-*/
 numero : INT 
        | FLOAT
 operacion : expresion '+' expresion
@@ -107,6 +86,9 @@ operacion : expresion '+' expresion
           | expresion '*' expresion 
           | expresion '/' expresion 
           | expresion '=''=' expresion 
+          | expresion '!''=' expresion 
+          | expresion '>' expresion 
+          | expresion '<' expresion 
           | expresion WORD_AND expresion 
           | expresion WORD_OR expresion
           | expresion _op
@@ -118,11 +100,15 @@ bloque : bloque_while
        | bloque_if
        | bloque_for
        | bloque_fun
-bloque_while : WORD_WHILE '(' expresion ')' '{' estatuto '}'
-bloque_do : WORD_DO '{' estatuto '}' WORD_WHILE '(' expresion ')' ';' 
-bloque_verbose : WORD_VERBOSE '{' VERBOSE_BLOCK '}'
-bloque_if : WORD_IF  '(' expresion ')' '{' estatuto '}'
-bloque_for : WORD_FOR '('_for_var_def_aux ';' expresion ';' operacion ')' '{' estatuto '}'
+bloque_while : WORD_WHILE '(' expresion ')' '{' estatutos '}'
+bloque_do : WORD_DO '{' estatutos '}' WORD_WHILE '(' expresion ')' ';' 
+bloque_verbose : VERBOSE_BLOCK
+bloque_if : WORD_IF  '(' expresion ')' '{' estatutos '}' _else
+_else:
+     | WORD_ELSE _aux_else
+_aux_else: bloque_if
+       | '{' estatutos '}'
+bloque_for : WORD_FOR '('_for_var_def_aux ';' expresion ';' operacion ')' '{' estatutos '}'
 _for_var_def_aux: asignacion
                 |
 bloque_fun : WORD_FUN ID '(' _params ')' '{' estatuto '}'
