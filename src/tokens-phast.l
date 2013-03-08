@@ -6,6 +6,7 @@
 //.*[^\n] { return COMMENT; }
 #.*[^\n] { return COMMENT; }
 */
+
 %}
 %option noyywrap
 %s comment
@@ -24,8 +25,8 @@
 
 verbose[ ]*\{  { BEGIN(verbose); return VERBOSE_BLOCK; }
 <verbose>\n             ++yylineno;
-<verbose>.* 
 <verbose>\}        BEGIN(INITIAL);
+<verbose>.* 
 
 "//".*\n { yylineno++; /* Comete los comentarios */ }
 

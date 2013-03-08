@@ -67,10 +67,14 @@ phast :  PH_OT estatutos PH_CT
 estatutos: estatuto estatutos
          |
 estatuto : asignacion ';'
-         | bloque
          | _fun_call ';'
          | operacion ';'
-         |
+         | bloque_while
+         | bloque_do 
+         | bloque_verbose
+         | bloque_if
+         | bloque_for
+         | bloque_fun
 asignacion: ID '=' expresion
 expresion : WORD_TRUE
           | WORD_FALSE
@@ -94,12 +98,6 @@ operacion : expresion '+' expresion
           | expresion _op
 _op: '+''+'
    | '-''-'
-bloque : bloque_while
-       | bloque_do 
-       | bloque_verbose
-       | bloque_if
-       | bloque_for
-       | bloque_fun
 bloque_while : WORD_WHILE '(' expresion ')' '{' estatutos '}'
 bloque_do : WORD_DO '{' estatutos '}' WORD_WHILE '(' expresion ')' ';' 
 bloque_verbose : VERBOSE_BLOCK
@@ -111,7 +109,7 @@ _aux_else: bloque_if
 bloque_for : WORD_FOR '('_for_var_def_aux ';' expresion ';' operacion ')' '{' estatutos '}'
 _for_var_def_aux: asignacion
                 |
-bloque_fun : WORD_FUN ID '(' _params ')' '{' estatuto '}'
+bloque_fun : WORD_FUN ID '(' _params ')' '{' estatutos '}'
 _fun_call: ID '('expresion ')' 
 _params: ID _params_aux
        |
@@ -133,6 +131,7 @@ int yyerror(char* s)
 int main(int argc, char *argv[])
 {
 
+    extern int yylineno;	// defined and maintained in lex.c
 	if (argc > 1)
 	{
 		FILE *fp = fopen(argv[1], "r");
@@ -148,6 +147,6 @@ int main(int argc, char *argv[])
 	}
 	int a = yyparse();
 	if(a == 0 )
-		printf("Sexy program!\n");
+		printf("Sexy program! LOC: %d\n",yylineno);
 }
 
