@@ -51,6 +51,14 @@ extern char *yytext;
 %token <string*> WORD_TRY 
 %token <string*> WORD_CATCH 
 %token <string*> WORD_THROW 
+%token <string*> OP_IDENTICAL
+%token <string*> OP_EQUAL
+%token <string*> OP_ASIGN
+%token <string*> OP_MULTIPLY
+%token <string*> OP_ADD
+%token <string*> OP_MINUS
+%token <string*> OP_INCREMENT
+%token <string*> OP_DECREMENT
 
 %token <string*> PH_OT 
 %token <string*> PH_CT
@@ -66,44 +74,47 @@ extern char *yytext;
 phast :  PH_OT estatutos PH_CT
 estatutos: estatuto estatutos
          |
-estatuto : asignacion ';'
+estatuto : operacion ';'
+         | asignacion ';'
          | _fun_call ';'
-         | operacion ';'
          | bloque_while
          | bloque_do 
          | bloque_verbose
          | bloque_if
          | bloque_for
          | bloque_fun
-asignacion: ID '=' expresion
-expresion : WORD_TRUE
+expresion: expresion_der | expresion_izq
+expresion_izq: ID
+expresion_der : WORD_TRUE
           | WORD_FALSE
-          | ID
           | STRING
           | operacion
           | numero
           | _fun_call
 numero : INT 
        | FLOAT
-operacion : expresion '+' expresion
-          | expresion '-' expresion
-          | expresion '*' expresion 
-          | expresion '/' expresion 
-          | expresion '=''=' expresion 
-          | expresion '!''=' expresion 
-          | expresion '>' expresion 
-          | expresion '<' expresion 
-          | expresion WORD_AND expresion 
-          | expresion WORD_OR expresion
-          | expresion _op
-_op: '+''+'
-   | '-''-'
+operacion : expresion_izq _id_only_ops
+          | expresion_der _all_ops
+_all_ops: OP_ADD expresion
+        | OP_MINUS expresion
+        | OP_MULTIPLY expresion 
+        | '/' expresion 
+        | OP_EQUAL expresion 
+        | '!''=' expresion 
+        | '>' expresion 
+        | '<' expresion 
+        | WORD_AND expresion 
+        | WORD_OR expresion
+_id_only_ops: OP_INCREMENT
+            | OP_DECREMENT
+            | _all_ops
+asignacion: expresion_izq OP_ASIGN expresion
 bloque_while : WORD_WHILE '(' expresion ')' '{' estatutos '}'
 bloque_do : WORD_DO '{' estatutos '}' WORD_WHILE '(' expresion ')' ';' 
 bloque_verbose : VERBOSE_BLOCK
 bloque_if : WORD_IF  '(' expresion ')' '{' estatutos '}' _else
-_else:
-     | WORD_ELSE _aux_else
+_else: WORD_ELSE _aux_else
+     |
 _aux_else: bloque_if
        | '{' estatutos '}'
 bloque_for : WORD_FOR '('_for_var_def_aux ';' expresion ';' operacion ')' '{' estatutos '}'

@@ -60,7 +60,15 @@ catch { return WORD_CATCH; }
 throw { return WORD_THROW; }
 [a-zA-Z_][_|a-zA-Z|0-9]* { return ID; }
 ['\"].*[\"'] { return STRING; }
-[=\+\-\*/><;:,\{\}\(\)\.\[\]]	{ return yytext[0];  /*TODO Operadores */ } 
+=== { return OP_IDENTICAL; }
+== { return OP_EQUAL; }
+= { return OP_ASIGN; }
+\* { return OP_MULTIPLY; }
+\+\+ { return OP_INCREMENT; }
+\+ { return OP_ADD; }
+\-\- { return OP_DECREMENT; }
+\- { return OP_MINUS; }
+[/><;:,\{\}\(\)\.\[\]]	{ return yytext[0];  /*TODO Operadores */ } 
 
 [ \t]*  //Omitir tabs y espacios
 [\n]  { yylineno++; }
