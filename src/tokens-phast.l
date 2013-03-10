@@ -32,6 +32,8 @@ verbose[ ]*\{  { BEGIN(verbose); return VERBOSE_BLOCK; }
 
 [0-9]+ { yylval.int_val = atoi(yytext); return INT; }
 [0-9]+\.[0-9]+ { yylval.float_val = atof(yytext); return FLOAT; }
+int { return WORD_INT; }
+float { return WORD_FLOAT; }
 if { return WORD_IF; }
 else { return WORD_ELSE; }
 while { return WORD_WHILE; }
@@ -58,17 +60,24 @@ xor { return WORD_XOR; }
 try { return WORD_TRY; }
 catch { return WORD_CATCH; }
 throw { return WORD_THROW; }
-[a-zA-Z_][_|a-zA-Z|0-9]* { return ID; }
+[a-zA-Z_][_a-zA-Z0-9]* { return ID; }
 ['\"].*[\"'] { return STRING; }
 === { return OP_IDENTICAL; }
 == { return OP_EQUAL; }
+!= { return OP_NOT_EQUAL; }
 = { return OP_ASIGN; }
-\* { return OP_MULTIPLY; }
-\+\+ { return OP_INCREMENT; }
-\+ { return OP_ADD; }
-\-\- { return OP_DECREMENT; }
+\+ { return OP_PLUS; }
 \- { return OP_MINUS; }
-[/><;:,\{\}\(\)\.\[\]]	{ return yytext[0];  /*TODO Operadores */ } 
+\* { return OP_MULTIPLY; }
+"/" { return OP_DIVIDE; }
+\+\+ { return OP_INCREMENT; }
+\-\- { return OP_DECREMENT; }
+"<=" { return OP_LESS_EQUAL; }
+"<" { return OP_LESS; }
+">=" { return OP_GREATER_EQUAL; }
+">" { return OP_GREATER; }
+
+[;:,\{\}\(\)\.\[\]]	{ return yytext[0];  /*TODO Operadores */ } 
 
 [ \t]*  //Omitir tabs y espacios
 [\n]  { yylineno++; }
