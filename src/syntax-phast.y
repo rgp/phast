@@ -82,16 +82,15 @@ extern char *yytext;
 phast :  PH_OT estatutos PH_CT
 estatutos: estatuto estatutos
          |
-estatuto : operacion ';'
-         | asignacion ';'
-         | _fun_call ';'
+estatuto : asignacion ';'
+         | call ';'
          | bloque_while
          | bloque_do 
          | bloque_verbose
          | bloque_if
          | bloque_for
          | bloque_fun
-/* */
+/*
 expresion: expresion_izq | expresion_der
 expresion_izq: ID
 expresion_der : WORD_TRUE
@@ -119,8 +118,39 @@ _all_ops: OP_PLUS
 _id_only_ops: OP_INCREMENT
             | OP_DECREMENT
             | _all_ops expresion
-/* */
-asignacion: expresion_izq OP_ASIGN expresion
+*/
+
+expresion: comparando comparando_aux
+comparando_aux: op_comp comparando
+           |
+comparando: termino termino_aux
+termino_aux: op_term termino
+           | 
+termino: factor factor_aux
+factor_aux: op_fact factor
+          | 
+factor: call
+      | numero
+      | STRING
+op_comp: OP_EQUAL  
+       | OP_NOT_EQUAL  
+       | OP_GREATER  
+       | OP_GREATER_EQUAL
+       | OP_LESS  
+       | OP_LESS_EQUAL
+       | WORD_AND  
+       | WORD_OR 
+
+op_term: OP_PLUS
+       | OP_MINUS
+
+op_fact: OP_MULTIPLY
+       | OP_DIVIDE
+
+numero : INT 
+       | FLOAT
+
+asignacion: ID OP_ASIGN expresion
 bloque_while : WORD_WHILE '(' expresion ')' '{' estatutos '}'
 bloque_do : WORD_DO '{' estatutos '}' WORD_WHILE '(' expresion ')' ';' 
 bloque_verbose : VERBOSE_BLOCK
@@ -129,11 +159,18 @@ _else: WORD_ELSE _aux_else
      |
 _aux_else: bloque_if
        | '{' estatutos '}'
-bloque_for : WORD_FOR '('_for_var_def_aux ';' expresion ';' operacion ')' '{' estatutos '}'
+bloque_for : WORD_FOR '('_for_var_def_aux ';' expresion ';' expresion ')' '{' estatutos '}'
 _for_var_def_aux: asignacion
                 |
 bloque_fun : WORD_FUN ID '(' _params ')' '{' estatutos '}'
-_fun_call: ID '('expresion ')' 
+call: ID call_aux
+    | OP_INCREMENT ID
+    | OP_DECREMENT ID
+
+call_aux: '(' expresion ')'
+        | OP_INCREMENT
+        | OP_DECREMENT
+        |
 _params: ID _params_aux
        |
 _params_aux: ',' ID _params_aux

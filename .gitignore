@@ -1,3 +1,5 @@
 phast-compiler
 *.swp
 *.swo
+bison/*
+flex/*
