@@ -24,9 +24,9 @@
 <comment>"*"+"/"        BEGIN(INITIAL);
 
 verbose[ ]*\{  { BEGIN(verbose);  }
-<verbose>\n       {   printf("EEEEEE\n");   ++yylineno; }
+<verbose>\n       { ++yylineno; }
 <verbose>\}       { BEGIN(INITIAL); return VERBOSE_BLOCK; }
-<verbose>[^\}]*         
+<verbose>[^\}^\n]*      
 
 "//".*\n { yylineno++; /* Comete los comentarios */ }
 
