@@ -8,6 +8,9 @@ beta = 3.2;
 perro_gato = "miau";
 edad = 3;
 
+fun a (a) 
+{
+}
 /* definicion de arreglos */
 construcciones = "lalal";
 
@@ -37,8 +40,16 @@ else
 print("no...");
 }
 
-verbose { $a = 5; echo $a;}
-fun (a) 
+verbose { 
+$a = 5; pato w $a; 
+asdafsagsdsd´gfsdfljg ljfsldfj
+
+
+
+
+
+}
+fun u(a) 
 {
 print(a*a);
 }

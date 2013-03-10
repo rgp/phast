@@ -192,6 +192,7 @@ int main(int argc, char *argv[])
 {
 
     extern int yylineno;	// defined and maintained in lex.c
+    yylineno = 0;
 	if (argc > 1)
 	{
 		FILE *fp = fopen(argv[1], "r");

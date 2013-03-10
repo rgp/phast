@@ -23,10 +23,10 @@
 <comment>\n             ++yylineno;
 <comment>"*"+"/"        BEGIN(INITIAL);
 
-verbose[ ]*\{  { BEGIN(verbose); return VERBOSE_BLOCK; }
-<verbose>\n             ++yylineno;
-<verbose>\}        BEGIN(INITIAL);
-<verbose>.* 
+verbose[ ]*\{  { BEGIN(verbose);  }
+<verbose>\n       {   printf("EEEEEE\n");   ++yylineno; }
+<verbose>\}       { BEGIN(INITIAL); return VERBOSE_BLOCK; }
+<verbose>[^\}]*         
 
 "//".*\n { yylineno++; /* Comete los comentarios */ }
 
