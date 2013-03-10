@@ -39,6 +39,8 @@ else { return WORD_ELSE; }
 while { return WORD_WHILE; }
 for { return WORD_FOR; }
 class { return WORD_CLASS; }
+extends { return WORD_EXTENDS; }
+implements { return WORD_IMPLEMENTS; }
 do { return WORD_DO; }
 switch { return WORD_SWITCH; }
 case { return WORD_CASE; }

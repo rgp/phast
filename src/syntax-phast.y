@@ -32,6 +32,8 @@ extern char *yytext;
 %token <string*> WORD_WHILE 
 %token <string*> WORD_FOR 
 %token <string*> WORD_CLASS 
+%token <string*> WORD_EXTENDS 
+%token <string*> WORD_IMPLEMENTS
 %token <string*> WORD_DO 
 %token <string*> WORD_SWITCH 
 %token <string*> WORD_CASE 
@@ -90,36 +92,7 @@ estatuto : asignacion ';'
          | bloque_if
          | bloque_for
          | bloque_fun
-/*
-expresion: expresion_izq | expresion_der
-expresion_izq: ID
-expresion_der : WORD_TRUE
-              | WORD_FALSE
-              | STRING
-              | operacion
-              | numero
-              | _fun_call
-numero : INT 
-       | FLOAT
-operacion : expresion_izq _id_only_ops
-          | expresion_der _all_ops expresion
-_all_ops: OP_PLUS 
-        | OP_MINUS 
-        | OP_MULTIPLY  
-        | OP_DIVIDE  
-        | OP_EQUAL  
-        | OP_NOT_EQUAL  
-        | OP_GREATER  
-        | OP_GREATER_EQUAL
-        | OP_LESS  
-        | OP_LESS_EQUAL
-        | WORD_AND  
-        | WORD_OR 
-_id_only_ops: OP_INCREMENT
-            | OP_DECREMENT
-            | _all_ops expresion
-*/
-
+         | bloque_class
 expresion: comparando comparando_aux
 comparando_aux: op_comp comparando
            |
@@ -132,7 +105,8 @@ factor_aux: op_fact factor
 factor: call
       | numero
       | STRING
-op_comp: OP_EQUAL  
+      | arreglo
+op_comp: OP_EQUAL
        | OP_NOT_EQUAL  
        | OP_GREATER  
        | OP_GREATER_EQUAL
@@ -149,6 +123,15 @@ op_fact: OP_MULTIPLY
 
 numero : INT 
        | FLOAT
+arreglo: '[' _arr_elems ']'
+_arr_elems: _arr_elem _arr_elems_aux
+          |
+_arr_elems_aux: ',' _arr_elem _arr_elems_aux
+          |
+_arr_elem: _arr_val _arr_elem_aux
+_arr_elem_aux: '=' '>' _arr_val
+             |
+_arr_val: expresion
 
 asignacion: ID OP_ASIGN expresion
 bloque_while : WORD_WHILE '(' expresion ')' '{' estatutos '}'
@@ -163,9 +146,19 @@ bloque_for : WORD_FOR '('_for_var_def_aux ';' expresion ';' expresion ')' '{' es
 _for_var_def_aux: asignacion
                 |
 bloque_fun : WORD_FUN ID '(' _params ')' '{' estatutos '}'
+
+bloque_class: WORD_CLASS ID _class_extras '{' _class_body '}'
+_class_body: _class_body_aux  _class_body
+           |
+_class_body_aux: bloque_fun
+           | asignacion ';'
+_class_extras: WORD_EXTENDS ID
+             |
+
 call: ID call_aux
     | OP_INCREMENT ID
     | OP_DECREMENT ID
+    | ID '[' expresion ']'
 
 call_aux: '(' expresion ')'
         | OP_INCREMENT
