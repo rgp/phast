@@ -1,57 +1,25 @@
 <?
-/* 
-definicion de variables "on the fly"
- */
-a = 3;
-alfa = "string";
-beta = 3.2;
-perro_gato = "miau";
-edad = 3;
 
-fun a (fiua) 
-{
-}
-/* definicion de arreglos */
-construcciones = "lalal";
+globalidad;
+a = b + c;
 
-/* ciclos */
-while( wiua)
-{
-    print(piua);
-    /* uso de operadores */
-    a++; 
-}
+class gato extends animal {
+    
+    nombre;
+    edad;
+    color;
 
-print("hola");
-
-do{
-}while(true);
-
-for(i=0;i < 3; i++)
-{
-}
-
-if (a + 2 > 10)
-{
-print("yes!");
-}
-else
-{
-print("no...");
-}
-
-verbose { 
-$a = 5; pato w $a; 
-asdafsagsdsd´gfsdfljg ljfsldfj
-
-
-
-
+    fun saludar_gato (n)
+    {
+        print(n);
+        otro_nombre = "bubu";
+        hola = 3;
+    }
 
 }
-fun u(a) 
-{
-print(a*a);
-}
+    nombre = "gatito";
+    edad = 10;
+    color = gris;
+    saludar_gato(nombre);
 
 ?>

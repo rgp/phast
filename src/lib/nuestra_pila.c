@@ -24,7 +24,7 @@ void pop(Scope **head)
     temp = *head;
 
     *head = (*head)->next;
-
+    sm_delete(temp->variables);
     free(temp);
 }
 
@@ -47,10 +47,10 @@ bool exists_in(char* variable,  Scope *a_scope)
     return true;
 }
 
-
 void print(Scope *head)
 {
     int i = 0;
+
     while (head)
     {
         printf("Scope: %d\n", i);
@@ -58,6 +58,6 @@ void print(Scope *head)
         sm_enum(head->variables, stack_iter, NULL);
         printf("\n");
         i++;
+        head = head->next;
     }
-
 }

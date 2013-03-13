@@ -10,6 +10,8 @@ extern FILE *yyin;
 extern char *yytext;
 /* END FROM LEX */
 
+Scope *scopes;
+StrMap *global;
 
 %}
 %union{
@@ -92,8 +94,9 @@ estatuto : expresion ';'
          | bloque_verbose
          | bloque_if
          | bloque_for
-         | bloque_fun
-         | bloque_class
+         | { aumenta_scope(); } bloques_declarativos { disminuye_scope(); }
+bloques_declarativos: bloque_fun
+                    | bloque_class
 expresion: comparando comparando_aux
 comparando_aux: op_comp comparando
            |
@@ -105,12 +108,12 @@ factor_aux: op_fact factor
           | 
 factor: llamada
       | estatico
-llamada: ID { llame_var(yytext,"llamada");} id_call
+llamada: ID { llame_var(yytext);} id_call
 estatico: numero
         | STRING
         | arreglo
-        | OP_INCREMENT ID { llame_var(yytext,"global");}
-        | OP_DECREMENT ID { llame_var(yytext,"global");}
+        | OP_INCREMENT ID { llame_var(yytext);}
+        | OP_DECREMENT ID { llame_var(yytext);}
         | WORD_TRUE
         | WORD_FALSE
 
@@ -161,16 +164,16 @@ bloque_fun : WORD_FUN ID '(' _params ')' '{' estatutos '}'
 bloque_class: WORD_CLASS ID _class_extras '{' _class_body '}'
 _class_body: _class_body_aux  _class_body
            |
-_class_body_aux: bloque_fun
-           | ID { llame_var(yytext,"class");} _class_def_var_aux ';'
+_class_body_aux: { aumenta_scope(); } bloque_fun { disminuye_scope(); }
+           | ID { llame_var(yytext);} _class_def_var_aux ';'
 _class_def_var_aux: OP_ASIGN
                   |
 _class_extras: WORD_EXTENDS ID
              |
 
-_params: ID { llame_var(yytext,"func");} _def_param _params_aux
+_params: ID { llame_var(yytext);} _def_param _params_aux
        |
-_params_aux: ',' ID { llame_var(yytext,"func");} _def_param _params_aux
+_params_aux: ',' ID { llame_var(yytext);} _def_param _params_aux
            |
 _def_param: '=' estatico
           |
@@ -181,22 +184,37 @@ static void iter(const char *key, const char *value, const void *obj)
     printf("key: %s value: %s\n", key, value);
 }
 
-int guarda_var(char* variable,char* scope,char* tipo)
+int aumenta_scope()
 {
-    printf("Guardando %s\n",variable);
-    return sm_put(global, variable, "NADA");
+    StrMap *tabla_variables_actual = sm_new(100);
+    push(tabla_variables_actual,&scopes);
+    printf("\n\nAumentando scope ahora es: %p\n",scopes);
 }
 
-int llame_var(char* variable,char* scope)
+int disminuye_scope()
+{
+    /*sm_enum(scopes->variables, iter, NULL);*/
+    print(scopes);
+    pop(&scopes);
+    printf("Disminuyendo scope ahora es: %p\n\n\n",scopes);
+}
+
+int guarda_var(char* variable)
+{
+    printf("Guardando %s\n",variable);
+    return sm_put(peek(scopes), variable,"NADA");
+}
+
+int llame_var(char* variable)
 {
     char buf[255];
     int result;
     char* tipo;
     tipo = "tipo";
-    printf("Quise usar: %s en el scope %s\n",variable,scope);
-    result = sm_get(global, variable, buf, sizeof(buf));
+    printf("Quise usar: %s en el scope %p\n",variable,scopes);
+    result = sm_get(peek(scopes), variable, buf, sizeof(buf));
     if(result == 0){
-        result = guarda_var(variable,scope,tipo);
+        result = guarda_var(variable);
     }
     else
         printf("Usaremos %s previamente definida\n",variable);
@@ -218,10 +236,10 @@ int yyerror(char* s)
 /* MAIN */
 int main(int argc, char *argv[])
 {
-    StrMap *global = sm_new(100);
-    Scope *scopes;
-    push(global, scopes);
-    print(scopes);
+    scopes = NULL;
+
+    global = sm_new(100);
+    push(global, &scopes);
     
     
     extern int yylineno;	// defined and maintained in lex.c
