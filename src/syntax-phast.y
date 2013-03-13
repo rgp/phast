@@ -188,20 +188,21 @@ int aumenta_scope()
 {
     StrMap *tabla_variables_actual = sm_new(100);
     push(tabla_variables_actual,&scopes);
-    printf("\n\nAumentando scope ahora es: %p\n",scopes);
+    printf("--->>Aumentando scope ahora es: %p\n",scopes);
 }
 
 int disminuye_scope()
 {
     /*sm_enum(scopes->variables, iter, NULL);*/
+    printf("PILA\n");
     print(scopes);
     pop(&scopes);
-    printf("Disminuyendo scope ahora es: %p\n\n\n",scopes);
+    printf("<<---Disminuyendo scope ahora es: %p\n",scopes);
 }
 
 int guarda_var(char* variable)
 {
-    printf("Guardando %s\n",variable);
+    printf("-Guardando %s\n",variable);
     return sm_put(peek(scopes), variable,"NADA");
 }
 
@@ -211,13 +212,13 @@ int llame_var(char* variable)
     int result;
     char* tipo;
     tipo = "tipo";
-    printf("Quise usar: %s en el scope %p\n",variable,scopes);
+    printf("-Quise usar: %s en el scope %p\n",variable,scopes);
     result = sm_get(peek(scopes), variable, buf, sizeof(buf));
     if(result == 0){
         result = guarda_var(variable);
     }
     else
-        printf("Usaremos %s previamente definida\n",variable);
+        printf("-Usaremos %s previamente definida\n",variable);
         
 }
 
@@ -258,10 +259,13 @@ int main(int argc, char *argv[])
 		printf(">> ");
 	}
 	int a = yyparse();
-	if(a == 0 )
-		printf("Sexy program! LOC: %d\n",yylineno);
-
+    
+    printf("varibles globales:\n");
     sm_enum(global, iter, NULL);
+	
+    if(a == 0 )
+		printf("PROGRAMA SINTÁCTICAMENTE CORRECTO.\nLOC: %d\n",yylineno);
+
     sm_delete(global);
 }
 
