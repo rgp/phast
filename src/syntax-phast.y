@@ -1,6 +1,7 @@
 %{
 #include "../../src/heading.h"
 #include "../../src/lib/strmap.h"
+#include "../../src/lib/nuestra_pila.h"
 int yyerror(char *s);
 int yylex(void);
 
@@ -8,8 +9,6 @@ int yylex(void);
 extern FILE *yyin;
 extern char *yytext;
 /* END FROM LEX */
-
-StrMap *map;
 
 
 %}
@@ -106,11 +105,11 @@ factor_aux: op_fact factor
           | 
 factor: llamada
       | estatico
-llamada: ID { llame_var(yytext,"llamada ME GUSTA");} id_call
+llamada: ID { llame_var(yytext,"llamada");} id_call
 estatico: numero
         | STRING
         | arreglo
-        | OP_INCREMENT ID { llame_var(yytext,"PENE!");}
+        | OP_INCREMENT ID { llame_var(yytext,"global");}
         | OP_DECREMENT ID { llame_var(yytext,"global");}
         | WORD_TRUE
         | WORD_FALSE
@@ -185,7 +184,7 @@ static void iter(const char *key, const char *value, const void *obj)
 int guarda_var(char* variable,char* scope,char* tipo)
 {
     printf("Guardando %s\n",variable);
-    return sm_put(map, variable, "NADA");
+    return sm_put(global, variable, "NADA");
 }
 
 int llame_var(char* variable,char* scope)
@@ -195,7 +194,7 @@ int llame_var(char* variable,char* scope)
     char* tipo;
     tipo = "tipo";
     printf("Quise usar: %s en el scope %s\n",variable,scope);
-    result = sm_get(map, variable, buf, sizeof(buf));
+    result = sm_get(global, variable, buf, sizeof(buf));
     if(result == 0){
         result = guarda_var(variable,scope,tipo);
     }
@@ -219,7 +218,12 @@ int yyerror(char* s)
 /* MAIN */
 int main(int argc, char *argv[])
 {
-    map = sm_new(100);
+    StrMap *global = sm_new(100);
+    Scope *scopes;
+    push(global, scopes);
+    print(scopes);
+    
+    
     extern int yylineno;	// defined and maintained in lex.c
     yylineno = 0;
 	if (argc > 1)
@@ -239,7 +243,7 @@ int main(int argc, char *argv[])
 	if(a == 0 )
 		printf("Sexy program! LOC: %d\n",yylineno);
 
-    sm_enum(map, iter, NULL);
-    sm_delete(map);
+    sm_enum(global, iter, NULL);
+    sm_delete(global);
 }
 
