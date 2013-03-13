@@ -8,6 +8,9 @@ extern FILE *yyin;
 extern char *yytext;
 /* END FROM LEX */
 
+StrMap *map;
+
+
 %}
 %union{
   int int_val;
@@ -76,16 +79,14 @@ extern char *yytext;
 
 %error-verbose
 
-/* TODO Operators 
-%left '-' '+'
-%left '*' '/'
-*/
+%left OP_PLUS OP_MINUS
+%left OP_MULTIPLY OP_DIVIDE
 %%
 
 phast :  PH_OT estatutos PH_CT
 estatutos: estatuto estatutos
          |
-estatuto : ID estatuto_aux
+estatuto : expresion ';'
          | bloque_while
          | bloque_do 
          | bloque_verbose
@@ -93,8 +94,6 @@ estatuto : ID estatuto_aux
          | bloque_for
          | bloque_fun
          | bloque_class
-estatuto_aux: asignacion ';'
-            | call ';'
 expresion: comparando comparando_aux
 comparando_aux: op_comp comparando
            |
@@ -104,12 +103,19 @@ termino_aux: op_term termino
 termino: factor factor_aux
 factor_aux: op_fact factor
           | 
-factor: ID call
+factor: ID { llame_var(yytext);} id_call
       | numero
       | STRING
       | arreglo
       | OP_INCREMENT ID
       | OP_DECREMENT ID
+
+id_call: '(' expresion ')'
+        | '[' expresion ']'
+        | OP_INCREMENT
+        | OP_DECREMENT
+        | OP_ASIGN expresion
+        |
 op_comp: OP_EQUAL
        | OP_NOT_EQUAL  
        | OP_GREATER  
@@ -137,7 +143,6 @@ _arr_elem_aux: '=' '>' _arr_val
              |
 _arr_val: expresion
 
-asignacion: {guarda_var(yytext);} OP_ASIGN expresion
 bloque_while : WORD_WHILE '(' expresion ')' '{' estatutos '}'
 bloque_do : WORD_DO '{' estatutos '}' WORD_WHILE '(' expresion ')' ';' 
 bloque_verbose : VERBOSE_BLOCK
@@ -146,26 +151,19 @@ _else: WORD_ELSE _aux_else
      |
 _aux_else: bloque_if
        | '{' estatutos '}'
-bloque_for : WORD_FOR '('_for_var_def_aux ';' expresion ';' expresion ')' '{' estatutos '}'
-_for_var_def_aux: ID asignacion
-                |
+bloque_for : WORD_FOR '('comparando ';' expresion ';' expresion ')' '{' estatutos '}'
 bloque_fun : WORD_FUN ID '(' _params ')' '{' estatutos '}'
 
 bloque_class: WORD_CLASS ID _class_extras '{' _class_body '}'
 _class_body: _class_body_aux  _class_body
            |
 _class_body_aux: bloque_fun
-           | ID asignacion ';'
+           | ID _class_def_var_aux ';'
+_class_def_var_aux: OP_ASIGN
+                  |
 _class_extras: WORD_EXTENDS ID
              |
 
-call: { llame_var(yytext);} call_aux
-
-call_aux: '(' expresion ')'
-        | '[' expresion ']'
-        | OP_INCREMENT
-        | OP_DECREMENT
-        |
 _params: ID _params_aux
        |
 _params_aux: ',' ID _params_aux
