@@ -1,5 +1,6 @@
 %{
 #include "../../src/heading.h"
+#include "../../src/lib/strmap.h"
 int yyerror(char *s);
 int yylex(void);
 
@@ -103,12 +104,16 @@ termino_aux: op_term termino
 termino: factor factor_aux
 factor_aux: op_fact factor
           | 
-factor: ID { llame_var(yytext);} id_call
-      | numero
-      | STRING
-      | arreglo
-      | OP_INCREMENT ID
-      | OP_DECREMENT ID
+factor: llamada
+      | estatico
+llamada: ID { llame_var(yytext,"llamada ME GUSTA");} id_call
+estatico: numero
+        | STRING
+        | arreglo
+        | OP_INCREMENT ID { llame_var(yytext,"PENE!");}
+        | OP_DECREMENT ID { llame_var(yytext,"global");}
+        | WORD_TRUE
+        | WORD_FALSE
 
 id_call: '(' expresion ')'
         | '[' expresion ']'
@@ -158,26 +163,45 @@ bloque_class: WORD_CLASS ID _class_extras '{' _class_body '}'
 _class_body: _class_body_aux  _class_body
            |
 _class_body_aux: bloque_fun
-           | ID _class_def_var_aux ';'
+           | ID { llame_var(yytext,"class");} _class_def_var_aux ';'
 _class_def_var_aux: OP_ASIGN
                   |
 _class_extras: WORD_EXTENDS ID
              |
 
-_params: ID _params_aux
+_params: ID { llame_var(yytext,"func");} _def_param _params_aux
        |
-_params_aux: ',' ID _params_aux
+_params_aux: ',' ID { llame_var(yytext,"func");} _def_param _params_aux
            |
+_def_param: '=' estatico
+          |
 %%
 
-int guarda_var(char* variable)
+static void iter(const char *key, const char *value, const void *obj)
 {
-    printf("Quise guardar en: %s\n",variable);
+    printf("key: %s value: %s\n", key, value);
 }
 
-int llame_var(char* variable)
+int guarda_var(char* variable,char* scope,char* tipo)
 {
-    printf("Quise llamar a: %s\n",variable);
+    printf("Guardando %s\n",variable);
+    return sm_put(map, variable, "NADA");
+}
+
+int llame_var(char* variable,char* scope)
+{
+    char buf[255];
+    int result;
+    char* tipo;
+    tipo = "tipo";
+    printf("Quise usar: %s en el scope %s\n",variable,scope);
+    result = sm_get(map, variable, buf, sizeof(buf));
+    if(result == 0){
+        result = guarda_var(variable,scope,tipo);
+    }
+    else
+        printf("Usaremos %s previamente definida\n",variable);
+        
 }
 
 int yyerror(char* s) 
@@ -190,10 +214,12 @@ int yyerror(char* s)
 }
 
 
+
+
 /* MAIN */
 int main(int argc, char *argv[])
 {
-
+    map = sm_new(100);
     extern int yylineno;	// defined and maintained in lex.c
     yylineno = 0;
 	if (argc > 1)
@@ -212,5 +238,8 @@ int main(int argc, char *argv[])
 	int a = yyparse();
 	if(a == 0 )
 		printf("Sexy program! LOC: %d\n",yylineno);
+
+    sm_enum(map, iter, NULL);
+    sm_delete(map);
 }
 

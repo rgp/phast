@@ -54,6 +54,8 @@ abstract { return WORD_ABSTRACT; }
 public { return WORD_PUBLIC; }
 private { return WORD_PRIVATE; }
 protected { return WORD_PROTECTED; }
+true|TRUE { return WORD_TRUE; }
+false|FALSE { return WORD_FALSE; }
 new { return WORD_NEW; }
 and { return WORD_AND; }
 or { return WORD_OR; }

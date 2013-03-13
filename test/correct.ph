@@ -8,16 +8,16 @@ beta = 3.2;
 perro_gato = "miau";
 edad = 3;
 
-fun a (a) 
+fun a (fiua) 
 {
 }
 /* definicion de arreglos */
 construcciones = "lalal";
 
 /* ciclos */
-while( a)
+while( wiua)
 {
-    print(a);
+    print(piua);
     /* uso de operadores */
     a++; 
 }
