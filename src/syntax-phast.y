@@ -20,6 +20,7 @@ extern char *yytext;
 %token <string*> VERBOSE_BLOCK 
 
 %token <string*> ID 
+%token <string*> FUNCID 
 %token <int> INT 
 %token <float> FLOAT
 %token <string*> WORD_INT
@@ -84,8 +85,7 @@ extern char *yytext;
 phast :  PH_OT estatutos PH_CT
 estatutos: estatuto estatutos
          |
-estatuto : asignacion ';'
-         | call ';'
+estatuto : ID estatuto_aux
          | bloque_while
          | bloque_do 
          | bloque_verbose
@@ -93,6 +93,8 @@ estatuto : asignacion ';'
          | bloque_for
          | bloque_fun
          | bloque_class
+estatuto_aux: asignacion ';'
+            | call ';'
 expresion: comparando comparando_aux
 comparando_aux: op_comp comparando
            |
@@ -102,10 +104,12 @@ termino_aux: op_term termino
 termino: factor factor_aux
 factor_aux: op_fact factor
           | 
-factor: call
+factor: ID call
       | numero
       | STRING
       | arreglo
+      | OP_INCREMENT ID
+      | OP_DECREMENT ID
 op_comp: OP_EQUAL
        | OP_NOT_EQUAL  
        | OP_GREATER  
@@ -133,7 +137,7 @@ _arr_elem_aux: '=' '>' _arr_val
              |
 _arr_val: expresion
 
-asignacion: ID OP_ASIGN expresion
+asignacion: {guarda_var(yytext);} OP_ASIGN expresion
 bloque_while : WORD_WHILE '(' expresion ')' '{' estatutos '}'
 bloque_do : WORD_DO '{' estatutos '}' WORD_WHILE '(' expresion ')' ';' 
 bloque_verbose : VERBOSE_BLOCK
@@ -143,7 +147,7 @@ _else: WORD_ELSE _aux_else
 _aux_else: bloque_if
        | '{' estatutos '}'
 bloque_for : WORD_FOR '('_for_var_def_aux ';' expresion ';' expresion ')' '{' estatutos '}'
-_for_var_def_aux: asignacion
+_for_var_def_aux: ID asignacion
                 |
 bloque_fun : WORD_FUN ID '(' _params ')' '{' estatutos '}'
 
@@ -151,16 +155,14 @@ bloque_class: WORD_CLASS ID _class_extras '{' _class_body '}'
 _class_body: _class_body_aux  _class_body
            |
 _class_body_aux: bloque_fun
-           | asignacion ';'
+           | ID asignacion ';'
 _class_extras: WORD_EXTENDS ID
              |
 
-call: ID call_aux
-    | OP_INCREMENT ID
-    | OP_DECREMENT ID
-    | ID '[' expresion ']'
+call: { llame_var(yytext);} call_aux
 
 call_aux: '(' expresion ')'
+        | '[' expresion ']'
         | OP_INCREMENT
         | OP_DECREMENT
         |
@@ -169,6 +171,16 @@ _params: ID _params_aux
 _params_aux: ',' ID _params_aux
            |
 %%
+
+int guarda_var(char* variable)
+{
+    printf("Quise guardar en: %s\n",variable);
+}
+
+int llame_var(char* variable)
+{
+    printf("Quise llamar a: %s\n",variable);
+}
 
 int yyerror(char* s) 
 {
