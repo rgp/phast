@@ -81,8 +81,8 @@ StrMap *global;
 
 %error-verbose
 
-%left OP_PLUS OP_MINUS
 %left OP_MULTIPLY OP_DIVIDE
+%left OP_PLUS OP_MINUS
 %%
 
 phast :  PH_OT estatutos PH_CT
@@ -178,6 +178,16 @@ _params_aux: ',' ID { llame_var(yytext);} _def_param _params_aux
 _def_param: '=' estatico
           |
 %%
+
+/*
+int int + int
+float float + float
+int float + float
+string string + string
+string int + string
+int string + string
+*/
+
 
 static void iter(const char *key, const char *value, const void *obj)
 {
