@@ -209,7 +209,12 @@ int disminuye_scope()
 int guarda_var(char* variable)
 {
     printf("-Guardando %s\n",variable);
-    triad data = {"nada", "nada2", "nada3"};
+    triad* data = (triad*)malloc(sizeof(triad*));
+    data->a = "nada";
+    data->b = "nada2";
+    data->c = "nada3";
+    printf("-Triad %p\n",data->a);
+//TODO los apuntadores indican que se pierden estos valores...
     return hashmapSet(peek(scopes), &data, variable);
 }
 
@@ -236,6 +241,11 @@ int yyerror(char* s)
     return 1;
 }
 
+static void iter(const char *key,const void *tmp)
+{
+    triad* obj = (triad*)tmp;
+    printf("key: %s values: %s,%s,%s\n", key, obj->a,obj->b,obj->c);
+}
 
 
 
@@ -267,6 +277,8 @@ int main(int argc, char *argv[])
     
     printf("varibles globales:\n");
     //sm_enum(global, iter, NULL);
+    /*hashmapProcess(global,iter);*/
+
 	
     if(a == 0 )
 		printf("PROGRAMA SINTÁCTICAMENTE CORRECTO.\nLOC: %d\n",yylineno);
