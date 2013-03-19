@@ -24,7 +24,7 @@ void pop(Scope **head)
     temp = *head;
 
     *head = (*head)->next;
-    sm_delete(temp->variables);
+    deleteHashmap(temp->variables);
     free(temp);
 }
 
@@ -55,7 +55,7 @@ void print(Scope *head)
     {
         printf("Scope: %d\n", i);
         printf("variables:\n");
-        sm_enum(head->variables, stack_iter, NULL);
+        //sm_enum(head->variables, stack_iter, NULL);
         printf("\n");
         i++;
         head = head->next;
