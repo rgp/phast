@@ -1,6 +1,8 @@
 %{
 #include "../../src/heading.h"
+
 #include "../../src/lib/strmap.h"
+#include "../../src/lib/hashmap.h"
 #include "../../src/lib/nuestra_pila.h"
 int yyerror(char *s);
 int yylex(void);
@@ -11,7 +13,7 @@ extern char *yytext;
 /* END FROM LEX */
 
 Scope *scopes;
-StrMap *global;
+hashmap* global;
 
 %}
 %union{
@@ -189,21 +191,15 @@ int string + string
 */
 
 
-static void iter(const char *key, const char *value, const void *obj)
-{
-    printf("key: %s value: %s\n", key, value);
-}
-
 int aumenta_scope()
 {
-    StrMap *tabla_variables_actual = sm_new(100);
+    hashmap* tabla_variables_actual = newHashmap(100);
     push(tabla_variables_actual,&scopes);
     printf("--->>Aumentando scope ahora es: %p\n",scopes);
 }
 
 int disminuye_scope()
 {
-    /*sm_enum(scopes->variables, iter, NULL);*/
     printf("PILA\n");
     print(scopes);
     pop(&scopes);
@@ -213,23 +209,22 @@ int disminuye_scope()
 int guarda_var(char* variable)
 {
     printf("-Guardando %s\n",variable);
-    return sm_put(peek(scopes), variable,"NADA");
+    triad* data = {"nada", "nada2", "nada3"};
+    return insert(peek(scope), data, variable);
 }
 
 int llame_var(char* variable)
 {
-    char buf[255];
-    int result;
+    triad* result;
     char* tipo;
     tipo = "tipo";
     printf("-Quise usar: %s en el scope %p\n",variable,scopes);
-    result = sm_get(peek(scopes), variable, buf, sizeof(buf));
-    if(result == 0){
+    result = hashmapGet(peek(scopes), variable);
+    if(result == NULL){
         result = guarda_var(variable);
     }
     else
         printf("-Usaremos %s previamente definida\n",variable);
-        
 }
 
 int yyerror(char* s) 
@@ -249,7 +244,7 @@ int main(int argc, char *argv[])
 {
     scopes = NULL;
 
-    global = sm_new(100);
+    global = newHashmap(100);
     push(global, &scopes);
     
     
