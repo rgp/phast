@@ -210,7 +210,7 @@ int guarda_var(char* variable)
 {
     printf("-Guardando %s\n",variable);
     triad data = {"nada", "nada2", "nada3"};
-    return insert(peek(scopes), data, variable);
+    return hashmapSet(peek(scopes), &data, variable);
 }
 
 int llame_var(char* variable)
