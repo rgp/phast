@@ -39,8 +39,8 @@ StrMap* peek(Scope *head)
 static void stack_iter(const char *key,const void *tmp)
 {
     triad* obj = (triad*)tmp;
-    printf("key: %s values: %p\n", key,obj->a);
-    /* printf("key: %s values: %s,%s,%s\n", key, obj->a,obj->b,obj->c); */
+    //printf("key: %s values: %p\n", key,obj->a);
+    printf("key: %s values: %s,%s,%s\n", key, obj->a,obj->b,obj->c);
 }
 
 

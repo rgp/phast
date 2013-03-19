@@ -208,14 +208,19 @@ int disminuye_scope()
 
 int guarda_var(char* variable)
 {
+    char* a;
+    char* b;
+    char* c;
+
     printf("-Guardando %s\n",variable);
-    triad* data = (triad*)malloc(sizeof(triad*));
-    data->a = "nada";
-    data->b = "nada2";
-    data->c = "nada3";
-    printf("-Triad %p\n",data->a);
-//TODO los apuntadores indican que se pierden estos valores...
-    return hashmapSet(peek(scopes), &data, variable);
+    triad* data = (triad*)malloc(sizeof(triad));
+    a = "nada";
+    b = "nada2";
+    c = "nada3";
+    data->a = strdup(a);
+    data->b = strdup(b);
+    data->c = strdup(c);
+    return hashmapSet(peek(scopes), data, variable);
 }
 
 int llame_var(char* variable)
@@ -276,8 +281,7 @@ int main(int argc, char *argv[])
 	int a = yyparse();
     
     printf("varibles globales:\n");
-    //sm_enum(global, iter, NULL);
-    /*hashmapProcess(global,iter);*/
+    hashmapProcess(global,iter);
 
 	
     if(a == 0 )
