@@ -271,6 +271,6 @@ int main(int argc, char *argv[])
     if(a == 0 )
 		printf("PROGRAMA SINTÁCTICAMENTE CORRECTO.\nLOC: %d\n",yylineno);
 
-    sm_delete(global);
+    deleteHashmap(global);
 }
 

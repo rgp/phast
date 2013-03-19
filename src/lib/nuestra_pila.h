@@ -1,13 +1,13 @@
 #include<stdbool.h>
-#include"strmap.h"
+#include"hashmap.h"
 
 typedef struct Scope Scope;
 
-void push(StrMap *variables, Scope **head);
+void push(hashmap *variables, Scope **head);
 
 void pop(Scope **head);
 
-StrMap* peek(Scope *head);
+hashmap* peek(Scope *head);
 
 bool exists_in(char *variable, Scope *a_scope);
 
