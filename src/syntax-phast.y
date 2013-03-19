@@ -209,8 +209,8 @@ int disminuye_scope()
 int guarda_var(char* variable)
 {
     printf("-Guardando %s\n",variable);
-    triad* data = {"nada", "nada2", "nada3"};
-    return insert(peek(scope), data, variable);
+    triad data = {"nada", "nada2", "nada3"};
+    return insert(peek(scopes), data, variable);
 }
 
 int llame_var(char* variable)
@@ -221,7 +221,7 @@ int llame_var(char* variable)
     printf("-Quise usar: %s en el scope %p\n",variable,scopes);
     result = hashmapGet(peek(scopes), variable);
     if(result == NULL){
-        result = guarda_var(variable);
+        guarda_var(variable);
     }
     else
         printf("-Usaremos %s previamente definida\n",variable);
@@ -266,7 +266,7 @@ int main(int argc, char *argv[])
 	int a = yyparse();
     
     printf("varibles globales:\n");
-    sm_enum(global, iter, NULL);
+    //sm_enum(global, iter, NULL);
 	
     if(a == 0 )
 		printf("PROGRAMA SINTÁCTICAMENTE CORRECTO.\nLOC: %d\n",yylineno);

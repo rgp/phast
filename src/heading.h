@@ -8,5 +8,4 @@ typedef struct triad {
     char* a;
     char* b;
     char* c;
-}
-
+} triad;
