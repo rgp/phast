@@ -236,27 +236,27 @@ TIPO_DATO cubo_sem_aritmetico(TIPO_DATO nuevo){
 }
 
 int fun1(char* y) {
-    printf("1.%s\n", y);
+    printf("Meter %s y su tipo a PilaO\n", y);
 return 1;
 }
 
 int fun2(char* y) {
-    printf("2.%s\n", y);
+    printf("Meter %s a Poper\n", y);
 return 1;
 }
 
 int fun3(char* y){
-    printf("3.%s\n", y);
+    printf("Checar el top de Poper tiene operador pendiente >>yytext = %s<<\n", y);
 return 1;
 }
 
 int fun4(char* y){
-    printf("4.%s\n", y);
+    printf("Poner fondo >>yytext = %s<<\n", y);
 return 1;
 }
 
 int fun5(char* y){
-    printf("5.%s\n", y);
+    printf("Quitar fondo >>yytext=%s<<\n", y);
 return 1;
 }
 
