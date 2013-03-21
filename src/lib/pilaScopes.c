@@ -19,12 +19,18 @@ void push(StrMap *variables, Scope **head)
     *head = temp;
 }
 
+static void elements_clean(const char *key,void *tmp)
+{
+    free(tmp);
+}
+
 void pop(Scope **head)
 {
     Scope* temp;
     temp = *head;
 
     *head = (*head)->next;
+    hashmapProcess(temp->variables,elements_clean);
     deleteHashmap(temp->variables);
     free(temp);
 }
