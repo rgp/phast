@@ -304,6 +304,11 @@ static void iter(const char *key,const void *tmp)
     printf("key: %s values: {%s,%s,%s,%s}\n", key, obj->a,obj->b,obj->c,obj->d);
 }
 
+static void elements_clean(const char *key,void *tmp)
+{
+    free(tmp);
+}
+
 
 
 /* MAIN */
@@ -340,5 +345,6 @@ int main(int argc, char *argv[])
 		printf("PROGRAMA SINTÁCTICAMENTE CORRECTO.\nLOC: %d\n",yylineno);
 
     deleteHashmap(global);
+    hashmapProcess(global,elements_clean);
 }
 
