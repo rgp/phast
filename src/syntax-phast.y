@@ -134,17 +134,17 @@ estatuto : expresion ';'
 bloques_declarativos: bloque_fun
                     | bloque_class
 expresion: comparando comparando_aux
-comparando_aux: op_comp {/*printf("OPERACION BOLEANA\n");*/}comparando
+comparando_aux: op_comp {fun2(yytext); /*printf("OPERACION BOLEANA\n");*/}comparando {fun3(yytext); }
            |
 comparando: termino termino_aux
-termino_aux: op_term termino
+termino_aux: op_term {fun2(yytext); } termino {fun3(yytext); }
            | 
 termino: factor factor_aux
-factor_aux: op_fact factor 
+factor_aux: op_fact {fun2(yytext); } factor {fun3(yytext); } 
           | 
 factor: llamada /* TODO */
-      | estatico { valor_actual = strdup(yytext); /*printf("valor: %s \n",yytext);*/}
-llamada: ID { llame_var(yytext);} id_call
+      | estatico {fun1(yytext); valor_actual = strdup(yytext); /*printf("valor: %s \n",yytext);*/}
+llamada: ID { fun1(yytext);llame_var(yytext);} id_call
 estatico: numero
         | STRING
         | arreglo
@@ -153,7 +153,7 @@ estatico: numero
         | WORD_TRUE
         | WORD_FALSE
         | WORD_NULL
-        | '(' expresion ')'
+        | '('{fun4(yytext);} expresion ')'{fun5(yytext);}
 
 id_call: '(' argumentos ')'
         | '[' expresion ']'
@@ -233,6 +233,31 @@ TIPO_DATO cubo_sem_aritmetico(TIPO_DATO nuevo){
         tipo_actual = nuevo;
     }
     return tipo_actual;
+}
+
+int fun1(char* y) {
+    printf("1.%s\n", y);
+return 1;
+}
+
+int fun2(char* y) {
+    printf("2.%s\n", y);
+return 1;
+}
+
+int fun3(char* y){
+    printf("3.%s\n", y);
+return 1;
+}
+
+int fun4(char* y){
+    printf("4.%s\n", y);
+return 1;
+}
+
+int fun5(char* y){
+    printf("5.%s\n", y);
+return 1;
 }
 
 char* tipo_dato_to_string(TIPO_DATO entrada){
