@@ -31,6 +31,8 @@ Jerarquía de tipos de datos:
 #include "../../src/lib/strmap.h"
 #include "../../src/lib/hashmap.h"
 #include "../../src/lib/pilaScopes.h"
+#include "../../src/lib/chain.h"
+
 int yyerror(char *s);
 int yylex(void);
 

@@ -1,6 +1,6 @@
 CC	= gcc
 CFLAGS	= #
-LINKS = src/lib/pilaScopes.c src/lib/hashmap.c #src/lib/list.c 
+LINKS = src/lib/*.c #src/lib/pilaScopes.c src/lib/hashmap.c #src/lib/list.c 
 build: clean bison.c lex.c
 	$(CC) $(CFLAGS) $(LINKS) bison/src/bison.c flex/src/lex.c -o phast-compiler
 
