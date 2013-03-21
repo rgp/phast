@@ -146,16 +146,17 @@ llamada: ID { llame_var(yytext);} id_call
 estatico: numero
         | STRING
         | arreglo
-        | OP_INCREMENT ID { llame_var(yytext);}
-        | OP_DECREMENT ID { llame_var(yytext);}
+        /*| OP_INCREMENT ID { llame_var(yytext);}*/
+        /*| OP_DECREMENT ID { llame_var(yytext);}*/
         | WORD_TRUE
         | WORD_FALSE
         | WORD_NULL
+        | '(' expresion ')'
 
 id_call: '(' argumentos ')'
         | '[' expresion ']'
-        | OP_INCREMENT
-        | OP_DECREMENT
+        /*| OP_INCREMENT*/
+        /*| OP_DECREMENT*/
         | OP_ASIGN expresion { /*printf("Asignamos tipo %d y valor: %s a:\n",tipo_actual,valor_actual,var_actual);*//*guarda_var();*/} 
         |
 argumentos: expresion args_aux
@@ -217,15 +218,6 @@ _params_aux: ',' ID { llame_var(yytext);} _def_param _params_aux
 _def_param: '=' estatico
           |
 %%
-
-/*
-int int + int
-float float + float
-int float + float
-string string + string
-string int + string
-int string + string
-*/
 
 TIPO_DATO cubo_sem_logico(TIPO_DATO nuevo){
     if(tipo_actual < nuevo){
