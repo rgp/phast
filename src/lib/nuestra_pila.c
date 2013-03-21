@@ -2,6 +2,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include"strmap.h"
+#include"../heading.h"
 
 typedef struct Scope
 {
@@ -24,7 +25,7 @@ void pop(Scope **head)
     temp = *head;
 
     *head = (*head)->next;
-    sm_delete(temp->variables);
+    deleteHashmap(temp->variables);
     free(temp);
 }
 
@@ -35,11 +36,12 @@ StrMap* peek(Scope *head)
     return head->variables;
 }
 
-static void stack_iter(const char *key, const char *value, const void *obj)
+static void stack_iter(const char *key,const void *tmp)
 {
-    printf("key: %s value: %s\n", key, value);
+    triad* obj = (triad*)tmp;
+    //printf("key: %s values: %p\n", key,obj->a);
+    printf("key: %s values: %s,%s,%s\n", key, obj->a,obj->b,obj->c);
 }
-
 
 
 bool exists_in(char* variable,  Scope *a_scope)
@@ -55,7 +57,8 @@ void print(Scope *head)
     {
         printf("Scope: %d\n", i);
         printf("variables:\n");
-        sm_enum(head->variables, stack_iter, NULL);
+        //sm_enum(head->variables, stack_iter, NULL);
+        hashmapProcess(head->variables,stack_iter);
         printf("\n");
         i++;
         head = head->next;

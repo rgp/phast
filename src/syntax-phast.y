@@ -208,9 +208,19 @@ int disminuye_scope()
 
 int guarda_var(char* variable)
 {
+    char* a;
+    char* b;
+    char* c;
+
     printf("-Guardando %s\n",variable);
-    triad* data = {"nada", "nada2", "nada3"};
-    return insert(peek(scope), data, variable);
+    triad* data = (triad*)malloc(sizeof(triad));
+    a = "nada";
+    b = "nada2";
+    c = "nada3";
+    data->a = strdup(a);
+    data->b = strdup(b);
+    data->c = strdup(c);
+    return hashmapSet(peek(scopes), data, variable);
 }
 
 int llame_var(char* variable)
@@ -221,7 +231,7 @@ int llame_var(char* variable)
     printf("-Quise usar: %s en el scope %p\n",variable,scopes);
     result = hashmapGet(peek(scopes), variable);
     if(result == NULL){
-        result = guarda_var(variable);
+        guarda_var(variable);
     }
     else
         printf("-Usaremos %s previamente definida\n",variable);
@@ -236,6 +246,11 @@ int yyerror(char* s)
     return 1;
 }
 
+static void iter(const char *key,const void *tmp)
+{
+    triad* obj = (triad*)tmp;
+    printf("key: %s values: %s,%s,%s\n", key, obj->a,obj->b,obj->c);
+}
 
 
 
@@ -266,7 +281,8 @@ int main(int argc, char *argv[])
 	int a = yyparse();
     
     printf("varibles globales:\n");
-    sm_enum(global, iter, NULL);
+    hashmapProcess(global,iter);
+
 	
     if(a == 0 )
 		printf("PROGRAMA SINTÁCTICAMENTE CORRECTO.\nLOC: %d\n",yylineno);

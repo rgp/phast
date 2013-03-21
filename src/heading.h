@@ -5,8 +5,7 @@
 #include <stdio.h>
 
 typedef struct triad {
-        char* a;
-        char* b;
-        char* c;
-}
-
+    char* a;
+    char* b;
+    char* c;
+} triad;
