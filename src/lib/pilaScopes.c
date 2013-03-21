@@ -42,7 +42,7 @@ StrMap* peek(Scope *head)
     return head->variables;
 }
 
-static void stack_iter(const char *key,const void *tmp)
+static void stack_iter(const char *key, void *tmp)
 {
     quad* obj = (quad*)tmp;
     //printf("key: %s values: %p\n", key,obj->a);

@@ -11,6 +11,11 @@ typedef struct quad {
     char* d;
 } quad;
 
+typedef struct pair {
+    void* a;
+    void* b;
+} pair;
+
 typedef enum {
     NULO = 0,
     BOLEANO = 1,

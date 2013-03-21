@@ -48,6 +48,9 @@ char* var_actual;
 char* valor_actual;
 TIPO_DATO tipo_actual;
 
+Node* pila_operandos;
+Node* pila_operadores;
+
 %}
 %union{
   int int_val;
@@ -124,7 +127,7 @@ TIPO_DATO tipo_actual;
 phast :  PH_OT estatutos PH_CT
 estatutos: estatuto estatutos
          |
-estatuto : expresion ';'
+estatuto : expresion {/* SEGUN YO DEBERIAMOS REVISAR: */} ';'
          | bloque_while
          | bloque_do 
          | bloque_verbose
@@ -133,14 +136,14 @@ estatuto : expresion ';'
          | { aumenta_scope(); } bloques_declarativos { disminuye_scope(); }
 bloques_declarativos: bloque_fun
                     | bloque_class
-expresion: comparando comparando_aux
-comparando_aux: op_comp {fun2(yytext); /*printf("OPERACION BOLEANA\n");*/}comparando {fun3(yytext); }
+expresion: comparando {fun3(yytext,2);} comparando_aux
+comparando_aux: op_comp {fun2(yytext); /*printf("OPERACION BOLEANA\n");*/}comparando {fun3(yytext,2); } comparando_aux
            |
-comparando: termino termino_aux
-termino_aux: op_term {fun2(yytext); } termino {fun3(yytext); }
+comparando: termino {fun3(yytext,1);} termino_aux
+termino_aux: op_term {fun2(yytext); } termino {fun3(yytext,1); } termino_aux
            | 
-termino: factor factor_aux
-factor_aux: op_fact {fun2(yytext); } factor {fun3(yytext); } 
+termino: factor {fun3(yytext,0);} factor_aux
+factor_aux: op_fact {fun2(yytext); } factor {fun3(yytext,0); } factor_aux 
           | 
 factor: llamada /* TODO */
       | estatico {fun1(yytext); valor_actual = strdup(yytext); /*printf("valor: %s \n",yytext);*/}
@@ -237,26 +240,57 @@ TIPO_DATO cubo_sem_aritmetico(TIPO_DATO nuevo){
 
 int fun1(char* y) {
     printf("Meter %s y su tipo a PilaO\n", y);
+    char* operando = strdup(y);
+    ch_push(operando,&pila_operandos);
 return 1;
 }
 
 int fun2(char* y) {
+    char* operador;
     printf("Meter %s a Poper\n", y);
+    operador = strdup(y);
+    ch_push(operador,&pila_operadores);
 return 1;
 }
 
-int fun3(char* y){
-    printf("Checar el top de Poper tiene operador pendiente >>yytext = %s<<\n", y);
+int fun3(char* y,int nivel){
+    Node* h1; 
+    char* op = (char*)ch_peek(pila_operadores);
+    printf("Checar el top de Poper tiene operador pendiente = '%s' <<\n", op);
+    switch(nivel){
+        case 0: //basico
+            if(*op == '*' || *op == '/')
+            {
+                printf("Hago lo de adentro (MULTIPLICACION / DIVISION)\n");
+                /*printf("En cabeza O: %s\n",(char*)ch_peek(pila_operandos));*/
+                /*printf("En cabeza 1: %s\n",(char*)ch_peekN(pila_operandos));*/
+                
+            }
+            break;
+        case 1: //basico
+            if(*op == '+' || *op == '-')
+            {
+                printf("Hago lo de adentro (SUMA / RESTA)\n");
+            }
+            break;
+        case 2: //basico
+            if(*op == '=' || *op == '>' || *op == '<' || *op == '!' || *op == 'a' || *op == 'A' || *op == 'o' || *op == 'O')
+            {
+                printf("Hago lo de adentro (COMPARACION)\n");
+            }
+            break;
+    }
+            
 return 1;
 }
 
 int fun4(char* y){
-    printf("Poner fondo >>yytext = %s<<\n", y);
+    printf("Poner fondo >> yytext = '%s' <<\n", y);
 return 1;
 }
 
 int fun5(char* y){
-    printf("Quitar fondo >>yytext=%s<<\n", y);
+    printf("Quitar fondo >> yytext='%s' <<\n", y);
 return 1;
 }
 
@@ -323,7 +357,7 @@ int yyerror(char* s)
     return 1;
 }
 
-static void iter(const char *key,const void *tmp)
+static void iter(const char *key, void *tmp)
 {
     quad* obj = (quad*)tmp;
     printf("key: %s values: {%s,%s,%s,%s}\n", key, obj->a,obj->b,obj->c,obj->d);
@@ -344,6 +378,11 @@ int main(int argc, char *argv[])
     global = newHashmap(100);
     push(global, &scopes);
     
+    char* eostack = strdup("$");   
+
+    ch_push(eostack,&pila_operandos);
+    ch_push(eostack,&pila_operadores);
+
     
     extern int yylineno;	// defined and maintained in lex.c
     yylineno = 0;
@@ -371,5 +410,7 @@ int main(int argc, char *argv[])
 
     deleteHashmap(global);
     hashmapProcess(global,elements_clean);
+    ch_clean(pila_operadores);
+    ch_clean(pila_operandos);
 }
 

@@ -16,22 +16,38 @@ void ch_push(void *element, Node **head)
     temp = (Node*)malloc(sizeof(Node*));
     temp->element = element;
     temp->next = *head;
-    temp->next = *head;
     *head = temp;
 }
 
 void* ch_pop(Node **head)
 {
     Node* temp;
+    void* elem;
     temp = *head;
+    elem = temp->element;
 
     *head = (*head)->next;
     free(temp);
+    return elem;
+}
+
+void ch_clean(Node **head)
+{
+    while (*head)
+    {
+        ch_pop(head);
+    }
 }
 
 void* ch_peek(Node *head)
 {
     return head->element;
+}
+
+void* ch_peekN(Node *head)
+{
+    Node* tmp = head->next;
+    return tmp;
 }
 
 bool ch_exists_in(char* variable,  Node *a_scope)

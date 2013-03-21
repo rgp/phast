@@ -1,8 +1,3 @@
 <?
-globalidad;
-p = 1;
-a = 3;
-b = "lala";
-p = a + 3 * 4;
-h = NULL;
+a + 3 * 4 and 5 + 6;
 ?>

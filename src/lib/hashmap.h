@@ -8,7 +8,7 @@ typedef struct sHashmap hashmap;
 #define HASHMAP_ILLEGAL 0   
 #define HASHMAP_INSERT 1    
 #define HASHMAP_UPDATE 2    
-typedef void(*fHashmapProc)(const char* key, const void* datum);
+typedef void(*fHashmapProc)(const char* key, void* datum);
 
 extern hashmap* newHashmap(unsigned int hint);
 
