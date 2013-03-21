@@ -1,3 +1,30 @@
+/*
+Cubo semantico:
+
+Operadores aritmeticos: (+,-,*,/,++,--)
+
+        String  Int     Float       Bool
+String  String  String  String      Bool
+Int     String  Int     Float       Int
+Float   String  Float   Float       Bool
+Bool    Bool    Int    Bool        Bool
+
+Operadores lógicos: (AND,OR, &&, ||, !, >, <, >=, <=, ==, !=)
+
+        String  Int     Float       Bool
+String  Bool    Bool    Bool        Bool
+Int     Bool    Bool    Bool        Bool
+Float   Bool    Bool    Bool        Bool
+Bool    Bool    Bool    Bool        Bool
+
+Jerarquía de tipos de datos:
+
+    NULO = 0,
+    BOLEANO = 1,
+    ENTERO = 2,
+    FLOTANTE = 3,
+    CADENA = 4
+*/
 %{
 #include "../../src/heading.h"
 
@@ -14,6 +41,10 @@ extern char *yytext;
 
 Scope *scopes;
 hashmap* global;
+
+char* var_actual;
+char* valor_actual;
+TIPO_DATO tipo_actual;
 
 %}
 %union{
@@ -33,6 +64,7 @@ hashmap* global;
 %token <string*> WORD_INT
 %token <string*> WORD_FLOAT
 %token <string*> STRING 
+%token <string*> WORD_NULL
 %token <string*> WORD_FALSE 
 %token <string*> WORD_TRUE
 %token <string*> WORD_IF 
@@ -100,16 +132,16 @@ estatuto : expresion ';'
 bloques_declarativos: bloque_fun
                     | bloque_class
 expresion: comparando comparando_aux
-comparando_aux: op_comp comparando
+comparando_aux: op_comp {/*printf("OPERACION BOLEANA\n");*/}comparando
            |
 comparando: termino termino_aux
 termino_aux: op_term termino
            | 
 termino: factor factor_aux
-factor_aux: op_fact factor
+factor_aux: op_fact factor 
           | 
-factor: llamada
-      | estatico
+factor: llamada /* TODO */
+      | estatico { valor_actual = strdup(yytext); /*printf("valor: %s \n",yytext);*/}
 llamada: ID { llame_var(yytext);} id_call
 estatico: numero
         | STRING
@@ -118,12 +150,17 @@ estatico: numero
         | OP_DECREMENT ID { llame_var(yytext);}
         | WORD_TRUE
         | WORD_FALSE
+        | WORD_NULL
 
-id_call: '(' expresion ')'
+id_call: '(' argumentos ')'
         | '[' expresion ']'
         | OP_INCREMENT
         | OP_DECREMENT
-        | OP_ASIGN expresion
+        | OP_ASIGN expresion { /*printf("Asignamos tipo %d y valor: %s a:\n",tipo_actual,valor_actual,var_actual);*//*guarda_var();*/} 
+        |
+argumentos: expresion args_aux
+          |
+args_aux: ',' expresion args_aux
         |
 op_comp: OP_EQUAL
        | OP_NOT_EQUAL  
@@ -140,8 +177,8 @@ op_term: OP_PLUS
 op_fact: OP_MULTIPLY
        | OP_DIVIDE
 
-numero : INT 
-       | FLOAT
+numero : INT { tipo_actual = ENTERO; /*printf("tipo actual es %d\n",tipo_actual);*/ }
+       | FLOAT { tipo_actual = FLOTANTE; /*printf("tipo actual es %d\n",tipo_actual);*/ }
 arreglo: '[' _arr_elems ']'
 _arr_elems: _arr_elem _arr_elems_aux
           |
@@ -168,7 +205,7 @@ _class_body: _class_body_aux  _class_body
            |
 _class_body_aux: { aumenta_scope(); } bloque_fun { disminuye_scope(); }
            | ID { llame_var(yytext);} _class_def_var_aux ';'
-_class_def_var_aux: OP_ASIGN
+_class_def_var_aux: OP_ASIGN { printf("Aqui esta mal\n");}
                   |
 _class_extras: WORD_EXTENDS ID
              |
@@ -190,51 +227,72 @@ string int + string
 int string + string
 */
 
+TIPO_DATO cubo_sem_logico(TIPO_DATO nuevo){
+    if(tipo_actual < nuevo){
+        tipo_actual = nuevo;
+    }
+    return tipo_actual;
+}
+
+TIPO_DATO cubo_sem_aritmetico(TIPO_DATO nuevo){
+    if(tipo_actual < nuevo){
+        tipo_actual = nuevo;
+    }
+    return tipo_actual;
+}
+
+char* tipo_dato_to_string(TIPO_DATO entrada){
+    switch(entrada){
+        case BOLEANO: return "bool";
+        case ENTERO: return "int";
+        case FLOTANTE: return "float";
+        case CADENA: return "string";
+        case NULO:
+        default:
+                 return NULL;
+    }
+    return NULL;
+}
+
 
 int aumenta_scope()
 {
     hashmap* tabla_variables_actual = newHashmap(100);
     push(tabla_variables_actual,&scopes);
-    printf("--->>Aumentando scope ahora es: %p\n",scopes);
+    /*printf("--->>Aumentando scope ahora es: %p\n",scopes);*/
 }
 
 int disminuye_scope()
 {
-    printf("PILA\n");
-    print(scopes);
+    /*printf("PILA\n");*/
+    /*print(scopes);*/
     pop(&scopes);
-    printf("<<---Disminuyendo scope ahora es: %p\n",scopes);
+    /*printf("<<---Disminuyendo scope ahora es: %p\n",scopes);*/
 }
 
-int guarda_var(char* variable)
+int guarda_var(char* variable,TIPO_DATO tipo_dato, char* valor)
 {
-    char* a;
-    char* b;
-    char* c;
-
-    printf("-Guardando %s\n",variable);
-    triad* data = (triad*)malloc(sizeof(triad));
-    a = "nada";
-    b = "nada2";
-    c = "nada3";
-    data->a = strdup(a);
-    data->b = strdup(b);
-    data->c = strdup(c);
+    /*printf("-Guardando %s\n",variable);*/
+    quad* data = (quad*)malloc(sizeof(quad));
+    char* tipo = tipo_dato_to_string(tipo_dato);
+    data->a = tipo == NULL ? NULL : strdup(tipo);
+    data->b = valor == NULL ? NULL : strdup(valor);
+    data->c = NULL;
+    data->d = NULL;
     return hashmapSet(peek(scopes), data, variable);
 }
 
 int llame_var(char* variable)
 {
-    triad* result;
-    char* tipo;
-    tipo = "tipo";
-    printf("-Quise usar: %s en el scope %p\n",variable,scopes);
+    var_actual = strdup(variable);
+    quad* result;
+    /*printf("-Quise usar: %s en el scope %p\n",variable,scopes);*/
     result = hashmapGet(peek(scopes), variable);
     if(result == NULL){
-        guarda_var(variable);
+        guarda_var(variable,NULO,NULL);
     }
-    else
-        printf("-Usaremos %s previamente definida\n",variable);
+    /*else*/
+        /*printf("-Usaremos %s previamente definida\n",variable);*/
 }
 
 int yyerror(char* s) 
@@ -248,8 +306,8 @@ int yyerror(char* s)
 
 static void iter(const char *key,const void *tmp)
 {
-    triad* obj = (triad*)tmp;
-    printf("key: %s values: %s,%s,%s\n", key, obj->a,obj->b,obj->c);
+    quad* obj = (quad*)tmp;
+    printf("key: %s values: {%s,%s,%s,%s}\n", key, obj->a,obj->b,obj->c,obj->d);
 }
 
 
@@ -280,8 +338,8 @@ int main(int argc, char *argv[])
 	}
 	int a = yyparse();
     
-    printf("varibles globales:\n");
-    hashmapProcess(global,iter);
+    /*printf("varibles globales:\n");*/
+    /*hashmapProcess(global,iter);*/
 
 	
     if(a == 0 )

@@ -38,9 +38,9 @@ StrMap* peek(Scope *head)
 
 static void stack_iter(const char *key,const void *tmp)
 {
-    triad* obj = (triad*)tmp;
+    quad* obj = (quad*)tmp;
     //printf("key: %s values: %p\n", key,obj->a);
-    printf("key: %s values: %s,%s,%s\n", key, obj->a,obj->b,obj->c);
+    /* printf("key: %s values: %s,%s,%s,%s\n", key, obj->a,obj->b,obj->c,obj->d); */
 }
 
 
@@ -55,10 +55,10 @@ void print(Scope *head)
 
     while (head)
     {
-        printf("Scope: %d\n", i);
-        printf("variables:\n");
+        /* printf("Scope: %d\n", i); */
+        /* printf("variables:\n"); */
         //sm_enum(head->variables, stack_iter, NULL);
-        hashmapProcess(head->variables,stack_iter);
+        /* hashmapProcess(head->variables,stack_iter); */
         printf("\n");
         i++;
         head = head->next;

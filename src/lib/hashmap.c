@@ -137,7 +137,6 @@ static hashmapEntry* find(const hashmap* map, const char* key)
 static int insert(hashmap* map, void* data, char* key)
 {
     hashmapEntry* entry;
-    triad* obj = (triad*)data;
     
     if (map->size == map->count)
         rehash(map);
