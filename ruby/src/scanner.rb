@@ -10,26 +10,56 @@ module Phast
     def self.scan(source)
       tokens = []
       scanner = StringScanner.new source
+      lineno = 0
 
       until scanner.empty?
         case
 
+        when scanner.scan(/\n/)
+            lineno += 1
+          #Counts lines
         when scanner.scan(/\s+/)
           #Eats tabs and white spaces
         when scanner.scan(/\/\/.*\n/)
-          #Eats comments
-        when scanner.scan(/\/\*(.|\n)*\*\//)
-          #Eats comment blocks
+            lineno += 1
         
-        # when scanner.scan(/verbose[ ]*{/) #Begin Verbose
-        #     puts "GO"
-        #     until scanner.scan(/}/) or scanner.empty?
-        #         case
-        #         when scanner.scan(/[^}]*/)
-        #         else
-        #         end
-        #     end
+        when scanner.scan(/\/\*/) #Begin Comment Block
+            until scanner.scan(/\*\//)
+                if scanner.empty?
+                    STDERR.puts "Incomplete Comment Block at #{scanner.rest}"
+                    exit 1
+                end
 
+                case
+                when scanner.scan(/\n/)
+                    lineno += 1
+                when scanner.scan(/\s+/)
+                when scanner.scan(/./)
+                else
+                end
+            end
+
+        when scanner.scan(/verbose[ ]*{/) #Begin Verbose
+          tokens << [:BLOCK_VERBOSE, "verbose"]
+          vbose_level = [1]
+            until vbose_level.empty?
+                if scanner.empty?
+                    STDERR.puts "Incomplete Verbose Block at #{scanner.rest}"
+                    exit 1
+                end
+
+                case
+                when scanner.scan(/{/)
+                    vbose_level.push 1
+                when scanner.scan(/}/)
+                    vbose_level.pop
+                when scanner.scan(/\n/)
+                    lineno += 1
+                when scanner.scan(/\s+/)
+                when scanner.scan(/./)
+                else
+                end
+            end
 
         #PH TAGS
         when scanner.scan(/<\?/)
@@ -100,11 +130,12 @@ module Phast
         when match = scanner.scan(OPERADORES)
           tokens << [match, match]
         else
-          STDERR.puts "Unkown input at #{scanner.string}..."
+          STDERR.puts "Unkown input at #{scanner.rest}..."
           exit 1
         end
       end
 
+        puts "LOC: #{lineno}"
       tokens
     end
   end
