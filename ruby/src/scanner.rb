@@ -18,7 +18,25 @@ module Phast
           #Eats tabs and white spaces
         when scanner.scan(/\/\/.*\n/)
           #Eats comments
+            puts "comments"
+        when scanner.scan(/\/\*(.*|\n)*\*\//)
+          #Eats comment blocks
+        
+        # when scanner.scan(/verbose[ ]*{/) #Begin Verbose
+        #     puts "GO"
+        #     until scanner.scan(/}/) or scanner.empty?
+        #         case
+        #         when scanner.scan(/[^}]*/)
+        #         else
+        #         end
+        #     end
 
+
+        #PH TAGS
+        when scanner.scan(/<\?/)
+          tokens << [:PH_OT, "<?"]
+        when scanner.scan(/\?>/)
+          tokens << [:PH_CT, "?>"]
         #KEYWORDS
         when scanner.scan(/import\b/)
           tokens << [:KEY_IMPORT, "import"]
