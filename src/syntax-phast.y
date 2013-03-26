@@ -256,14 +256,17 @@ return 1;
 int fun3(char* y,int nivel){
     Node* h1; 
     char* op = (char*)ch_peek(pila_operadores);
+    char* op1;
     printf("Checar el top de Poper tiene operador pendiente = '%s' <<\n", op);
     switch(nivel){
         case 0: //basico
             if(*op == '*' || *op == '/')
             {
                 printf("Hago lo de adentro (MULTIPLICACION / DIVISION)\n");
-                /*printf("En cabeza O: %s\n",(char*)ch_peek(pila_operandos));*/
-                /*printf("En cabeza 1: %s\n",(char*)ch_peekN(pila_operandos));*/
+                printf("En cabeza O: %s\n",(char*)ch_peek(pila_operandos));
+                h1 = pila_operandos;
+                op1 = (char *)ch_peek(pila_operandos->next);
+                printf("En cabeza 1: %s\n",op1);
                 
             }
             break;

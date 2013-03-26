@@ -1,19 +1,13 @@
 #include<stdbool.h>
 #include<stdio.h>
 #include<stdlib.h>
+#include"chain.h"
 #include"../heading.h"
-
-typedef struct Node
-{
-    void* element;
-    struct Node *next;
-    struct Node *prev;
-} Node;
 
 void ch_push(void *element, Node **head)
 {
     Node *temp;
-    temp = (Node*)malloc(sizeof(Node*));
+    temp = (Node*)malloc(sizeof(Node));
     temp->element = element;
     temp->next = *head;
     *head = temp;
@@ -44,13 +38,13 @@ void* ch_peek(Node *head)
     return head->element;
 }
 
-void* ch_peekN(Node *head)
+void* ch_peekNext(Node *head)
 {
     Node* tmp = head->next;
     return tmp;
 }
 
-bool ch_exists_in(char* variable,  Node *a_scope)
+bool ch_exists_in(void* variable,  Node *a_scope)
 {
     /* TODO */
     return true;
