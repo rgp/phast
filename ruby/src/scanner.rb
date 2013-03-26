@@ -4,7 +4,7 @@ module Phast
   module Scanner
 
     SEPARADORES = /\(|\)|\{|\}|\[|\]|:|\.|,|;/
-    OPERADORES = /!=|!|\+|-|\*|\/|>|<|==|\|\||&&|=/
+    OPERADORES = /!=|!|\+|\*|\/|>|<|==|\|\||&&|=/
 
 
     def self.scan(source)
@@ -39,7 +39,7 @@ module Phast
                 end
             end
 
-        when scanner.scan(/verbose[ ]*{/) #Begin Verbose
+        when scanner.scan(/verbose[ ]*\{/) #Begin Verbose
           tokens << [:BLOCK_VERBOSE, "verbose"]
           vbose_level = [1]
             until vbose_level.empty?
@@ -49,9 +49,9 @@ module Phast
                 end
 
                 case
-                when scanner.scan(/{/)
+                when scanner.scan(/\{/)
                     vbose_level.push 1
-                when scanner.scan(/}/)
+                when scanner.scan(/\}/)
                     vbose_level.pop
                 when scanner.scan(/\n/)
                     lineno += 1
@@ -66,53 +66,104 @@ module Phast
           tokens << [:PH_OT, "<?"]
         when scanner.scan(/\?>/)
           tokens << [:PH_CT, "?>"]
+
         #KEYWORDS
-        when scanner.scan(/import\b/)
-          tokens << [:KEY_IMPORT, "import"]
-        when match = scanner.scan(/func main\b/)
-          tokens << [:KEY_MAIN, match]
-        when match = scanner.scan(/func\b/)
-          tokens << [:KEY_FUNC, match]
-        when match = scanner.scan(/struct\b/)
-          tokens << [:KEY_STRUCT, match]
-        when match = scanner.scan(/for\b/)
-          tokens << [:KEY_FOR, match]
-        when match = scanner.scan(/while\b/)
-          tokens << [:KEY_WHILE, match]
-        when match = scanner.scan(/if\b/)
-          tokens << [:KEY_IF, match]
-        when match = scanner.scan(/else\b/)
-          tokens << [:KEY_ELSE, match]
-        when match = scanner.scan(/int\b/)
-          tokens << [:KEY_INT, match]
-        when match = scanner.scan(/float\b/)
-          tokens << [:KEY_FLOAT, match]
-        when match = scanner.scan(/string\b/)
-          tokens << [:KEY_STRING, match]
-        when match = scanner.scan(/boolean\b/)
-          tokens << [:KEY_BOOLEAN, match]
-        when match = scanner.scan(/print\b/)
-          tokens << [:KEY_PRINT, match]
-        when match = scanner.scan(/true\b/)
-          tokens << [:KEY_TRUE, match]
-        when match = scanner.scan(/false\b/)
-          tokens << [:KEY_FALSE, match]
-        when match = scanner.scan(/return\b/)
-          tokens << [:KEY_RETURN, match]
-        when match = scanner.scan(/break\b/)
-          tokens << [:KEY_BREAK, match]
-        when match = scanner.scan(/thread_is_dead\b/)
-          tokens << [:KEY_THREAD_IS_DEAD, match]
-        when match = scanner.scan(/thread_is_alive\b/)
-          tokens << [:KEY_THREAD_IS_ALIVE, match]
-        when match = scanner.scan(/thread_run\b/)
-          tokens << [:KEY_THREAD_RUN, match]
-        when match = scanner.scan(/join\b/)
-          tokens << [:KEY_JOIN, match]
-        when match = scanner.scan(/return\b/)
-          tokens << [:KEY_RETURN, match]
-        when match = scanner.scan(/var\b/)
-          tokens << [:KEY_VAR, match]
+        when match = scanner.scan(/int/)
+          tokens << [:WORD_INT, match]
+        when match = scanner.scan(/float/)
+          tokens << [:WORD_FLOAT, match]
+        when match = scanner.scan(/if/)
+          tokens << [:WORD_IF, match]
+        when match = scanner.scan(/else/)
+          tokens << [:WORD_ELSE, match]
+        when match = scanner.scan(/while/)
+          tokens << [:WORD_WHILE, match]
+        when match = scanner.scan(/for/)
+          tokens << [:WORD_FOR, match]
+        when match = scanner.scan(/class/)
+          tokens << [:WORD_CLASS, match]
+        when match = scanner.scan(/extends/)
+          tokens << [:WORD_EXTENDS, match]
+        when match = scanner.scan(/implements/)
+          tokens << [:WORD_IMPLEMENTS, match]
+        when match = scanner.scan(/do/)
+          tokens << [:WORD_DO, match]
+        when match = scanner.scan(/switch/)
+          tokens << [:WORD_SWITCH, match]
+        when match = scanner.scan(/case/)
+          tokens << [:WORD_CASE, match]
+        when match = scanner.scan(/break/)
+          tokens << [:WORD_BREAK, match]
+        when match = scanner.scan(/default/)
+          tokens << [:WORD_DEFAULT, match]
+        when match = scanner.scan(/continue/)
+          tokens << [:WORD_CONTINUE, match]
+        when match = scanner.scan(/fun/)
+          tokens << [:WORD_FUN, match]
+        when match = scanner.scan(/return/)
+          tokens << [:WORD_RETURN, match]
+        when match = scanner.scan(/static/)
+          tokens << [:WORD_STATIC, match]
+        when match = scanner.scan(/abstract/)
+          tokens << [:WORD_ABSTRACT, match]
+        when match = scanner.scan(/public/)
+          tokens << [:WORD_PUBLIC, match]
+        when match = scanner.scan(/private/)
+          tokens << [:WORD_PRIVATE, match]
+        when match = scanner.scan(/protected/)
+          tokens << [:WORD_PROTECTED, match]
+        when match = scanner.scan(/true|TRUE/)
+          tokens << [:WORD_TRUE, match]
+        when match = scanner.scan(/false|FALSE/)
+          tokens << [:WORD_FALSE, match]
+        when match = scanner.scan(/null|NULL/)
+          tokens << [:WORD_NULL, match]
+        when match = scanner.scan(/new/)
+          tokens << [:WORD_NEW, match]
+        when match = scanner.scan(/and/)
+          tokens << [:WORD_AND, match]
+        when match = scanner.scan(/or/)
+          tokens << [:WORD_OR, match]
+        when match = scanner.scan(/not/)
+          tokens << [:WORD_NOT, match]
+        when match = scanner.scan(/xor/)
+          tokens << [:WORD_XOR, match]
+        when match = scanner.scan(/try/)
+          tokens << [:WORD_TRY, match]
+        when match = scanner.scan(/catch/)
+          tokens << [:WORD_CATCH, match]
+        when match = scanner.scan(/throw/)
+          tokens << [:WORD_THROW, match]
+          
+        #OPERATORS
+        when match = scanner.scan(/===/)
+          tokens << [:OP_IDENTICAL, match]
+        when match = scanner.scan(/==/)
+          tokens << [:OP_EQUAL, match]
+        when match = scanner.scan(/!=/)
+          tokens << [:OP_NOT_EQUAL, match]
+        when match = scanner.scan(/=/)
+          tokens << [:OP_ASIGN, match]
+        when match = scanner.scan(/\+\+/)
+          tokens << [:OP_INCREMENT, match]
+        when match = scanner.scan(/--/)
+          tokens << [:OP_DECREMENT, match]
+        when match = scanner.scan(/\+/)
+          tokens << [:OP_PLUS, match]
+        when match = scanner.scan(/-/)
+          tokens << [:OP_MINUS, match]
+        when match = scanner.scan(/\*/)
+          tokens << [:OP_MULTIPLY, match]
+        when match = scanner.scan(/\//)
+          tokens << [:OP_DIVIDE, match]
+        when match = scanner.scan(/<=/)
+          tokens << [:OP_LESS_EQUAL, match]
+        when match = scanner.scan(/</)
+          tokens << [:OP_LESS, match]
+        when match = scanner.scan(/>=/)
+          tokens << [:OP_GREATER_EQUAL, match]
+        when match = scanner.scan(/>/)
+          tokens << [:OP_EQUAL, match]
 
         #REGEX
         when match = scanner.scan(/[a-zA-Z_][a-zA-Z0-9_]*/)
