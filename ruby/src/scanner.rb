@@ -3,9 +3,9 @@ require 'strscan'
 module Phast
   module Scanner
 
-    SEPARADORES = /\(|\)|\{|\}|\[|\]|:|\.|,|;/
-    OPERADORES = /!=|!|\+|\*|\/|>|<|==|\|\||&&|=/
 
+    # SEPARADORES = /\(|\)|\{|\}|\[|\]|:|\.|,|;/
+    SEPARADORES = [;:,\{\}\(\)\.\[\]]
 
     def self.scan(source)
       tokens = []
@@ -178,8 +178,6 @@ module Phast
         when match = scanner.scan(SEPARADORES)
           tokens << [match, match]
 
-        when match = scanner.scan(OPERADORES)
-          tokens << [match, match]
         else
           STDERR.puts "Unkown input at #{scanner.rest}..."
           exit 1
