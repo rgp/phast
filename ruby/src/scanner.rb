@@ -44,7 +44,7 @@ module Phast
           vbose_level = [1]
             until vbose_level.empty?
                 if scanner.empty?
-                    STDERR.puts "Incomplete Verbose Block at #{scanner.rest}"
+                    STDERR.puts "Incomplete Verbose Block at #{scanner.rest} on line #{lineno}"
                     exit 1
                 end
 
@@ -130,12 +130,11 @@ module Phast
         when match = scanner.scan(OPERADORES)
           tokens << [match, match]
         else
-          STDERR.puts "Unkown input at #{scanner.rest}..."
+          STDERR.puts "Unkown input at #{scanner.rest}... on line #{lineno}"
           exit 1
         end
       end
 
-        puts "LOC: #{lineno}"
       tokens
     end
   end
