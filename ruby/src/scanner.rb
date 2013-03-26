@@ -3,7 +3,7 @@ require 'strscan'
 module Phast
   module Scanner
 
-    SEPARADORES = /\(|\)|\{|\}|\[|\]|:|\.|,/
+    SEPARADORES = /\(|\)|\{|\}|\[|\]|:|\.|,|;/
     OPERADORES = /!=|!|\+|-|\*|\/|>|<|==|\|\||&&|=/
 
 
@@ -18,8 +18,7 @@ module Phast
           #Eats tabs and white spaces
         when scanner.scan(/\/\/.*\n/)
           #Eats comments
-            puts "comments"
-        when scanner.scan(/\/\*(.*|\n)*\*\//)
+        when scanner.scan(/\/\*(.|\n)*\*\//)
           #Eats comment blocks
         
         # when scanner.scan(/verbose[ ]*{/) #Begin Verbose
