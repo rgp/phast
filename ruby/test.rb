@@ -1,5 +1,5 @@
-require './src/scanner.rb'
-require './src/parser.rb'
+require './rbs/scanner.rb'
+require './rbs/parser.rb'
 
 if ARGV[0].empty?
     puts "Sin archivo de entrada"
@@ -14,9 +14,6 @@ end
 file.close
 
 tokens = Phast::Scanner.scan(str)
-puts "TOKENS:\n"
-puts tokens
-# puts "PARSE:\n"
-# a = Phast::Parser.new
-# a.parse(tokens)
+ a = Phast::Parser.new
+ a.parse(tokens)
 

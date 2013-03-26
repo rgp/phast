@@ -2,175 +2,138 @@ class Phast::Parser
 
 rule
 
-programa: import main funciones
-
-import: KEY_IMPORT STRING
-      |
-
-main: KEY_MAIN '('')' {setup_scope} bloque {update_scope}
-
-bloque: '{' bloque_p '}'
-bloque_p: estatuto bloque_p
-        |
-
-funciones: funcion funciones
-        |
-
-funcion: KEY_FUNC ID {setup_scope}'(' params ')' return bloque {update_scope}
-
-return: tipo_p
-      |
-
-
-llamada_funcion: ID '(' llamada_funcion_p ')'
-llamada_funcion_p: asignacion_p llamada_funcion_pp
-                |
-llamada_funcion_pp: ',' asignacion_p llamada_funcion_pp
-                |
-
-estatuto: vars
-      | asignacion
-      | llamada_funcion
-      | condicion
-      | ciclo
-
-id: ID {check_for_existance(val[0])}
-
-tipo: tipo_p {@types.push val[0];}
-
-tipo_p: KEY_STRING 
-    | KEY_INT
-    | KEY_FLOAT
-    | KEY_BOOLEAN
-
-params: tipo ID params_p {add_to_vars val[1], true}
-      |
-
-params_p: ',' tipo ID params_p {add_to_vars val[2], true}
-      |
-
-vars: KEY_VAR tipo vars_aux vars_p {add_to_vars val[2]}
-vars_p: ',' vars_aux vars_p {add_to_vars val[1]}
-      |
-      
-vars_aux: ID '[' expresion ']'
-        | ID
-
-ciclo: while
-
-while: KEY_WHILE '(' estatuto ')' bloque
-
-condicion: KEY_IF '(' estatuto ')' bloque else
-
-else: KEY_ELSE bloque
-    |
-
-asignacion: id_o_arreglo '=' asignacion_p
-
-asignacion_p: expresion
-            | STRING
-            | BOOLEAN
-            | nuevo_arreglo
-          
-nuevo_arreglo: '{'   nuevo_arreglo_p  '}'
-
-nuevo_arreglo_p: asignacion_p nuevo_arreglo_aux
-
-nuevo_arreglo_aux: ',' asignacion_p nuevo_arreglo_aux
-                |
-
-id_o_arreglo: id arreglo_p
-
-arreglo_p: '[' expresion ']'
-          |
-
-var_cte: INT
-      | FLOAT
-      | llamada_funcion
-      | id_o_arreglo
-
-expresion: es expresion_p
-
-expresion_p: operacion_relacional es {}
-          |
-
-es: termino es_p
-
-es_p: suma_resta termino es_p
-    |
-
-termino: termino_p {}
-termino_p: factor termino_pp
-termino_pp: mult_div factor termino_pp
+phast :  PH_OT estatutos PH_CT
+estatutos: estatuto estatutos
          |
+estatuto : expresion ';' 
+         | bloque_while
+         | bloque_do 
+         | bloque_verbose
+         | bloque_if
+         | bloque_for
+         | { aumenta_scope } bloques_declarativos { disminuye_scope }
+bloques_declarativos: bloque_fun
+                    | bloque_class
+expresion: comparando {} comparando_aux
+comparando_aux: op_comp {}comparando {} comparando_aux
+           |
+comparando: termino {} termino_aux
+termino_aux: op_term {} termino {} termino_aux
+           | 
+termino: factor {} factor_aux
+factor_aux: op_fact {} factor {} factor_aux 
+          | 
+factor: llamada 
+      | estatico {}
+llamada: ID { llame_var } id_call
+estatico: numero
+        | STRING
+        | arreglo
+        /*| OP_INCREMENT ID {}*/
+        /*| OP_DECREMENT ID {}*/
+        | WORD_TRUE
+        | WORD_FALSE
+        | WORD_NULL
+        | '('{} expresion ')'{}
 
-factor: factor_p {}
-factor_p: var_cte {}
-      | {} '(' expresion ')' {}
-      
-suma_resta: suma_resta_p { }
-suma_resta_p: '+' 
-            | '-' 
+id_call: '(' argumentos ')'
+        | '[' expresion ']'
+        /*| OP_INCREMENT*/
+        /*| OP_DECREMENT*/
+        | OP_ASIGN expresion {} 
+        |
+argumentos: expresion args_aux
+          |
+args_aux: ',' expresion args_aux
+        |
+op_comp: OP_EQUAL
+       | OP_NOT_EQUAL  
+       | OP_GREATER  
+       | OP_GREATER_EQUAL
+       | OP_LESS  
+       | OP_LESS_EQUAL
+       | WORD_AND  
+       | WORD_OR 
 
-mult_div: mult_div_p {}
-mult_div_p: '*'
-          | '/'
+op_term: OP_PLUS
+       | OP_MINUS
 
-operacion_relacional: operacion_relacional_p {}
-operacion_relacional_p: '!='
-                    | '>'
-                    | '<'
+op_fact: OP_MULTIPLY
+       | OP_DIVIDE
+
+numero : INT {}
+       | FLOAT {}
+arreglo: '[' arr_elems ']'
+arr_elems: arr_elem arr_elems_aux
+          |
+arr_elems_aux: ',' arr_elem arr_elems_aux
+          |
+arr_elem: arr_val arr_elem_aux
+arr_elem_aux: '=' '>' arr_val
+             |
+arr_val: expresion
+
+bloque_while : WORD_WHILE '(' expresion ')' '{' estatutos '}'
+bloque_do : WORD_DO '{' estatutos '}' WORD_WHILE '(' expresion ')' ';' 
+bloque_verbose : VERBOSE_BLOCK
+bloque_if : WORD_IF  '(' expresion ')' '{' estatutos '}' else
+else: WORD_ELSE aux_else
+     |
+aux_else: bloque_if
+       | '{' estatutos '}'
+bloque_for : WORD_FOR '('comparando ';' expresion ';' expresion ')' '{' estatutos '}'
+bloque_fun : WORD_FUN ID '(' params ')' '{' estatutos '}'
+
+bloque_class: WORD_CLASS ID class_extras '{' class_body '}'
+class_body: class_body_aux  class_body
+           |
+class_body_aux: { aumenta_scope } bloque_fun { disminuye_scope }
+           | ID { llame_var } class_def_var_aux ';'
+class_def_var_aux: OP_ASIGN 
+                  |
+class_extras: WORD_EXTENDS ID
+             |
+
+params: ID { llame_var } def_param params_aux
+       |
+params_aux: ',' ID { llame_var } def_param params_aux
+           |
+def_param: '=' estatico
+          |
 end
 
 ---- header ----
 
 ---- inner ----
-  class UndeclaredVariable < StandardError
-  end
-  class VariableAlreadyDeclared < StandardError
-  end
 
   def parse(tokens)
     @tokens = tokens
-    @scope = 0
-    @vars = {}
-    @types = []
+    @scopes = [[]]
 
     do_parse
   end
 
-  def vars
-    @vars
-  end
-
   def next_token
-    @tokens.shift
+    @curr_token = @tokens.shift
   end
 
-  def setup_scope
-    @vars[@scope] = {}
-  end
-  
-  def update_scope
-    @scope +=1
-  end
-
-  def add_to_vars id, is_stack=false
-    type = is_stack ? @types.pop : @types.last
-
-    if exists? id
-      raise VariableAlreadyDeclared
+  def llame_var
+    if @scopes.last.include? @curr_token[1]
+        puts "usando ya existente #{@curr_token[1]}"
     else
-      @vars[@scope][id] = type
+        guarda_var
+        puts "guardando #{@curr_token[1]}"
     end
   end
 
-  def exists? id
-      !@vars[@scope][id].nil?
+  def guarda_var
+    @scopes.last.push(@curr_token[1])
   end
 
-  def check_for_existance id
-    unless exists?(id)
-      raise UndeclaredVariable 
-    end
+  def aumenta_scope
+    @scopes.push []
+  end
+
+  def disminuye_scope
+    @scopes.pop
   end
