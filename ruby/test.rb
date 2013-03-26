@@ -1,7 +1,7 @@
-require './scanner.rb'
-require './parser.rb'
+require './src/scanner.rb'
+require './src/parser.rb'
 
-file = File.new("../test/correct.ph", "r")
+file = File.new("test/correct.ph", "r")
 str = ""
 while (line = file.gets)
     str << line
