@@ -2,15 +2,9 @@
 /* lalala
  otro*/
 //lalala
-//lalala
-//lalala
-//lalala
-//lalala
-//lalala
-//lalala
-//lalala
-//lalala
-//lalala
-//lalala
-//lalala
+verbose {
+adasdasd
+id = 3;
+if{}else{}
+}
 ?>
