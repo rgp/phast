@@ -1,5 +1,5 @@
 run: clean rbs/parser.rb rbs/scanner.rb
-	ruby test.rb $(f)
+	ruby driver.rb $(f)
 
 rbs/scanner.rb:
 	cp src/scanner.rb rbs/scanner.rb
