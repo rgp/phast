@@ -109,6 +109,7 @@ end
 
     def initialize(scanner)
         @scanner = scanner
+        @scope = 0
     end
 
     def parse
@@ -128,15 +129,26 @@ end
     end
 
     def guarda_var
-        @scopes.last[@curr_token[1]] = [$lineno]
+        @scopes.last[@curr_token[1]] = [@scope,nil,$lineno] #[scope,type,declared_at]
     end
 
     def aumenta_scope
         @scopes.push Hash.new
+        @scope += 1
     end
 
     def disminuye_scope
-        @scopes.pop
+        last_scope = @scopes.pop
+        @scope -= 1
+    end
+    
+    def func1
+    end
+
+    def func2
+    end
+
+    def func3
     end
 
     def on_error(t,val,vstack)

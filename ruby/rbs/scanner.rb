@@ -26,7 +26,7 @@ module Phast
 
             when @scanner.scan(/\n/) #Count line breaks
                 $lineno += 1
-            when @scanner.scan(/\s+/) #Eats tabs and white spaces
+            when @scanner.scan(/[ \t]+/) #Eats tabs and white spaces
             when @scanner.scan(/\/\/.*\n/)
                 $lineno += 1
             when @scanner.scan(/\/\*/) #Begin Comment Block

@@ -14,6 +14,7 @@ module_eval(<<'...end parser.y/module_eval...', 'parser.y', 109)
 
     def initialize(scanner)
         @scanner = scanner
+        @scope = 0
     end
 
     def parse
@@ -33,24 +34,23 @@ module_eval(<<'...end parser.y/module_eval...', 'parser.y', 109)
     end
 
     def guarda_var
-        @scopes.last[@curr_token[1]] = [$lineno]
+        @scopes.last[@curr_token[1]] = [@scope,nil,$lineno] #[scope,type,declared_at]
     end
 
     def aumenta_scope
+        puts @scopes.last.inspect
         @scopes.push Hash.new
+        @scope += 1
     end
 
     def disminuye_scope
-        @scopes.pop
+        last_scope = @scopes.pop
+        puts last_scope.inspect
+        @scope -= 1
     end
 
     def on_error(t,val,vstack)
-        puts "t"
-        puts @vstack.inspect
-        puts "val"
-        puts @tstack.inspect
-        puts self.instance_variables
-        raise ParseError, sprintf("\nError de sintaxis. Se encontro %s (%s)", val.inspect, token_to_str(t) || '?')
+        raise ParseError, sprintf("\nError de sintaxis. Se encontro %s (%s) inesperado", val.inspect, token_to_str(t) || '?')
     end
 ...end parser.y/module_eval...
 ##### State transition tables begin ###
