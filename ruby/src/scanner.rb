@@ -3,9 +3,8 @@ require 'strscan'
 module Phast
   class Scanner
 
-
-    # SEPARADORES = /\(|\)|\{|\}|\[|\]|:|\.|,|;/
-    SEPARADORES = [;:,\{\}\(\)\.\[\]]
+    SEPARADORES = /\(|\)|\{|\}|\[|\]|:|\.|,|;/
+    LOGICAL = /!|\||&&/
 
     def initialize(source)
         @src = source
@@ -169,7 +168,7 @@ module Phast
             when match = @scanner.scan(/>=/)
                 token = [:OP_GREATER_EQUAL, match]
             when match = @scanner.scan(/>/)
-                token = [:OP_EQUAL, match]
+                token = [:OP_GREATER, match]
 
                 #REGEX
             when match = @scanner.scan(/[a-zA-Z_][a-zA-Z0-9_]*/)
@@ -184,7 +183,7 @@ module Phast
             when match = @scanner.scan(SEPARADORES)
                 token = [match, match]
 
-            when match = @scanner.scan(OPERADORES)
+            when match = @scanner.scan(LOGICAL)
                 token = [match, match]
             when @scanner.eos?
                 return nil
