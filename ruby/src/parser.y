@@ -15,18 +15,18 @@ estatuto : expresion ';'
 bloques_declarativos: bloque_fun
                     | bloque_class
 #Expresiones
-expresion: comparando {} comparando_aux
-comparando_aux: op_comp {} comparando {} comparando_aux
+expresion: comparando {fun3 2} comparando_aux
+comparando_aux: op_comp {fun2} comparando {fun3 2} comparando_aux
            |
-comparando: termino {} termino_aux
-termino_aux: op_term {} termino {} termino_aux
+comparando: termino {fun3 1} termino_aux
+termino_aux: op_term {fun2} termino {fun3 1} termino_aux
            | 
-termino: factor {} factor_aux
-factor_aux: op_fact {} factor {} factor_aux 
+termino: factor {fun3 0} factor_aux
+factor_aux: op_fact {fun2} factor {fun3 0} factor_aux 
           | 
 factor: llamada 
-      | estatico {}
-llamada: ID { llame_var } id_call
+      | estatico {fun1}
+llamada: ID { llame_var}{ fun1 } id_call
 estatico: numero
         | STRING
         | arreglo
@@ -35,7 +35,7 @@ estatico: numero
         | WORD_TRUE
         | WORD_FALSE
         | WORD_NULL
-        | '('{} expresion ')'{}
+        | '('{fun4} expresion ')'{fun5}
 
 id_call: '(' argumentos ')'
         | '[' expresion ']'
@@ -110,6 +110,10 @@ end
     def initialize(scanner)
         @scanner = scanner
         @scope = 0
+        @poper = []
+        @operandos = []
+        @tmp_var_id = 0
+        @tmp_v = []
     end
 
     def parse
@@ -142,13 +146,56 @@ end
         @scope -= 1
     end
     
-    def func1
+    def fun1
+        # puts "Meter #{@curr_token[1]} a pila Operandos" 
+        @operandos.push @curr_token[1]
     end
 
-    def func2
+    def fun2
+        # puts "Meter #{@curr_token[1]} a pila Operadores" 
+        @poper.push @curr_token[1]
     end
 
-    def func3
+    def fun3(nivel)
+        # puts "Checar el top de Poper tiene operador pendiente"
+        if !@poper.empty?
+            op = @poper.last
+            case
+            when nivel == 0
+                if(op == '*' || op == '/')
+                    @poper.pop
+                    oper = @operandos.pop
+                    oper1 = @operandos.pop
+                    @tmp_var_id += 1
+                    @operandos.push "t#{@tmp_var_id}"
+                    puts "#{op}\t#{oper}\t#{oper1}\tt#{@tmp_var_id}"
+                end
+            when nivel == 1
+                if(op == '+' || op == '-')
+                    @poper.pop
+                    oper = @operandos.pop
+                    oper1 = @operandos.pop
+                    @tmp_var_id += 1
+                    @operandos.push "t#{@tmp_var_id}"
+                    puts "#{op}\t#{oper}\t#{oper1}\tt#{@tmp_var_id}"
+                end
+            when nivel == 2
+                if(op == "and" || op == "or")
+                    @poper.pop
+                    oper = @operandos.pop
+                    oper1 = @operandos.pop
+                    @tmp_var_id += 1
+                    @operandos.push "t#{@tmp_var_id}"
+                    puts "#{op}\t#{oper}\t#{oper1}\tt#{@tmp_var_id}"
+                end
+            end
+        end
+    end
+
+    def fun4
+    end
+
+    def fun5
     end
 
     def on_error(t,val,vstack)
