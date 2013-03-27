@@ -140,10 +140,5 @@ end
     end
 
     def on_error(t,val,vstack)
-        puts "t"
-        puts token_to_str t
-        puts "val"
-        puts val
-        puts "vstack"
-        puts vstack
+        raise ParseError, sprintf("\nError de sintaxis. Se encontro %s (%s) inesperado", val.inspect, token_to_str(t) || '?')
     end

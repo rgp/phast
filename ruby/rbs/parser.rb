@@ -46,11 +46,11 @@ module_eval(<<'...end parser.y/module_eval...', 'parser.y', 109)
 
     def on_error(t,val,vstack)
         puts "t"
-        puts token_to_str t
+        puts @vstack.inspect
         puts "val"
-        puts val
-        puts "vstack"
-        puts vstack
+        puts @tstack.inspect
+        puts self.instance_variables
+        raise ParseError, sprintf("\nError de sintaxis. Se encontro %s (%s)", val.inspect, token_to_str(t) || '?')
     end
 ...end parser.y/module_eval...
 ##### State transition tables begin ###
