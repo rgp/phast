@@ -14,8 +14,9 @@ estatuto : expresion ';'
          | { aumenta_scope } bloques_declarativos { disminuye_scope }
 bloques_declarativos: bloque_fun
                     | bloque_class
+#Expresiones
 expresion: comparando {} comparando_aux
-comparando_aux: op_comp {}comparando {} comparando_aux
+comparando_aux: op_comp {} comparando {} comparando_aux
            |
 comparando: termino {} termino_aux
 termino_aux: op_term {} termino {} termino_aux
@@ -106,34 +107,43 @@ end
 
 ---- inner ----
 
-  def parse(tokens)
-    @tokens = tokens
-    @scopes = [[]]
-
-    do_parse
-  end
-
-  def next_token
-    @curr_token = @tokens.shift
-  end
-
-  def llame_var
-    if @scopes.last.include? @curr_token[1]
-        puts "usando ya existente #{@curr_token[1]}"
-    else
-        guarda_var
-        puts "guardando #{@curr_token[1]}"
+    def initialize(scanner)
+        @scanner = scanner
     end
-  end
 
-  def guarda_var
-    @scopes.last.push(@curr_token[1])
-  end
+    def parse
+        @scopes = [{}]
+        do_parse
+    end
 
-  def aumenta_scope
-    @scopes.push []
-  end
+    def next_token
+        @curr_token = @scanner.next_token
+    end
 
-  def disminuye_scope
-    @scopes.pop
-  end
+    def llame_var
+        if @scopes.last.include? @curr_token[1]
+        else
+        guarda_var
+        end
+    end
+
+    def guarda_var
+        @scopes.last[@curr_token[1]] = [$lineno]
+    end
+
+    def aumenta_scope
+        @scopes.push Hash.new
+    end
+
+    def disminuye_scope
+        @scopes.pop
+    end
+
+    def on_error(t,val,vstack)
+        puts "t"
+        puts token_to_str t
+        puts "val"
+        puts val
+        puts "vstack"
+        puts vstack
+    end

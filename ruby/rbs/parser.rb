@@ -10,39 +10,48 @@ require 'racc/parser.rb'
 module Phast
   class Parser < Racc::Parser
 
-module_eval(<<'...end parser.y/module_eval...', 'parser.y', 108)
+module_eval(<<'...end parser.y/module_eval...', 'parser.y', 109)
 
-  def parse(tokens)
-    @tokens = tokens
-    @scopes = [[]]
-
-    do_parse
-  end
-
-  def next_token
-    @curr_token = @tokens.shift
-  end
-
-  def llame_var
-    if @scopes.last.include? @curr_token[1]
-        puts "usando ya existente #{@curr_token[1]}"
-    else
-        guarda_var
-        puts "guardando #{@curr_token[1]}"
+    def initialize(scanner)
+        @scanner = scanner
     end
-  end
 
-  def guarda_var
-    @scopes.last.push(@curr_token[1])
-  end
+    def parse
+        @scopes = [{}]
+        do_parse
+    end
 
-  def aumenta_scope
-    @scopes.push []
-  end
+    def next_token
+        @curr_token = @scanner.next_token
+    end
 
-  def disminuye_scope
-    @scopes.pop
-  end
+    def llame_var
+        if @scopes.last.include? @curr_token[1]
+        else
+        guarda_var
+        end
+    end
+
+    def guarda_var
+        @scopes.last[@curr_token[1]] = [$lineno]
+    end
+
+    def aumenta_scope
+        @scopes.push Hash.new
+    end
+
+    def disminuye_scope
+        @scopes.pop
+    end
+
+    def on_error(t,val,vstack)
+        puts "t"
+        puts token_to_str t
+        puts "val"
+        puts val
+        puts "vstack"
+        puts vstack
+    end
 ...end parser.y/module_eval...
 ##### State transition tables begin ###
 
@@ -565,7 +574,7 @@ module_eval(<<'.,.,', 'parser.y', 13)
 
 # reduce 13 omitted
 
-module_eval(<<'.,.,', 'parser.y', 16)
+module_eval(<<'.,.,', 'parser.y', 17)
   def _reduce_14(val, _values, result)
     
     result
@@ -574,14 +583,14 @@ module_eval(<<'.,.,', 'parser.y', 16)
 
 # reduce 15 omitted
 
-module_eval(<<'.,.,', 'parser.y', 17)
+module_eval(<<'.,.,', 'parser.y', 18)
   def _reduce_16(val, _values, result)
     
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 17)
+module_eval(<<'.,.,', 'parser.y', 18)
   def _reduce_17(val, _values, result)
     
     result
@@ -592,7 +601,7 @@ module_eval(<<'.,.,', 'parser.y', 17)
 
 # reduce 19 omitted
 
-module_eval(<<'.,.,', 'parser.y', 19)
+module_eval(<<'.,.,', 'parser.y', 20)
   def _reduce_20(val, _values, result)
     
     result
@@ -601,14 +610,14 @@ module_eval(<<'.,.,', 'parser.y', 19)
 
 # reduce 21 omitted
 
-module_eval(<<'.,.,', 'parser.y', 20)
+module_eval(<<'.,.,', 'parser.y', 21)
   def _reduce_22(val, _values, result)
     
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 20)
+module_eval(<<'.,.,', 'parser.y', 21)
   def _reduce_23(val, _values, result)
     
     result
@@ -619,7 +628,7 @@ module_eval(<<'.,.,', 'parser.y', 20)
 
 # reduce 25 omitted
 
-module_eval(<<'.,.,', 'parser.y', 22)
+module_eval(<<'.,.,', 'parser.y', 23)
   def _reduce_26(val, _values, result)
     
     result
@@ -628,14 +637,14 @@ module_eval(<<'.,.,', 'parser.y', 22)
 
 # reduce 27 omitted
 
-module_eval(<<'.,.,', 'parser.y', 23)
+module_eval(<<'.,.,', 'parser.y', 24)
   def _reduce_28(val, _values, result)
     
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 23)
+module_eval(<<'.,.,', 'parser.y', 24)
   def _reduce_29(val, _values, result)
     
     result
@@ -648,14 +657,14 @@ module_eval(<<'.,.,', 'parser.y', 23)
 
 # reduce 32 omitted
 
-module_eval(<<'.,.,', 'parser.y', 26)
+module_eval(<<'.,.,', 'parser.y', 27)
   def _reduce_33(val, _values, result)
     
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 27)
+module_eval(<<'.,.,', 'parser.y', 28)
   def _reduce_34(val, _values, result)
      llame_var 
     result
@@ -676,14 +685,14 @@ module_eval(<<'.,.,', 'parser.y', 27)
 
 # reduce 41 omitted
 
-module_eval(<<'.,.,', 'parser.y', 36)
+module_eval(<<'.,.,', 'parser.y', 37)
   def _reduce_42(val, _values, result)
     
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 36)
+module_eval(<<'.,.,', 'parser.y', 37)
   def _reduce_43(val, _values, result)
     
     result
@@ -694,7 +703,7 @@ module_eval(<<'.,.,', 'parser.y', 36)
 
 # reduce 45 omitted
 
-module_eval(<<'.,.,', 'parser.y', 42)
+module_eval(<<'.,.,', 'parser.y', 43)
   def _reduce_46(val, _values, result)
     
     result
@@ -735,14 +744,14 @@ module_eval(<<'.,.,', 'parser.y', 42)
 
 # reduce 63 omitted
 
-module_eval(<<'.,.,', 'parser.y', 63)
+module_eval(<<'.,.,', 'parser.y', 64)
   def _reduce_64(val, _values, result)
     
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 64)
+module_eval(<<'.,.,', 'parser.y', 65)
   def _reduce_65(val, _values, result)
     
     result
@@ -793,21 +802,21 @@ module_eval(<<'.,.,', 'parser.y', 64)
 
 # reduce 87 omitted
 
-module_eval(<<'.,.,', 'parser.y', 89)
+module_eval(<<'.,.,', 'parser.y', 90)
   def _reduce_88(val, _values, result)
      aumenta_scope 
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 89)
+module_eval(<<'.,.,', 'parser.y', 90)
   def _reduce_89(val, _values, result)
      disminuye_scope 
     result
   end
 .,.,
 
-module_eval(<<'.,.,', 'parser.y', 90)
+module_eval(<<'.,.,', 'parser.y', 91)
   def _reduce_90(val, _values, result)
      llame_var 
     result
@@ -824,7 +833,7 @@ module_eval(<<'.,.,', 'parser.y', 90)
 
 # reduce 95 omitted
 
-module_eval(<<'.,.,', 'parser.y', 96)
+module_eval(<<'.,.,', 'parser.y', 97)
   def _reduce_96(val, _values, result)
      llame_var 
     result
@@ -835,7 +844,7 @@ module_eval(<<'.,.,', 'parser.y', 96)
 
 # reduce 98 omitted
 
-module_eval(<<'.,.,', 'parser.y', 98)
+module_eval(<<'.,.,', 'parser.y', 99)
   def _reduce_99(val, _values, result)
      llame_var 
     result

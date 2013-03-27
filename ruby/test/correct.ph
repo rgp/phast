@@ -2,6 +2,7 @@
 
 globalidad;
 a = b + c;
+fun 3
 
 class gato extends animal {
     

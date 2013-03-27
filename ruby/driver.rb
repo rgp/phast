@@ -14,10 +14,5 @@ while (line = file.gets)
 end
 file.close
 
-scanner = Phast::Scanner.new(str)
-while (tk = scanner.next_token)
-    puts tk.inspect
- # a = Phast::Parser.new(scanner)
- # a.parse(tokens)
-end
-
+parser = Phast::Parser.new(Phast::Scanner.new(str))
+parser.parse
