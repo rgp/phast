@@ -3,9 +3,9 @@ require 'strscan'
 module Phast
   class Scanner
 
-    SEPARADORES = /\(|\)|\{|\}|\[|\]|:|\.|,|;/
-    OPERADORES = /!=|!|\+|\*|\/|>|<|==|\|\||&&|=/
 
+    # SEPARADORES = /\(|\)|\{|\}|\[|\]|:|\.|,|;/
+    SEPARADORES = [;:,\{\}\(\)\.\[\]]
 
     def initialize(source)
         @src = source
