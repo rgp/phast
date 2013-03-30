@@ -41,7 +41,7 @@ id_call: '(' argumentos ')'
         | '[' expresion ']'
         /*| OP_INCREMENT*/
         /*| OP_DECREMENT*/
-        | OP_ASIGN expresion {} 
+        | OP_ASIGN {fun2} expresion {fun3 3} 
         |
 argumentos: expresion args_aux
           |
@@ -168,7 +168,7 @@ end
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
                     @operandos.push "t#{@tmp_var_id}"
-                    puts "#{op}\t#{oper}\t#{oper1}\tt#{@tmp_var_id}"
+                    puts "#{op}\t#{oper1}\t#{oper}\tt#{@tmp_var_id}"
                 end
             when nivel == 1
                 if(op == '+' || op == '-')
@@ -177,7 +177,7 @@ end
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
                     @operandos.push "t#{@tmp_var_id}"
-                    puts "#{op}\t#{oper}\t#{oper1}\tt#{@tmp_var_id}"
+                    puts "#{op}\t#{oper1}\t#{oper}\tt#{@tmp_var_id}"
                 end
             when nivel == 2
                 if(op == "and" || op == "or")
@@ -186,7 +186,16 @@ end
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
                     @operandos.push "t#{@tmp_var_id}"
-                    puts "#{op}\t#{oper}\t#{oper1}\tt#{@tmp_var_id}"
+                    puts "#{op}\t#{oper1}\t#{oper}\tt#{@tmp_var_id}"
+                end
+            when nivel == 3
+                if(op == "=")
+                    @poper.pop
+                    oper = @operandos.pop
+                    oper1 = @operandos.pop
+                    # @tmp_var_id += 1
+                    @operandos.push oper1
+                    puts "#{op}\t#{oper}\t\t#{oper1}"
                 end
             end
         end
