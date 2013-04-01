@@ -2,7 +2,7 @@ class Phast::Parser
 
 rule
 
-phast :  PH_OT estatutos PH_CT
+phast :  PH_OT estatutos PH_CT {print_quads}
 estatutos: estatuto estatutos
          |
 estatuto : expresion ';' 
@@ -14,7 +14,8 @@ estatuto : expresion ';'
          | { aumenta_scope } bloques_declarativos { disminuye_scope }
 bloques_declarativos: bloque_fun
                     | bloque_class
-#Expresiones
+
+# Expresiones
 expresion: comparando {fun3 2} comparando_aux
 comparando_aux: op_comp {fun2} comparando {fun3 2} comparando_aux
            |
@@ -74,14 +75,15 @@ arr_elem_aux: '=' '>' arr_val
              |
 arr_val: expresion
 
-bloque_while : WORD_WHILE '(' expresion ')' '{' estatutos '}'
-bloque_do : WORD_DO '{' estatutos '}' WORD_WHILE '(' expresion ')' ';' 
-bloque_verbose : VERBOSE_BLOCK
-bloque_if : WORD_IF  '(' expresion ')' '{' estatutos '}' else
-else: WORD_ELSE aux_else
+# Bloques
+bloque_if : WORD_IF  '(' expresion {if_quad 1} ')' '{' estatutos '}' else {if_quad 2} 
+else: WORD_ELSE {if_quad 3} aux_else
      |
 aux_else: bloque_if
        | '{' estatutos '}'
+bloque_while : WORD_WHILE '(' expresion ')' '{' estatutos '}'
+bloque_do : WORD_DO '{' estatutos '}' WORD_WHILE '(' expresion ')' ';' 
+bloque_verbose : VERBOSE_BLOCK
 bloque_for : WORD_FOR '('comparando ';' expresion ';' expresion ')' '{' estatutos '}'
 bloque_fun : WORD_FUN ID '(' params ')' '{' estatutos '}'
 
@@ -110,8 +112,11 @@ end
     def initialize(scanner)
         @scanner = scanner
         @scope = 0
+        @quads = []
+        @next_quad = 0
         @poper = []
         @operandos = []
+        @psaltos = []
         @tmp_var_id = 0
         @tmp_v = []
     end
@@ -145,6 +150,19 @@ end
         last_scope = @scopes.pop
         @scope -= 1
     end
+
+    def genera(w,x,y,z)
+        quad = []
+        quad.push w
+        quad.push x
+        quad.push y
+        quad.push z
+    end
+    
+    def rellena(n)
+        incomplete_quad = @quads.delete_at n
+        @quads.insert(n, genera(incomplete_quad[0], incomplete_quad[1], nil, @next_quad))
+    end
     
     def fun1
         # puts "Meter #{@curr_token[1]} a pila Operandos" 
@@ -168,7 +186,9 @@ end
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
                     @operandos.push "t#{@tmp_var_id}"
-                    puts "#{op}\t#{oper1}\t#{oper}\tt#{@tmp_var_id}"
+                    @quads.push genera(op, oper1, oper, "t#{@tmp_var_id}")
+                    @next_quad += 1
+                    # puts "#{op}\t#{oper1}\t#{oper}\tt#{@tmp_var_id}"
                 end
             when nivel == 1
                 if(op == '+' || op == '-')
@@ -177,7 +197,9 @@ end
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
                     @operandos.push "t#{@tmp_var_id}"
-                    puts "#{op}\t#{oper1}\t#{oper}\tt#{@tmp_var_id}"
+                    @quads.push genera(op, oper1, oper, "t#{@tmp_var_id}")
+                    @next_quad += 1
+                    # puts "#{op}\t#{oper1}\t#{oper}\tt#{@tmp_var_id}"
                 end
             when nivel == 2
                 if(op == "and" || op == "or")
@@ -186,7 +208,9 @@ end
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
                     @operandos.push "t#{@tmp_var_id}"
-                    puts "#{op}\t#{oper1}\t#{oper}\tt#{@tmp_var_id}"
+                    @quads.push genera(op, oper1, oper, "t#{@tmp_var_id}")
+                    @next_quad += 1
+                    # puts "#{op}\t#{oper1}\t#{oper}\tt#{@tmp_var_id}"
                 end
             when nivel == 3
                 if(op == "=")
@@ -195,16 +219,52 @@ end
                     oper1 = @operandos.pop
                     # @tmp_var_id += 1
                     @operandos.push oper1
-                    puts "#{op}\t#{oper}\t\t#{oper1}"
+                    @quads.push genera(op, oper, nil, oper1)
+                    @next_quad += 1
+                    # puts "#{op}\t#{oper}\t\t#{oper1}"
                 end
             end
         end
     end
 
-    def fun4
+    def if_quad(step)
+        case
+        when step == 1
+            @psaltos.push @next_quad
+            condicion = @operandos.pop
+            @quads.push genera("GotoF", condicion, nil, nil)
+            @next_quad += 1
+        when step ==  2
+            rellena(@psaltos.pop)
+        when step == 3
+            f = @psaltos.pop
+            @psaltos.push @next_quad
+            @quads.push genera("Goto", nil, nil, nil)
+            @next_quad += 1
+            rellena(f)
+        end
     end
 
-    def fun5
+    def if_else_quad(step)
+        case
+        when step == 1
+            @psaltos.push @next_quad
+            condicion = @operandos.pop
+            @quads.push genera("GotoF", condicion, nil, nil)
+            @next_quad += 1
+        when step ==  2
+            rellena(@psaltos.pop)
+        end
+    end
+
+    def print_quads
+        i = 0;
+        until @quads.empty?
+            quad = @quads.shift
+            puts "#{i}.-\t#{quad[0]}\t#{quad[1]}\t#{quad[2]}\t#{quad[3]}\n"
+            i += 1
+        end
+        puts "next quad:#{@next_quad}"
     end
 
     def on_error(t,val,vstack)
