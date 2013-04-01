@@ -157,11 +157,13 @@ end
         quad.push x
         quad.push y
         quad.push z
+        @quads.push quad
+        @next_quad += 1
     end
     
     def rellena(n)
         incomplete_quad = @quads.delete_at n
-        @quads.insert(n, genera(incomplete_quad[0], incomplete_quad[1], nil, @next_quad))
+        @quads.insert(n, [incomplete_quad[0], incomplete_quad[1], nil, @next_quad])
     end
     
     def fun1
@@ -186,8 +188,7 @@ end
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
                     @operandos.push "t#{@tmp_var_id}"
-                    @quads.push genera(op, oper1, oper, "t#{@tmp_var_id}")
-                    @next_quad += 1
+                    genera(op, oper1, oper, "t#{@tmp_var_id}")
                     # puts "#{op}\t#{oper1}\t#{oper}\tt#{@tmp_var_id}"
                 end
             when nivel == 1
@@ -197,8 +198,7 @@ end
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
                     @operandos.push "t#{@tmp_var_id}"
-                    @quads.push genera(op, oper1, oper, "t#{@tmp_var_id}")
-                    @next_quad += 1
+                    genera(op, oper1, oper, "t#{@tmp_var_id}")
                     # puts "#{op}\t#{oper1}\t#{oper}\tt#{@tmp_var_id}"
                 end
             when nivel == 2
@@ -208,8 +208,7 @@ end
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
                     @operandos.push "t#{@tmp_var_id}"
-                    @quads.push genera(op, oper1, oper, "t#{@tmp_var_id}")
-                    @next_quad += 1
+                    genera(op, oper1, oper, "t#{@tmp_var_id}")
                     # puts "#{op}\t#{oper1}\t#{oper}\tt#{@tmp_var_id}"
                 end
             when nivel == 3
@@ -219,8 +218,7 @@ end
                     oper1 = @operandos.pop
                     # @tmp_var_id += 1
                     @operandos.push oper1
-                    @quads.push genera(op, oper, nil, oper1)
-                    @next_quad += 1
+                    genera(op, oper, nil, oper1)
                     # puts "#{op}\t#{oper}\t\t#{oper1}"
                 end
             end
@@ -232,15 +230,13 @@ end
         when step == 1
             @psaltos.push @next_quad
             condicion = @operandos.pop
-            @quads.push genera("GotoF", condicion, nil, nil)
-            @next_quad += 1
+            genera("GotoF", condicion, nil, nil)
         when step ==  2
             rellena(@psaltos.pop)
         when step == 3
             f = @psaltos.pop
             @psaltos.push @next_quad
-            @quads.push genera("Goto", nil, nil, nil)
-            @next_quad += 1
+            genera("Goto", nil, nil, nil)
             rellena(f)
         end
     end
@@ -252,13 +248,11 @@ end
         when step ==  2
             condicion = @operandos.pop
             @psaltos.push @next_quad
-            @quads.push genera("GotoF", condicion, nil, nil)
-            @next_quad += 1
+            genera("GotoF", condicion, nil, nil)
         when step == 3
             f = @psaltos.pop
             r = @psaltos.pop
-            @quads.push genera("Goto", nil, nil, r)
-            @next_quad += 1
+            genera("Goto", nil, nil, r)
             rellena(f)
         end
     end
@@ -269,8 +263,7 @@ end
             @psaltos.push @next_quad
         when step ==  2
             condicion = @operandos.pop
-            @quads.push genera("GotoV", condicion, nil, @psaltos.pop)
-            @next_quad += 1
+            genera("GotoV", condicion, nil, @psaltos.pop)
         end
     end
 
