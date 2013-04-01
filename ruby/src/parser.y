@@ -245,18 +245,6 @@ end
         end
     end
 
-    def if_else_quad(step)
-        case
-        when step == 1
-            @psaltos.push @next_quad
-            condicion = @operandos.pop
-            @quads.push genera("GotoF", condicion, nil, nil)
-            @next_quad += 1
-        when step ==  2
-            rellena(@psaltos.pop)
-        end
-    end
-
     def print_quads
         i = 0;
         until @quads.empty?
