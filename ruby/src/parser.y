@@ -270,6 +270,7 @@ end
         when step ==  2
             condicion = @operandos.pop
             @quads.push genera("GotoV", condicion, nil, @psaltos.pop)
+            @next_quad += 1
         end
     end
 
