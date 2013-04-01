@@ -76,13 +76,13 @@ arr_elem_aux: '=' '>' arr_val
 arr_val: expresion
 
 # Bloques
-bloque_if : WORD_IF  '(' expresion {if_quad 1} ')' '{' estatutos '}' else {if_quad 2} 
+bloque_if : WORD_IF  '(' expresion ')' {if_quad 1} '{' estatutos '}' else {if_quad 2} 
 else: WORD_ELSE {if_quad 3} aux_else
      |
 aux_else: bloque_if
        | '{' estatutos '}'
-bloque_while : WORD_WHILE '(' expresion ')' '{' estatutos '}'
-bloque_do : WORD_DO '{' estatutos '}' WORD_WHILE '(' expresion ')' ';' 
+bloque_while : WORD_WHILE {while_quad 1} '(' expresion ')' {while_quad 2} '{' estatutos '}' {while_quad 3}
+bloque_do : WORD_DO {do_while_quad 1} '{' estatutos '}' WORD_WHILE '(' expresion ')' {do_while_quad 2} ';' 
 bloque_verbose : VERBOSE_BLOCK
 bloque_for : WORD_FOR '('comparando ';' expresion ';' expresion ')' '{' estatutos '}'
 bloque_fun : WORD_FUN ID '(' params ')' '{' estatutos '}'
@@ -202,7 +202,7 @@ end
                     # puts "#{op}\t#{oper1}\t#{oper}\tt#{@tmp_var_id}"
                 end
             when nivel == 2
-                if(op == "and" || op == "or")
+                if(op == "and" || op == "or" || op == "<" || op == ">" || op == "<=" || op == ">=")
                     @poper.pop
                     oper = @operandos.pop
                     oper1 = @operandos.pop
@@ -242,6 +242,34 @@ end
             @quads.push genera("Goto", nil, nil, nil)
             @next_quad += 1
             rellena(f)
+        end
+    end
+
+    def while_quad(step)
+        case
+        when step == 1
+            @psaltos.push @next_quad
+        when step ==  2
+            condicion = @operandos.pop
+            @psaltos.push @next_quad
+            @quads.push genera("GotoF", condicion, nil, nil)
+            @next_quad += 1
+        when step == 3
+            f = @psaltos.pop
+            r = @psaltos.pop
+            @quads.push genera("Goto", nil, nil, r)
+            @next_quad += 1
+            rellena(f)
+        end
+    end
+
+    def do_while_quad(step)
+        case
+        when step == 1
+            @psaltos.push @next_quad
+        when step ==  2
+            condicion = @operandos.pop
+            @quads.push genera("GotoV", condicion, nil, @psaltos.pop)
         end
     end
 
