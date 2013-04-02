@@ -107,6 +107,8 @@ end
 
 ---- header ----
 
+require './src/Quad'
+
 ---- inner ----
 
     def initialize(scanner)
@@ -150,18 +152,10 @@ end
         last_scope = @scopes.pop
         @scope -= 1
     end
-
-    def genera(w,x,y,z)
-        quad = []
-        quad.push w
-        quad.push x
-        quad.push y
-        quad.push z
-    end
     
     def rellena(n)
         incomplete_quad = @quads.delete_at n
-        @quads.insert(n, genera(incomplete_quad[0], incomplete_quad[1], nil, @next_quad))
+        @quads.insert(n, Quad.new(incomplete_quad.instruccion, incomplete_quad.op1, nil, @next_quad))
     end
     
     def fun1
@@ -186,7 +180,7 @@ end
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
                     @operandos.push "t#{@tmp_var_id}"
-                    @quads.push genera(op, oper1, oper, "t#{@tmp_var_id}")
+                    @quads.push Quad.new(op, oper1, oper, "t#{@tmp_var_id}")
                     @next_quad += 1
                     # puts "#{op}\t#{oper1}\t#{oper}\tt#{@tmp_var_id}"
                 end
@@ -197,7 +191,7 @@ end
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
                     @operandos.push "t#{@tmp_var_id}"
-                    @quads.push genera(op, oper1, oper, "t#{@tmp_var_id}")
+                    @quads.push Quad.new(op, oper1, oper, "t#{@tmp_var_id}")
                     @next_quad += 1
                     # puts "#{op}\t#{oper1}\t#{oper}\tt#{@tmp_var_id}"
                 end
@@ -208,7 +202,7 @@ end
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
                     @operandos.push "t#{@tmp_var_id}"
-                    @quads.push genera(op, oper1, oper, "t#{@tmp_var_id}")
+                    @quads.push Quad.new(op, oper1, oper, "t#{@tmp_var_id}")
                     @next_quad += 1
                     # puts "#{op}\t#{oper1}\t#{oper}\tt#{@tmp_var_id}"
                 end
@@ -219,7 +213,7 @@ end
                     oper1 = @operandos.pop
                     # @tmp_var_id += 1
                     @operandos.push oper1
-                    @quads.push genera(op, oper, nil, oper1)
+                    @quads.push Quad.new(op, oper, nil, oper1)
                     @next_quad += 1
                     # puts "#{op}\t#{oper}\t\t#{oper1}"
                 end
@@ -232,14 +226,14 @@ end
         when step == 1
             @psaltos.push @next_quad
             condicion = @operandos.pop
-            @quads.push genera("GotoF", condicion, nil, nil)
+            @quads.push Quad.new("GotoF", condicion, nil, nil)
             @next_quad += 1
         when step ==  2
             rellena(@psaltos.pop)
         when step == 3
             f = @psaltos.pop
             @psaltos.push @next_quad
-            @quads.push genera("Goto", nil, nil, nil)
+            @quads.push Quad.new("Goto", nil, nil, nil)
             @next_quad += 1
             rellena(f)
         end
@@ -252,12 +246,12 @@ end
         when step ==  2
             condicion = @operandos.pop
             @psaltos.push @next_quad
-            @quads.push genera("GotoF", condicion, nil, nil)
+            @quads.push Quad.new("GotoF", condicion, nil, nil)
             @next_quad += 1
         when step == 3
             f = @psaltos.pop
             r = @psaltos.pop
-            @quads.push genera("Goto", nil, nil, r)
+            @quads.push Quad.new("Goto", nil, nil, r)
             @next_quad += 1
             rellena(f)
         end
@@ -269,7 +263,7 @@ end
             @psaltos.push @next_quad
         when step ==  2
             condicion = @operandos.pop
-            @quads.push genera("GotoV", condicion, nil, @psaltos.pop)
+            @quads.push Quad.new("GotoV", condicion, nil, @psaltos.pop)
         end
     end
 
@@ -277,10 +271,10 @@ end
         i = 0;
         until @quads.empty?
             quad = @quads.shift
-            puts "#{i}.-\t#{quad[0]}\t#{quad[1]}\t#{quad[2]}\t#{quad[3]}\n"
+             puts "#{i}: \t#{quad.to_s}"
             i += 1
         end
-        puts "next quad:#{@next_quad}"
+        # puts "next quad:#{@next_quad}"
     end
 
     def on_error(t,val,vstack)
