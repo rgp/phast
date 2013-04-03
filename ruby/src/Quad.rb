@@ -1,3 +1,4 @@
+require './src/Instrucciones.rb'
 class Quad
 
     attr_accessor :instruccion, :op1, :op2, :registro
@@ -10,6 +11,10 @@ class Quad
     end
 
     def to_s
-        "#{@instruccion}\t#{@op1}\t#{@op2}\t#{@registro}"
+        if($debug)
+            #Convierte a texto
+            @instruccion = Phast.i_to_s(@instruccion) if (@instruccion.is_a? Integer) 
+        end
+            "#{@instruccion}\t#{@op1}\t#{@op2}\t#{@registro}"
     end
 end
