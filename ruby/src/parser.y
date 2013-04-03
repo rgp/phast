@@ -108,6 +108,8 @@ end
 ---- header ----
 
 require './src/Quad'
+require './src/Var'
+require './src/Instrucciones'
 
 ---- inner ----
 
@@ -121,6 +123,9 @@ require './src/Quad'
         @psaltos = []
         @tmp_var_id = 0
         @tmp_v = []
+        @direccion_memoria = 1
+        #Global config
+        $debug = true
     end
 
     def parse
@@ -134,13 +139,19 @@ require './src/Quad'
 
     def llame_var
         if @scopes.last.include? @curr_token[1]
+        @scopes.last[@curr_token[1]]
         else
-        guarda_var
+            if @scopes.first.include? @curr_token[1]
+            @scopes.first[@curr_token[1]]
+            else
+            guarda_var
+            end
         end
     end
 
     def guarda_var
-        @scopes.last[@curr_token[1]] = [@scope,nil,$lineno] #[scope,type,declared_at]
+        @direccion_memoria += 1
+        @scopes.last[@curr_token[1]] = Var.new(@curr_token[1],nil,$scope,@direccion_memoria,@lineno) #[Name,type,direccion,scope,declared_at]
     end
 
     def aumenta_scope
@@ -156,6 +167,11 @@ require './src/Quad'
     def rellena(n)
         incomplete_quad = @quads.delete_at n
         @quads.insert(n, Quad.new(incomplete_quad.instruccion, incomplete_quad.op1, nil, @next_quad))
+    end
+
+    def genera(w,x,y,z)
+        @quads.push Quad.new(w,x,y,z)
+        @next_quad += 1
     end
     
     def fun1
@@ -180,9 +196,7 @@ require './src/Quad'
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
                     @operandos.push "t#{@tmp_var_id}"
-                    @quads.push Quad.new(op, oper1, oper, "t#{@tmp_var_id}")
-                    @next_quad += 1
-                    # puts "#{op}\t#{oper1}\t#{oper}\tt#{@tmp_var_id}"
+                    genera(op, oper1, oper, "t#{@tmp_var_id}")
                 end
             when nivel == 1
                 if(op == '+' || op == '-')
@@ -193,7 +207,6 @@ require './src/Quad'
                     @operandos.push "t#{@tmp_var_id}"
                     @quads.push Quad.new(op, oper1, oper, "t#{@tmp_var_id}")
                     @next_quad += 1
-                    # puts "#{op}\t#{oper1}\t#{oper}\tt#{@tmp_var_id}"
                 end
             when nivel == 2
                 if(op == "and" || op == "or" || op == "<" || op == ">" || op == "<=" || op == ">=")
@@ -202,9 +215,7 @@ require './src/Quad'
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
                     @operandos.push "t#{@tmp_var_id}"
-                    @quads.push Quad.new(op, oper1, oper, "t#{@tmp_var_id}")
-                    @next_quad += 1
-                    # puts "#{op}\t#{oper1}\t#{oper}\tt#{@tmp_var_id}"
+                    genera(op, oper1, oper, "t#{@tmp_var_id}")
                 end
             when nivel == 3
                 if(op == "=")
@@ -213,9 +224,7 @@ require './src/Quad'
                     oper1 = @operandos.pop
                     # @tmp_var_id += 1
                     @operandos.push oper1
-                    @quads.push Quad.new(op, oper, nil, oper1)
-                    @next_quad += 1
-                    # puts "#{op}\t#{oper}\t\t#{oper1}"
+                    genera(op, oper, nil, oper1)
                 end
             end
         end
@@ -226,15 +235,13 @@ require './src/Quad'
         when step == 1
             @psaltos.push @next_quad
             condicion = @operandos.pop
-            @quads.push Quad.new("GotoF", condicion, nil, nil)
-            @next_quad += 1
+            genera(Phast::GOTOF, condicion, nil, nil)
         when step ==  2
             rellena(@psaltos.pop)
         when step == 3
             f = @psaltos.pop
             @psaltos.push @next_quad
-            @quads.push Quad.new("Goto", nil, nil, nil)
-            @next_quad += 1
+            genera(Phast::GOTO, nil, nil, nil)
             rellena(f)
         end
     end
@@ -246,13 +253,11 @@ require './src/Quad'
         when step ==  2
             condicion = @operandos.pop
             @psaltos.push @next_quad
-            @quads.push Quad.new("GotoF", condicion, nil, nil)
-            @next_quad += 1
+            genera(Phast::GOTOF, condicion, nil, nil)
         when step == 3
             f = @psaltos.pop
             r = @psaltos.pop
-            @quads.push Quad.new("Goto", nil, nil, r)
-            @next_quad += 1
+            genera(Phast::GOTO, nil, nil, r)
             rellena(f)
         end
     end
@@ -263,7 +268,7 @@ require './src/Quad'
             @psaltos.push @next_quad
         when step ==  2
             condicion = @operandos.pop
-            @quads.push Quad.new("GotoV", condicion, nil, @psaltos.pop)
+            genera(Phast::GOTOV, condicion, nil, @psaltos.pop)
         end
     end
 
@@ -274,7 +279,6 @@ require './src/Quad'
              puts "#{i}: \t#{quad.to_s}"
             i += 1
         end
-        # puts "next quad:#{@next_quad}"
     end
 
     def on_error(t,val,vstack)
