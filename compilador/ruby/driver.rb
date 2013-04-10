@@ -1,5 +1,5 @@
-require './rbs/scanner.rb'
-require './rbs/parser.rb'
+require_relative 'rbs/scanner.rb'
+require_relative 'rbs/parser.rb'
 
 if ARGV[0].empty?
     puts "Sin archivo de entrada"

@@ -107,9 +107,9 @@ end
 
 ---- header ----
 
-require './src/Quad'
-require './src/Var'
-require './src/Instrucciones'
+require_relative 'lib/Quad'
+require_relative 'lib/Var'
+require_relative 'lib/Instrucciones'
 
 ---- inner ----
 

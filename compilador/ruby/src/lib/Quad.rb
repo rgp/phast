@@ -1,4 +1,4 @@
-require './src/Instrucciones.rb'
+require_relative 'Instrucciones.rb'
 class Quad
 
     attr_accessor :instruccion, :op1, :op2, :registro
