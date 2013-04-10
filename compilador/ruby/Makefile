@@ -1,5 +1,6 @@
-run: clean rbs/parser.rb rbs/scanner.rb libs
+run: compile
 	ruby driver.rb $(f)
+compile: clean rbs/parser.rb rbs/scanner.rb libs
 
 rbs/scanner.rb:
 	cp src/scanner.rb rbs/scanner.rb

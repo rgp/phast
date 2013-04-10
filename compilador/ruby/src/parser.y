@@ -63,8 +63,8 @@ op_term: OP_PLUS
 op_fact: OP_MULTIPLY
        | OP_DIVIDE
 
-numero : INT {}
-       | FLOAT {}
+numero : INT { guarda_cte @curr_token[1], Integer(@curr_token[1]) , "int" }
+       | FLOAT { guarda_cte @curr_token[1], Float(@curr_token[1]) , "float" }
 arreglo: '[' arr_elems ']'
 arr_elems: arr_elem arr_elems_aux
           |
@@ -123,7 +123,7 @@ require_relative 'lib/Instrucciones'
         @psaltos = []
         @tmp_var_id = 0
         @tmp_v = []
-        @direccion_memoria = 1
+        @ctes = {}
         #Global config
         $debug = true
     end
@@ -139,19 +139,22 @@ require_relative 'lib/Instrucciones'
 
     def llame_var
         if @scopes.last.include? @curr_token[1]
-        @scopes.last[@curr_token[1]]
+            @scopes.last[@curr_token[1]]
         else
             if @scopes.first.include? @curr_token[1]
             @scopes.first[@curr_token[1]]
             else
-            guarda_var
+            guarda_var @curr_token[1]
             end
         end
     end
 
-    def guarda_var
-        @direccion_memoria += 1
-        @scopes.last[@curr_token[1]] = Var.new(@curr_token[1],nil,$scope,@direccion_memoria,@lineno) #[Name,type,direccion,scope,declared_at]
+    def guarda_var(nombre)
+        @scopes.last[nombre] = Var.new(nombre,nil,nil,@scope,@lineno) #[Name,type,direccion,scope,declared_at]
+    end
+
+    def guarda_cte(nombre,valor,tipo)
+        @ctes[nombre] = Var.new(valor,tipo,valor,-2,@lineno)
     end
 
     def aumenta_scope
@@ -176,7 +179,12 @@ require_relative 'lib/Instrucciones'
     
     def fun1
         # puts "Meter #{@curr_token[1]} a pila Operandos" 
-        @operandos.push @curr_token[1]
+        # @operandos.push @curr_token[1]
+        if @scopes.last.include? @curr_token[1]
+            @operandos.push @scopes.last[@curr_token[1]]
+        else #Constantes
+            @operandos.push @ctes[@curr_token[1]]
+        end
     end
 
     def fun2
@@ -195,8 +203,11 @@ require_relative 'lib/Instrucciones'
                     oper = @operandos.pop
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
-                    @operandos.push "t#{@tmp_var_id}"
-                    genera(op, oper1, oper, "t#{@tmp_var_id}")
+                    # @operandos.push "t#{@tmp_var_id}"
+                    @operandos.push Var.new("t#{@tmp_var_id}",nil,nil,-1,-1)
+ # Var.new(@curr_token[1],nil,nil,$scope,@lineno)
+
+                    genera(op, oper1, oper,@operandos.last)
                 end
             when nivel == 1
                 if(op == '+' || op == '-')
@@ -204,8 +215,9 @@ require_relative 'lib/Instrucciones'
                     oper = @operandos.pop
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
-                    @operandos.push "t#{@tmp_var_id}"
-                    @quads.push Quad.new(op, oper1, oper, "t#{@tmp_var_id}")
+                    # @operandos.push "t#{@tmp_var_id}"
+                    @operandos.push Var.new("t#{@tmp_var_id}",nil,nil,-1,-1)
+                    @quads.push Quad.new(op, oper1, oper,@operandos.last)
                     @next_quad += 1
                 end
             when nivel == 2
@@ -214,15 +226,15 @@ require_relative 'lib/Instrucciones'
                     oper = @operandos.pop
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
-                    @operandos.push "t#{@tmp_var_id}"
-                    genera(op, oper1, oper, "t#{@tmp_var_id}")
+                    # @operandos.push "t#{@tmp_var_id}"
+                    @operandos.push Var.new("t#{@tmp_var_id}",nil,nil,-1,-1)
+                    genera(op, oper1, oper, @operandos.last)
                 end
             when nivel == 3
                 if(op == "=")
                     @poper.pop
                     oper = @operandos.pop
                     oper1 = @operandos.pop
-                    # @tmp_var_id += 1
                     @operandos.push oper1
                     genera(op, oper, nil, oper1)
                 end
@@ -273,12 +285,21 @@ require_relative 'lib/Instrucciones'
     end
 
     def print_quads
+        Var.map_mem
+        mems = Var.mem_info
+        puts "CTS\t#{mems[0]}"
+        puts "GLBL\t#{mems[1]}"
+        puts "SCPS\t#{mems[2]}"
+        puts "TMP\t#{mems[3]}"
+
+        puts "SOQ"
         i = 0;
         until @quads.empty?
             quad = @quads.shift
              puts "#{i}: \t#{quad.to_s}"
             i += 1
         end
+        puts "EOQ"
     end
 
     def on_error(t,val,vstack)

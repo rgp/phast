@@ -15,6 +15,6 @@ class Quad
             #Convierte a texto
             @instruccion = Phast.i_to_s(@instruccion) if (@instruccion.is_a? Integer) 
         end
-            "#{@instruccion}\t#{@op1}\t#{@op2}\t#{@registro}"
+            "#{@instruccion}\t#{@op1.to_s}\t#{@op2}\t#{@registro}"
     end
 end
