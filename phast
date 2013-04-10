@@ -26,7 +26,8 @@
                                    ruby compilador/ruby/driver.rb $2
                                    shift;;
                            --)
-                                   echo "Maquina virtual.... -> $2"
+                                   shift
+                                   php -f vm/phast_vm.php $@
                                    shift; break;;
                    esac
            done
