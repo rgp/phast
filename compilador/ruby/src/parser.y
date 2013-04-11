@@ -121,7 +121,7 @@ require_relative 'lib/Instrucciones'
         @scopes = [{}]
         
         #Quads
-        @quads = []
+        @quads = [[]]
         @next_quad = 0
 
         #Pilas
@@ -166,21 +166,23 @@ require_relative 'lib/Instrucciones'
 
     def aumenta_scope
         @scopes.push Hash.new
+        @quads.push Array.new
         @scope += 1
     end
 
     def disminuye_scope
-        last_scope = @scopes.pop
+        tabla_variables_last_scope = @scopes.pop
+        quads_last_scope = @quads.pop
         @scope -= 1
     end
     
     def rellena(n)
-        incomplete_quad = @quads.delete_at n
-        @quads.insert(n, Quad.new(incomplete_quad.instruccion, incomplete_quad.op1, nil, @next_quad))
+        incomplete_quad = @quads.last.delete_at n
+        @quads.last.insert(n, Quad.new(incomplete_quad.instruccion, incomplete_quad.op1, nil, @next_quad))
     end
 
     def genera(w,x,y,z)
-        @quads.push Quad.new(w,x,y,z)
+        @quads.last.push Quad.new(w,x,y,z)
         @next_quad += 1
     end
     
@@ -221,7 +223,7 @@ require_relative 'lib/Instrucciones'
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
                     @operandos.push Var.new("t#{@tmp_var_id}",nil,nil,-1,-1)
-                    @quads.push Quad.new(op, oper1, oper,@operandos.last)
+                    @quads.last.push Quad.new(op, oper1, oper,@operandos.last)
                     @next_quad += 1
                 end
             when nivel == 2
@@ -297,8 +299,8 @@ require_relative 'lib/Instrucciones'
 
         puts "SOQ"
         i = 0;
-        until @quads.empty?
-            quad = @quads.shift
+        until @quads.last.empty?
+            quad = @quads.last.shift
              puts "#{i}: \t#{quad.to_s}"
             i += 1
         end
