@@ -36,8 +36,8 @@ if(!$file_handle){
             $curr_reg++; //TODO Quitar saltos
                 break;
         case "Goto":
-            // $curr_reg = (int)$instruccion[3];
-            $curr_reg++; //TODO Quitar saltos
+            $curr_reg = (int)$instruccion[3];
+            // $curr_reg++; //TODO Quitar saltos
             echo "GOTO ${instruccion[3]}\n";
                 break;
             #Arithmetic instructions

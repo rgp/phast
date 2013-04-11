@@ -115,21 +115,28 @@ require_relative 'lib/Instrucciones'
 
     def initialize(scanner)
         @scanner = scanner
+
+        #Scopes
         @scope = 0
+        @scopes = [{}]
+        
+        #Quads
         @quads = []
         @next_quad = 0
+
+        #Pilas
         @poper = []
         @operandos = []
         @psaltos = []
+
         @tmp_var_id = 0
-        @tmp_v = []
         @ctes = {}
+
         #Global config
         $debug = true
     end
 
     def parse
-        @scopes = [{}]
         do_parse
     end
 
@@ -203,9 +210,7 @@ require_relative 'lib/Instrucciones'
                     oper = @operandos.pop
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
-                    # @operandos.push "t#{@tmp_var_id}"
                     @operandos.push Var.new("t#{@tmp_var_id}",nil,nil,-1,-1)
- # Var.new(@curr_token[1],nil,nil,$scope,@lineno)
 
                     genera(op, oper1, oper,@operandos.last)
                 end
@@ -215,7 +220,6 @@ require_relative 'lib/Instrucciones'
                     oper = @operandos.pop
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
-                    # @operandos.push "t#{@tmp_var_id}"
                     @operandos.push Var.new("t#{@tmp_var_id}",nil,nil,-1,-1)
                     @quads.push Quad.new(op, oper1, oper,@operandos.last)
                     @next_quad += 1
@@ -226,7 +230,6 @@ require_relative 'lib/Instrucciones'
                     oper = @operandos.pop
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
-                    # @operandos.push "t#{@tmp_var_id}"
                     @operandos.push Var.new("t#{@tmp_var_id}",nil,nil,-1,-1)
                     genera(op, oper1, oper, @operandos.last)
                 end
