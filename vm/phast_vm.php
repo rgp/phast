@@ -20,11 +20,11 @@ if(!$file_handle){
     fclose($file_handle);
 
     $curr_reg = $source[0][0];
-    array_shift($source);
-    array_shift($source);
-    array_shift($source);
-    array_shift($source);
-    array_shift($source);
+    array_shift($source); //START
+    array_shift($source); //CTES
+    array_shift($source); //GLOBS
+    array_shift($source); //SCPS
+    array_shift($source); //TMPS
 
     while($curr_reg < $EOF)
     {
