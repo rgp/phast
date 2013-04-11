@@ -1,3 +1,31 @@
+/*
+Cubo semantico:
+
+Operadores aritmeticos: (+,-,*,/,++,--)
+
+        String  Int     Float       Bool
+String  String  String  String      Bool
+Int     String  Int     Float       Int
+Float   String  Float   Float       Bool
+Bool    Bool    Int    Bool        Bool
+
+Operadores lógicos: (AND,OR, &&, ||, !, >, <, >=, <=, ==, !=)
+
+        String  Int     Float       Bool
+String  Bool    Bool    Bool        Bool
+Int     Bool    Bool    Bool        Bool
+Float   Bool    Bool    Bool        Bool
+Bool    Bool    Bool    Bool        Bool
+
+Jerarquía de tipos de datos:
+
+    NULO = 0,
+    BOLEANO = 1,
+    ENTERO = 2,
+    FLOTANTE = 3,
+    CADENA = 4
+*/
+
 class Phast::Parser
 
 rule
@@ -65,8 +93,8 @@ op_term: OP_PLUS
 op_fact: OP_MULTIPLY
        | OP_DIVIDE
 
-numero : INT { guarda_cte @curr_token[1], Integer(@curr_token[1]) , "int" }
-       | FLOAT { guarda_cte @curr_token[1], Float(@curr_token[1]) , "float" }
+numero : INT { guarda_cte @curr_token[1], Integer(@curr_token[1]) , 2 }
+       | FLOAT { guarda_cte @curr_token[1], Float(@curr_token[1]) , 3 }
 arreglo: '[' arr_elems ']'
 arr_elems: arr_elem arr_elems_aux
           |
@@ -331,8 +359,9 @@ require_relative 'lib/Instrucciones'
             @salida.push "#{mems[2]}"
             @salida.push "#{mems[3]}"
         end
-
-        # puts @ctes
+        @ctes.each do |k,c|
+            @salida.push "#{c}\t#{c.valor}\t#{c.tipo}"
+        end
 
         @reg_counter = 0
         main_quads = @output[:main]
