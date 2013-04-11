@@ -19,12 +19,47 @@ if(!$file_handle){
     }
     fclose($file_handle);
 
-    $curr_reg = $source[0][0];
+    $start = $source[0][0];
     array_shift($source); //START
+
+    $ctes = $source[0][0];
     array_shift($source); //CTES
+
+    $globs = $source[0][0];
     array_shift($source); //GLOBS
+
+    $scops = $source[0][0];
     array_shift($source); //SCPS
+
+    $temps = $source[0][0];
     array_shift($source); //TMPS
+
+    $curr_reg = $start;
+
+    $memoria = array();
+
+    for ($i = 0; $i < $ctes; $i++)
+    {
+        $type = $source[0][2];
+        switch($type)
+        {
+        case 2:
+            $memoria[$source[0][0]] = (int)$source[0][1];
+            break;
+        case 3:
+            $memoria[$source[0][0]] = (float)$source[0][1];
+            break;
+        case 4:
+            $memoria[$source[0][0]] = (string)$source[0][1];
+            break;
+        default:
+            echo "ERROR\n";
+            echo $type."\n";
+            break;
+        }
+        array_shift($source);
+    }
+
 
     while($curr_reg < $EOF)
     {
@@ -52,19 +87,23 @@ if(!$file_handle){
                 break;
             #Arithmetic instructions
         case 5:
-            echo "SUM ${instruccion[1]} ${instruccion[2]}\n";
+            // echo "SUM ${instruccion[1]} ${instruccion[2]}\n";
+            $memoria[(int)$instruccion[3]] = $memoria[(int)$instruccion[1]] + $memoria[(int)$instruccion[2]];
             $curr_reg++;
                 break;
         case 6:
-            echo "MUL ${instruccion[1]} ${instruccion[2]}\n";
+            // echo "MUL ${instruccion[1]} ${instruccion[2]}\n";
+            $memoria[(int)$instruccion[3]] = $memoria[(int)$instruccion[1]] * $memoria[(int)$instruccion[2]];
             $curr_reg++;
                 break;
         case 7:
-            echo "DIV ${instruccion[1]} ${instruccion[2]}\n";
+            // echo "DIV ${instruccion[1]} ${instruccion[2]}\n";
+            $memoria[(int)$instruccion[3]] = $memoria[(int)$instruccion[1]] / $memoria[(int)$instruccion[2]];
             $curr_reg++;
                 break;
         case 8:
-            echo "REST ${instruccion[1]} ${instruccion[2]}\n";
+            // echo "REST ${instruccion[1]} ${instruccion[2]}\n";
+            $memoria[(int)$instruccion[3]] = $memoria[(int)$instruccion[1]] - $memoria[(int)$instruccion[2]];
             $curr_reg++;
                 break;
             #Logical instructions
@@ -77,7 +116,8 @@ if(!$file_handle){
             $curr_reg++;
                 break;
         case 11:
-            echo "ASIGN ${instruccion[1]} ${instruccion[2]}\n";
+            // echo "ASIGN ${instruccion[1]} ${instruccion[2]}\n";
+            $memoria[(int)$instruccion[3]] = $memoria[(int)$instruccion[1]];
             $curr_reg++;
                 break;
         case 12:
