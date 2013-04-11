@@ -42,7 +42,7 @@ class Var
 
     def self.map_mem
         scope_dirs = @@dir.select {|k,v| k > 0}
-        @@mem_for_global = @@dir[0]
+        @@mem_for_global = @@dir[0] if @@dir[0] != nil
         tmp_mem_scps = scope_dirs.values.inject(:+)
         @@mem_for_scopes = tmp_mem_scps if tmp_mem_scps != nil
         @@mem_for_ctes = @@dir[-2] if @@dir[-2] != nil
