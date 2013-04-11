@@ -143,7 +143,7 @@ require_relative 'lib/Instrucciones'
         @output[@llave_quads.last] = {}
 
         #Global config
-        $debug = false
+        $debug = true
     end
 
     def parse
@@ -200,9 +200,7 @@ require_relative 'lib/Instrucciones'
 
     def genera(w,x,y,z)
         @next_quad += 1
-        tmp = Quad.new(w,x,y,z)
-        @quads.last.push tmp
-        tmp
+        @quads.last.push Quad.new(w,x,y,z)
     end
 
     def fun_call cual
@@ -344,10 +342,9 @@ require_relative 'lib/Instrucciones'
         print_quads main_quads[:quads]
         @salida.push "EOQ" if $debug
 
-        @call_quads.each do |q|
-            q.registro = $declared_funcs[q.registro]
-        end
         puts @salida
+        #TODO rellenar CALL
+        #TODO imprimir salida
 
     end
 
@@ -355,9 +352,7 @@ require_relative 'lib/Instrucciones'
         reg_offset = @reg_counter
         until quads.empty?
             quad = quads.shift
-            quad.saltos reg_offset
-            # @salida.push "#{@reg_counter}: \t#{quad.imprime reg_offset}"
-            @salida.push quad
+            @salida.push "#{@reg_counter}: \t#{quad.imprime reg_offset}"
             @reg_counter += 1
         end
     end

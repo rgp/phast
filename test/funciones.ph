@@ -1,5 +1,5 @@
 <?
-f = 2 + 3;
+primera = 2 + 3;
 
 if (f)
 {
@@ -10,9 +10,10 @@ else
     c + d;
 }
 
+
 fun suma(a,b){
-    c = a + b;
-    print(c);
+    total = a + b;
+    resta(c);
     if(c){
         a = 3 + 2;
     }
@@ -21,13 +22,13 @@ fun suma(a,b){
 
 fun resta(a,b){
     c = a - b;
-    print(c);
+    // print(c);
 }
 
 catdog = perro + gato;
 
-print("Esto es una calculadora.");
-print(" 5 + 4 = ");
+//print("Esto es una calculadora.");
+//print(" 5 + 4 = ");
 
 suma(5,4);
 

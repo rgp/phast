@@ -10,6 +10,10 @@ class Quad
         @registro = registro
     end
 
+    def saltos i
+        @registro += i if @registro.is_a? Integer
+    end
+
     def to_s
         if($debug)
             #Convierte a texto
