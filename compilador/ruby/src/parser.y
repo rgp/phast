@@ -2,7 +2,7 @@ class Phast::Parser
 
 rule
 
-phast :  PH_OT estatutos PH_CT {print_quads}
+phast :  PH_OT estatutos PH_CT {}
 estatutos: estatuto estatutos
          |
 estatuto : expresion ';' 
@@ -85,7 +85,7 @@ bloque_while : WORD_WHILE {while_quad 1} '(' expresion ')' {while_quad 2} '{' es
 bloque_do : WORD_DO {do_while_quad 1} '{' estatutos '}' WORD_WHILE '(' expresion ')' {do_while_quad 2} ';' 
 bloque_verbose : VERBOSE_BLOCK
 bloque_for : WORD_FOR '('comparando ';' expresion ';' expresion ')' '{' estatutos '}'
-bloque_fun : WORD_FUN ID '(' params ')' '{' estatutos '}'
+bloque_fun : WORD_FUN ID { nombre_scope } '(' params ')' '{' estatutos '}'
 
 bloque_class: WORD_CLASS ID class_extras '{' class_body '}'
 class_body: class_body_aux  class_body
@@ -128,9 +128,13 @@ require_relative 'lib/Instrucciones'
         @poper = []
         @operandos = []
         @psaltos = []
+        @output = {}
 
         @tmp_var_id = 0
         @ctes = {}
+        @llave_quads = [:main]
+
+        @output[@llave_quads.last] = {}
 
         #Global config
         $debug = true
@@ -138,6 +142,7 @@ require_relative 'lib/Instrucciones'
 
     def parse
         do_parse
+        process_output
     end
 
     def next_token
@@ -164,15 +169,22 @@ require_relative 'lib/Instrucciones'
         @ctes[nombre] = Var.new(valor,tipo,valor,-2,@lineno)
     end
 
+    def nombre_scope
+        @llave_quads.push @curr_token[1]
+    end
+
     def aumenta_scope
         @scopes.push Hash.new
         @quads.push Array.new
         @scope += 1
+        @next_quad = 0
     end
 
     def disminuye_scope
-        tabla_variables_last_scope = @scopes.pop
-        quads_last_scope = @quads.pop
+        @output[@llave_quads.last] = {}
+        @output[@llave_quads.last][:quads] = @quads.pop
+        @output[@llave_quads.last][:var_info] = @scopes.pop
+        @llave_quads.pop
         @scope -= 1
     end
     
@@ -223,8 +235,7 @@ require_relative 'lib/Instrucciones'
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
                     @operandos.push Var.new("t#{@tmp_var_id}",nil,nil,-1,-1)
-                    @quads.last.push Quad.new(op, oper1, oper,@operandos.last)
-                    @next_quad += 1
+                    genera(op, oper1, oper, @operandos.last)
                 end
             when nivel == 2
                 if(op == "and" || op == "or" || op == "<" || op == ">" || op == "<=" || op == ">=")
@@ -289,7 +300,11 @@ require_relative 'lib/Instrucciones'
         end
     end
 
-    def print_quads
+    def process_output
+
+        @output[@llave_quads.last][:quads] = @quads.pop
+        @output[@llave_quads.last][:var_info] = @scopes.pop
+
         Var.map_mem
         mems = Var.mem_info
         puts "CTS\t#{mems[0]}"
@@ -297,11 +312,19 @@ require_relative 'lib/Instrucciones'
         puts "SCPS\t#{mems[2]}"
         puts "TMP\t#{mems[3]}"
 
+        main_quads = @output[:main]
+        @output.delete(:main)
+        @output.each {|key, value| print_quads value[:quads] }
+        print_quads main_quads[:quads]
+
+    end
+
+    def print_quads(quads)
         puts "SOQ"
         i = 0;
-        until @quads.last.empty?
-            quad = @quads.last.shift
-             puts "#{i}: \t#{quad.to_s}"
+        until quads.empty?
+            quad = quads.shift
+            puts "#{i}: \t#{quad.to_s}"
             i += 1
         end
         puts "EOQ"
