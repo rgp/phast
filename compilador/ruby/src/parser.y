@@ -237,7 +237,7 @@ require_relative 'lib/Instrucciones'
                     @tmp_var_id += 1
                     @operandos.push Var.new("t#{@tmp_var_id}",nil,nil,-1,-1)
 
-                    genera(op, oper1, oper,@operandos.last)
+                    genera(Phast.op_to_inst(op), oper1, oper,@operandos.last)
                 end
             when nivel == 1
                 if(op == '+' || op == '-')
@@ -246,7 +246,7 @@ require_relative 'lib/Instrucciones'
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
                     @operandos.push Var.new("t#{@tmp_var_id}",nil,nil,-1,-1)
-                    genera(op, oper1, oper, @operandos.last)
+                    genera(Phast.op_to_inst(op), oper1, oper, @operandos.last)
                 end
             when nivel == 2
                 if(op == "and" || op == "or" || op == "<" || op == ">" || op == "<=" || op == ">=")
@@ -255,7 +255,7 @@ require_relative 'lib/Instrucciones'
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
                     @operandos.push Var.new("t#{@tmp_var_id}",nil,nil,-1,-1)
-                    genera(op, oper1, oper, @operandos.last)
+                    genera(Phast.op_to_inst(op), oper1, oper, @operandos.last)
                 end
             when nivel == 3
                 if(op == "=")
@@ -263,7 +263,7 @@ require_relative 'lib/Instrucciones'
                     oper = @operandos.pop
                     oper1 = @operandos.pop
                     @operandos.push oper1
-                    genera(op, oper, nil, oper1)
+                    genera(Phast.op_to_inst(op), oper, nil, oper1)
                 end
             end
         end
@@ -320,10 +320,17 @@ require_relative 'lib/Instrucciones'
 
         Var.map_mem
         mems = Var.mem_info
-        @salida.push "CTS\t#{mems[0]}"
-        @salida.push "GLBL\t#{mems[1]}"
-        @salida.push "SCPS\t#{mems[2]}"
-        @salida.push "TMP\t#{mems[3]}"
+        if $debug 
+            @salida.push "CTS\t#{mems[0]}"
+            @salida.push "GLBL\t#{mems[1]}"
+            @salida.push "SCPS\t#{mems[2]}"
+            @salida.push "TMP\t#{mems[3]}"
+        else
+            @salida.push "#{mems[0]}"
+            @salida.push "#{mems[1]}"
+            @salida.push "#{mems[2]}"
+            @salida.push "#{mems[3]}"
+        end
 
         # puts @ctes
 
@@ -340,6 +347,7 @@ require_relative 'lib/Instrucciones'
         # if !@undeclared_funcs.empty?
         #     raise ParseError, sprintf("Funcion #{@undeclared_funcs.last} no declarada")
         # end
+        @salida.unshift @reg_counter
         @salida.push "SOQ" if $debug
         print_quads main_quads[:quads]
         @salida.push "EOQ" if $debug

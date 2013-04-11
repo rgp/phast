@@ -4,6 +4,18 @@ module Phast
     GOTOF = 2
     GOTOV = 3
     CALL = 4
+    SUM = 5
+    MUL = 6
+    DIV = 7
+    REST = 8
+    AND = 9
+    OR = 10
+    ASIG = 11
+    GT = 12
+    LT = 13
+    EGT = 14
+    ELT = 15
+    EQ = 16
 
     def self.i_to_s(i)
         case
@@ -17,6 +29,37 @@ module Phast
             "Call"
         end
     end
+
+    def self.op_to_inst(op)
+        case
+        when op == "+"
+            SUM
+        when op == "-"
+            REST
+        when op == "*"
+            MUL
+        when op == "/"
+            DIV
+        when op == "and"
+            AND
+        when op == "or"
+            OR
+        when op == ">"
+            GT
+        when op == "<"
+            LT
+        when op == "<="
+            ELT
+        when op == ">="
+            EGT
+        when op == "="
+            ASIG
+        when op == "=="
+            EQ
+        end
+    end
+
+
     def self.op_to_s(o)
         puts "Not yet implemented"
     end

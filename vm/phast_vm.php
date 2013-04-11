@@ -19,7 +19,12 @@ if(!$file_handle){
     }
     fclose($file_handle);
 
-    $curr_reg = 0;
+    $curr_reg = $source[0][0];
+    array_shift($source);
+    array_shift($source);
+    array_shift($source);
+    array_shift($source);
+    array_shift($source);
 
     while($curr_reg < $EOF)
     {
@@ -27,43 +32,77 @@ if(!$file_handle){
         switch($instruccion[0])
         {
             #Flow Control instructions
-        case "GotoF":
-            echo "GOTOF ${instruccion[3]}\n";
-            $curr_reg++; //TODO Quitar saltos
-                break;
-        case "GotoV":
-            echo "GOTOV ${instruccion[3]}\n";
-            $curr_reg++; //TODO Quitar saltos
-                break;
-        case "Goto":
+        case 1:
             $curr_reg = (int)$instruccion[3];
             // $curr_reg++; //TODO Quitar saltos
             echo "GOTO ${instruccion[3]}\n";
                 break;
+        case 2:
+            echo "GOTOF ${instruccion[3]}\n";
+            $curr_reg++; //TODO Quitar saltos
+                break;
+        case 3:
+            echo "GOTOV ${instruccion[3]}\n";
+            $curr_reg++; //TODO Quitar saltos
+                break;
+        case 4:
+            // $curr_reg = (int)$instruccion[3];
+            $curr_reg++; //TODO Quitar saltos
+            echo "CALL ${instruccion[3]}\n";
+                break;
             #Arithmetic instructions
-        case "+":
+        case 5:
             echo "SUM ${instruccion[1]} ${instruccion[2]}\n";
             $curr_reg++;
                 break;
-        case "*":
+        case 6:
             echo "MUL ${instruccion[1]} ${instruccion[2]}\n";
             $curr_reg++;
                 break;
+        case 7:
+            echo "DIV ${instruccion[1]} ${instruccion[2]}\n";
+            $curr_reg++;
+                break;
+        case 8:
+            echo "REST ${instruccion[1]} ${instruccion[2]}\n";
+            $curr_reg++;
+                break;
             #Logical instructions
-        case "=":
+        case 9:
+            echo "AND ${instruccion[1]} ${instruccion[2]}\n";
+            $curr_reg++;
+                break;
+        case 10:
+            echo "OR ${instruccion[1]} ${instruccion[2]}\n";
+            $curr_reg++;
+                break;
+        case 11:
             echo "ASIGN ${instruccion[1]} ${instruccion[2]}\n";
             $curr_reg++;
                 break;
-        case ">":
+        case 12:
             echo "GT ${instruccion[1]} ${instruccion[2]}\n";
             $curr_reg++;
                 break;
-        case "<":
+        case 13:
             echo "LT ${instruccion[1]} ${instruccion[2]}\n";
             $curr_reg++;
                 break;
+        case 14:
+            echo "EGT ${instruccion[1]} ${instruccion[2]}\n";
+            $curr_reg++;
+                break;
+        case 15:
+            echo "ELT ${instruccion[1]} ${instruccion[2]}\n";
+            $curr_reg++;
+                break;
+        case 16:
+            echo "EQ ${instruccion[1]} ${instruccion[2]}\n";
+            $curr_reg++;
+                break;
         default:
-            echo $curr_reg;
+            echo "died at: ".$curr_reg;
+            die();
             // echo "Unknown instruction:\n".implode("\t",$instruccion);
             die();
         }

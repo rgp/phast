@@ -24,7 +24,8 @@
                    in
                            -c)
                                    ruby compilador/ruby/driver.rb $2
-                                   shift;;
+                                   shift;
+                                   break;;
                            --)
                                    shift
                                    php -f vm/phast_vm.php $@

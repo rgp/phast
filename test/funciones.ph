@@ -1,7 +1,7 @@
 <?
-primera = 2 + 3;
+cinco = 2 + 3;
 
-if (f)
+if (cinco > 3)
 {
     a + b;
 }
