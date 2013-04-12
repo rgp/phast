@@ -34,6 +34,8 @@ if(!$file_handle){
     $temps = $source[0][0];
     array_shift($source); //TMPS
 
+    $EOF -= 5 + $ctes;
+
     $curr_reg = $start;
 
     $memoria = array();
@@ -69,7 +71,6 @@ if(!$file_handle){
             #Flow Control instructions
         case 1:
             $curr_reg = (int)$instruccion[3];
-            // $curr_reg++; //TODO Quitar saltos
             echo "GOTO ${instruccion[3]}\n";
                 break;
         case 2:
