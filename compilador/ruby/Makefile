@@ -1,5 +1,7 @@
 run: compile
 	ruby driver.rb $(f)
+debug: compile
+	ruby driver.rb -d $(f) 
 compile: clean rbs/parser.rb rbs/scanner.rb libs
 
 rbs/scanner.rb:

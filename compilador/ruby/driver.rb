@@ -6,8 +6,15 @@ if ARGV[0].empty?
     exit 1
 end
 
+if(ARGV.include? "-d")
+    $debug = true
+    ARGV.delete "-d"
+else
+    $debug = false
+end
+
 #Leemos el archivo de entrada
-file = File.new(ARGV[0], "r")
+file = File.new(ARGV.first, "r")
 str = ""
 while (line = file.gets)
     str << line
