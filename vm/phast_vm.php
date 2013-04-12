@@ -82,8 +82,8 @@ if(!$file_handle){
                 break;
         case 4:
             // $curr_reg = (int)$instruccion[3];
-            $curr_reg++; //TODO Quitar saltos
-            echo "CALL ${instruccion[3]}\n";
+            $call_stack[] = ++$curr_reg;
+            $curr_reg = $instruccion[3]; 
                 break;
             #Arithmetic instructions
         case 5:
@@ -140,14 +140,15 @@ if(!$file_handle){
             echo "EQ ${instruccion[1]} ${instruccion[2]}\n";
             $curr_reg++;
                 break;
+        case 17:
+            $curr_reg = array_pop($call_stack);
+                break;
         default:
-            echo "died at: ".$curr_reg;
+            echo "died at: ".$curr_reg."\n";
             die();
             // echo "Unknown instruction:\n".implode("\t",$instruccion);
             die();
         }
-
     }
-
 }
 ?> 

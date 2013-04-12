@@ -16,6 +16,7 @@ module Phast
     EGT = 14
     ELT = 15
     EQ = 16
+    RET = 17
 
     def self.i_to_s(i)
         case

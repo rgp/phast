@@ -115,7 +115,7 @@ bloque_while : WORD_WHILE {while_quad 1} '(' expresion ')' {while_quad 2} '{' es
 bloque_do : WORD_DO {do_while_quad 1} '{' estatutos '}' WORD_WHILE '(' expresion ')' {do_while_quad 2} ';' 
 bloque_verbose : VERBOSE_BLOCK
 bloque_for : WORD_FOR '('comparando ';' expresion ';' expresion ')' '{' estatutos '}'
-bloque_fun : WORD_FUN ID { nombre_scope } '(' params ')' '{' estatutos '}'
+bloque_fun : WORD_FUN ID { nombre_scope } '(' params ')' '{' estatutos { end_fun } '}'
 
 bloque_class: WORD_CLASS ID class_extras '{' class_body '}'
 class_body: class_body_aux  class_body
@@ -170,8 +170,6 @@ require_relative 'lib/Instrucciones'
 
         @output[@llave_quads.last] = {}
 
-        #Global config
-        $debug = false
     end
 
     def parse
@@ -236,6 +234,10 @@ require_relative 'lib/Instrucciones'
     def fun_call cual
         @undeclared_funcs.push cual if !$declared_funcs.include? cual
         @call_quads.push genera(Phast::CALL,nil,nil,cual)
+    end
+
+    def end_fun
+        genera(Phast::RET,nil,nil,nil)
     end
     
     def fun1(cual)
