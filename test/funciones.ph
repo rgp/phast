@@ -1,35 +1,10 @@
 <?
-cinco = 2 + 3;
-
-if (cinco > 3)
-{
-    a + b;
-}
-else
-{
-    c + d;
-}
-
-
 fun suma(a,b){
     total = a + b;
-    resta(c);
-    if(c){
-        a = 3 + 2;
-    }
-    b = 5;
 }
+c = 1 + 1;
+a = 7;
+b = 9;
 
-fun resta(a,b){
-    c = a - b;
-    // print(c);
-}
-
-catdog = perro + gato;
-
-//print("Esto es una calculadora.");
-//print(" 5 + 4 = ");
-
-suma(5,4);
-
+suma(a,b);
 ?>
