@@ -232,6 +232,10 @@ require_relative 'lib/Instrucciones'
     end
 
     def fun_call cual
+        if(cual == "print")
+            genera(Phast::PRT,nil,nil,nil)
+            # p "PRT"
+        end
         @undeclared_funcs.push cual if !$declared_funcs.include? cual
         @call_quads.push genera(Phast::CALL,nil,nil,cual)
     end
