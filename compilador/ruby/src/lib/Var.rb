@@ -49,14 +49,14 @@ class Var
         @@mem_for_temp = @@dir[-1] if @@dir[-1] != nil
 
         @@dir[-2] = 0
-        @@dir[-1] = @@mem_for_ctes + @@mem_for_global + @@mem_for_scopes
+        @@dir[-1] = @@mem_for_ctes + @@mem_for_global
         @@dir[0] = @@mem_for_ctes
-        m = @@dir.max_by { |s, v| s }
-        m = m[0]
-        while m > 0
-            @@dir[m] = @@dir[0] + @@mem_for_global
-            m -= 1
-        end
+        # m = @@dir.max_by { |s, v| s }
+        # m = m[0]
+        # while m > 0
+        #     @@dir[m] = @@dir[0] + @@mem_for_global
+        #     m -= 1
+        # end
     end
 
     def self.mem_info
