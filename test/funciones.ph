@@ -1,14 +1,10 @@
 <?
 fun suma(a,b){
-    total = a + (b + c);
-    f= 2;
-    return (total + f);
+    total = a + b;
+    return (total);
 }
-/*
-c = 1 + 1;
-aa = 7;
-bb = 9;
-*/
+aa = 1;
+bb = 2;
 
 suma(aa,bb);
 ?>
