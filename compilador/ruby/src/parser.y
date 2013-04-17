@@ -55,6 +55,7 @@ factor_aux: op_fact {fun2} factor {fun3 0} factor_aux
           | 
 factor: llamada 
       | estatico {fun1 @curr_token[1]}
+      | '('{fun4} expresion ')'{fun5}
 llamada: ID tipo_llamada 
 
 tipo_llamada: { llame_var @prev_token[1] }{ fun1 @prev_token[1] } vars 
@@ -73,7 +74,6 @@ estatico: numero
         | WORD_TRUE
         | WORD_FALSE
         | WORD_NULL
-        | '('{fun4} expresion ')'{fun5}
 argumentos: expresion args_aux
           |
 args_aux: ',' expresion args_aux
@@ -301,6 +301,13 @@ require_relative 'lib/Instrucciones'
                 end
             end
         end
+    end
+
+    def fun4
+        @poper.push "("
+    end
+    def fun5
+        @poper.pop
     end
 
     def if_quad(step)
