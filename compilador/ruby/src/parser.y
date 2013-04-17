@@ -61,7 +61,7 @@ llamada: ID tipo_llamada
 
 tipo_llamada: { llame_var @prev_token[1] }{ fun1 @prev_token[1] } vars 
             | funcs
-funcs: { fun_call @prev_token[1] } '(' argumentos ')'
+funcs: { fun_prepare @prev_token[1] } '(' argumentos ')' { fun_call }
         /*| OP_INCREMENT*/
         /*| OP_DECREMENT*/
 vars: OP_ASIGN {fun2} expresion {fun3 3} 
@@ -75,9 +75,9 @@ estatico: numero
         | WORD_TRUE
         | WORD_FALSE
         | WORD_NULL
-argumentos: expresion args_aux
+argumentos:  expresion { argument @latest_var } args_aux
           |
-args_aux: ',' expresion args_aux
+args_aux: ',' expresion { argument @latest_var } args_aux
         |
 op_comp: OP_EQUAL
        | OP_NOT_EQUAL  
@@ -128,9 +128,9 @@ class_def_var_aux: OP_ASIGN
 class_extras: WORD_EXTENDS ID
              |
 
-params: ID { llame_var @curr_token[1] } def_param params_aux
+params: ID { llame_var @curr_token[1] } { param @latest_var } def_param params_aux
        |
-params_aux: ',' ID { llame_var @curr_token[1] } def_param params_aux
+params_aux: ','  ID { llame_var @curr_token[1] } { param @latest_var } def_param params_aux
            |
 def_param: '=' estatico
           |
@@ -163,6 +163,7 @@ require_relative 'lib/Instrucciones'
         @undeclared_funcs = []
         $declared_funcs = {}
 
+        @function_to_call = nil
         @latest_var = nil
         @tmp_var_id = 0
         @ctes = {}
@@ -171,6 +172,7 @@ require_relative 'lib/Instrucciones'
         @call_quads = []
 
         @output[@llave_quads.last] = {}
+    
 
     end
 
@@ -186,14 +188,16 @@ require_relative 'lib/Instrucciones'
 
     def llame_var cual
         if @scopes.last.include? cual
-            @last_id = @scopes.last[cual]
+            @latest_var = @scopes.last[cual]
         else
-            @last_id = guarda_var cual
+            @latest_var = guarda_var cual
         end
     end
 
     def guarda_var(nombre)
-        @scopes.last[nombre] = Var.new(nombre,nil,nil,@scope,@lineno) #[Name,type,direccion,scope,declared_at]
+        var = Var.new(nombre,nil,nil,@scope,@lineno) #[Name,type,direccion,scope,declared_at]
+        @scopes.last[nombre] = var
+        return var
     end
 
     def guarda_cte(nombre,valor,tipo)
@@ -234,7 +238,18 @@ require_relative 'lib/Instrucciones'
         tmp
     end
 
-    def fun_call cual
+    def fun_prepare cual
+        @function_to_call = cual
+    end
+        
+
+    def fun_call
+        if @function_to_call == nil
+            p "Compile Error"
+            exit
+        end
+        cual = @function_to_call
+        @function_to_call = nil
         if(cual == "print")
             genera(Phast::PRT,nil,nil,nil)
             # p "PRT"
@@ -243,12 +258,20 @@ require_relative 'lib/Instrucciones'
         @call_quads.push genera(Phast::CALL,nil,nil,cual)
     end
 
+    def argument name
+        genera("ARG",nil,nil,name)
+    end
+
     def return_quad var
         genera(Phast::RET,nil,nil,var)
     end
 
     def end_fun
         return_quad nil
+    end
+    
+    def param a
+        genera("PARAM",nil,nil,a)
     end
     
     def fun1(cual)
@@ -376,8 +399,8 @@ require_relative 'lib/Instrucciones'
         if $debug 
             @salida.push "CTS\t#{mems[0]}"
             @salida.push "GLBL\t#{mems[1]}"
-            @salida.push "SCPS\t#{mems[2]}"
             @salida.push "TMP\t#{mems[3]}"
+            @salida.push "SCPS\t#{mems[2]}"
         else
             @salida.push "#{mems[0]}"
             @salida.push "#{mems[1]}"
