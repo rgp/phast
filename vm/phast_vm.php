@@ -28,17 +28,22 @@ if(!$file_handle){
     $globs = $source[0][0];
     array_shift($source); //GLOBS
 
-    $scops = $source[0][0];
-    array_shift($source); //SCPS
-
     $temps = $source[0][0];
     array_shift($source); //TMPS
+
+    //TODO QUITAR ESTO**********
+    $scops = $source[0][0];
+    array_shift($source); //SCPS
+    //**************************
 
     $EOF -= 5 + $ctes;
 
     $curr_reg = $start;
 
     $memoria = array();
+
+    $offset_stack = array(0); // stack de offsets para mapear memoria al modulo actual
+    $last_mem_space_used = 0; // ultimo espacio de memoria ocupado
 
     for ($i = 0; $i < $ctes; $i++)
     {
@@ -60,6 +65,7 @@ if(!$file_handle){
             break;
         }
         array_shift($source);
+        $last_mem_space_used++;
     }
 
 
@@ -69,54 +75,61 @@ if(!$file_handle){
         switch($instruccion[0])
         {
             #Flow Control instructions
-        case 1:
+        case 1: // GOTO
             $curr_reg = (int)$instruccion[3];
             echo "GOTO ${instruccion[3]}\n";
                 break;
-        case 2:
+        case 2: // GOTOF
             echo "GOTOF ${instruccion[3]}\n";
             $curr_reg++; //TODO Quitar saltos
                 break;
-        case 3:
+        case 3: // GOTOV
             echo "GOTOV ${instruccion[3]}\n";
             $curr_reg++; //TODO Quitar saltos
                 break;
-        case 4:
-            // $curr_reg = (int)$instruccion[3];
+        case 4: // CALL
+            // meter al offset_stack la posicion donde se puede empezar a utilizar la memoria
+            array_push($offset_stack,$last_mem_space_used);
+            // actualizar la nueva posicion ocupada de memoria
+            $last_mem_space_used += (int)$instruccion[1];
+            // guardar quad al que se va a regresar en el RETURN
             $call_stack[] = ++$curr_reg;
+            // ir al quad correspondiente a la funcion llamada
             $curr_reg = $instruccion[3]; 
                 break;
+
             #Arithmetic instructions
-        case 5:
+        case 5: // SUM
             // echo "SUM ${instruccion[1]} ${instruccion[2]}\n";
-            $memoria[(int)$instruccion[3]] = $memoria[(int)$instruccion[1]] + $memoria[(int)$instruccion[2]];
+            $memoria[((int)$instruccion[3]) + end($offset_stack))] = $memoria[(int)$instruccion[1]] + $memoria[(int)$instruccion[2]];
             $curr_reg++;
                 break;
-        case 6:
+        case 6: // MUL
             // echo "MUL ${instruccion[1]} ${instruccion[2]}\n";
-            $memoria[(int)$instruccion[3]] = $memoria[(int)$instruccion[1]] * $memoria[(int)$instruccion[2]];
+            $memoria[((int)$instruccion[3]) + end($offset_stack))] = $memoria[(int)$instruccion[1]] * $memoria[(int)$instruccion[2]];
             $curr_reg++;
                 break;
-        case 7:
+        case 7: // DIV
             // echo "DIV ${instruccion[1]} ${instruccion[2]}\n";
-            $memoria[(int)$instruccion[3]] = $memoria[(int)$instruccion[1]] / $memoria[(int)$instruccion[2]];
+            $memoria[((int)$instruccion[3]) + end($offset_stack))] = $memoria[(int)$instruccion[1]] / $memoria[(int)$instruccion[2]];
             $curr_reg++;
                 break;
-        case 8:
+        case 8: // REST
             // echo "REST ${instruccion[1]} ${instruccion[2]}\n";
-            $memoria[(int)$instruccion[3]] = $memoria[(int)$instruccion[1]] - $memoria[(int)$instruccion[2]];
+            $memoria[((int)$instruccion[3]) + end($offset_stack))] = $memoria[(int)$instruccion[1]] - $memoria[(int)$instruccion[2]];
             $curr_reg++;
                 break;
+
             #Logical instructions
-        case 9:
+        case 9: // AND
             echo "AND ${instruccion[1]} ${instruccion[2]}\n";
             $curr_reg++;
                 break;
-        case 10:
+        case 10: // OR
             echo "OR ${instruccion[1]} ${instruccion[2]}\n";
             $curr_reg++;
                 break;
-        case 11:
+        case 11: // ASIGN
             // echo "ASIGN ${instruccion[1]} ${instruccion[2]}\n";
             $memoria[(int)$instruccion[3]] = $memoria[(int)$instruccion[1]];
             $curr_reg++;
