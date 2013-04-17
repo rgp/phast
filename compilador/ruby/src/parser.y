@@ -40,6 +40,7 @@ estatuto : expresion ';'
          | bloque_if
          | bloque_for
          | { aumenta_scope } bloques_declarativos { disminuye_scope }
+         | WORD_RETURN expresion {return_quad @latest_var } ';'
 bloques_declarativos: bloque_fun
                     | bloque_class
 
@@ -55,6 +56,7 @@ factor_aux: op_fact {fun2} factor {fun3 0} factor_aux
           | 
 factor: llamada 
       | estatico {fun1 @curr_token[1]}
+      | '('{fun4} expresion ')'{fun5}
 llamada: ID tipo_llamada 
 
 tipo_llamada: { llame_var @prev_token[1] }{ fun1 @prev_token[1] } vars 
@@ -73,7 +75,6 @@ estatico: numero
         | WORD_TRUE
         | WORD_FALSE
         | WORD_NULL
-        | '('{fun4} expresion ')'{fun5}
 argumentos: expresion args_aux
           |
 args_aux: ',' expresion args_aux
@@ -162,6 +163,7 @@ require_relative 'lib/Instrucciones'
         @undeclared_funcs = []
         $declared_funcs = {}
 
+        @latest_var = nil
         @tmp_var_id = 0
         @ctes = {}
         @llave_quads = [:main]
@@ -215,6 +217,7 @@ require_relative 'lib/Instrucciones'
         @output[@llave_quads.last] = {}
         @output[@llave_quads.last][:quads] = @quads.pop
         @output[@llave_quads.last][:var_info] = @scopes.pop
+        @output[@llave_quads.last][:mem_info] = Var.reset_scope(@scope)
         @llave_quads.pop
         @scope -= 1
     end
@@ -240,15 +243,21 @@ require_relative 'lib/Instrucciones'
         @call_quads.push genera(Phast::CALL,nil,nil,cual)
     end
 
+    def return_quad var
+        genera(Phast::RET,nil,nil,var)
+    end
+
     def end_fun
-        genera(Phast::RET,nil,nil,nil)
+        return_quad nil
     end
     
     def fun1(cual)
         # puts "Meter #{@curr_token[1]} a pila Operandos" 
         if @scopes.last.include? cual
+            @latest_var = @scopes.last[cual]
             @operandos.push @scopes.last[cual]
         else #Constantes
+            @latest_var = @ctes[cual]
             @operandos.push @ctes[cual]
         end
     end
@@ -270,7 +279,7 @@ require_relative 'lib/Instrucciones'
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
                     @operandos.push Var.new("t#{@tmp_var_id}",nil,nil,-1,-1)
-
+                    @latest_var = @operandos.last
                     genera(Phast.op_to_inst(op), oper1, oper,@operandos.last)
                 end
             when nivel == 1
@@ -280,6 +289,7 @@ require_relative 'lib/Instrucciones'
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
                     @operandos.push Var.new("t#{@tmp_var_id}",nil,nil,-1,-1)
+                    @latest_var = @operandos.last
                     genera(Phast.op_to_inst(op), oper1, oper, @operandos.last)
                 end
             when nivel == 2
@@ -289,6 +299,7 @@ require_relative 'lib/Instrucciones'
                     oper1 = @operandos.pop
                     @tmp_var_id += 1
                     @operandos.push Var.new("t#{@tmp_var_id}",nil,nil,-1,-1)
+                    @latest_var = @operandos.last
                     genera(Phast.op_to_inst(op), oper1, oper, @operandos.last)
                 end
             when nivel == 3
@@ -297,10 +308,18 @@ require_relative 'lib/Instrucciones'
                     oper = @operandos.pop
                     oper1 = @operandos.pop
                     @operandos.push oper1
+                    @latest_var = @operandos.last
                     genera(Phast.op_to_inst(op), oper, nil, oper1)
                 end
             end
         end
+    end
+
+    def fun4
+        @poper.push "("
+    end
+    def fun5
+        @poper.pop
     end
 
     def if_quad(step)
@@ -388,6 +407,7 @@ require_relative 'lib/Instrucciones'
         @salida.push "EOQ" if $debug
 
         @call_quads.each do |q|
+            q.op1 = @output[q.registro][:mem_info].to_s
             q.registro = $declared_funcs[q.registro]
         end
         puts @salida
