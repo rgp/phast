@@ -61,7 +61,7 @@ llamada: ID tipo_llamada
 
 tipo_llamada: { llame_var @prev_token[1] }{ fun1 @prev_token[1] } vars 
             | funcs
-funcs: { fun_prepare @prev_token[1] } '(' argumentos ')' { fun_call }
+funcs: { fun_prepare @prev_token[1] } '(' { @operandos.push "(" }  argumentos { clean_operandos } ')' { fun_call }
         /*| OP_INCREMENT*/
         /*| OP_DECREMENT*/
 vars: OP_ASIGN {fun2} expresion {fun3 3} 
@@ -142,6 +142,17 @@ require_relative 'lib/Quad'
 require_relative 'lib/Var'
 require_relative 'lib/Instrucciones'
 
+class Array
+
+def to_s
+    print "["
+    self.each do |o|
+        print o.nombre+","
+    end
+    print "]\n"
+end
+end
+
 ---- inner ----
 
     def initialize(scanner)
@@ -206,6 +217,13 @@ require_relative 'lib/Instrucciones'
         end
     end
 
+    def clean_operandos
+        while @operandos.last != "("
+            @operandos.pop
+        end
+        @operandos.pop
+    end
+
     def nombre_scope
         @llave_quads.push @curr_token[1]
     end
@@ -250,14 +268,19 @@ require_relative 'lib/Instrucciones'
         end
         cual = @function_to_call
         @function_to_call = nil
-        # if(cual == "print")
-        #     genera(Phast::PRT,nil,nil,nil)
-        # end
-        @undeclared_funcs.push cual if !$declared_funcs.include? cual
-        @call_quads.push genera(Phast::CALL,nil,nil,cual)
-        @tmp_var_id += 1
-        @operandos.push Var.new("t#{@tmp_var_id}",nil,nil,-1,-1)
-        genera(Phast::REV,nil,nil,@operandos.last)
+        if(cual == "print")
+            @output["print"] = {}
+            @output["print"][:mem_info] = nil
+            @output["print"][:quads] = {}
+            $declared_funcs["print"] = nil
+            genera(Phast::PRT,nil,nil,nil)
+        else
+            @undeclared_funcs.push cual if !$declared_funcs.include? cual
+            @call_quads.push genera(Phast::CALL,nil,nil,cual)
+            @tmp_var_id += 1
+            @operandos.push Var.new("t#{@tmp_var_id}",nil,nil,-1,-1)
+            genera(Phast::REV,nil,nil,@operandos.last)
+        end
     end
 
     def argument name

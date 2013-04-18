@@ -73,7 +73,6 @@ if(!$file_handle){
     while($curr_reg < $EOF)
     {
         $instruccion = $source[$curr_reg];
-        print_r($memoria);
         switch($instruccion[0])
         {
             #Flow Control instructions
@@ -165,7 +164,8 @@ if(!$file_handle){
             $curr_reg = array_pop($call_stack);
                 break;
         case 18:
-            echo $memoria[(int)$instruccion[3]];
+            $param = array_shift($params);
+            echo $param;
             $curr_reg++;
             break;
         case 19:
@@ -188,6 +188,5 @@ if(!$file_handle){
             die();
         }
     }
-    print_r($memoria);
 }
 ?> 

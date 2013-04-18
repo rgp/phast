@@ -4,9 +4,10 @@ fun suma(a,b){
     return (total);
 }
 resultado = 1;
-aa = 1;
+aa = 5;
 bb = 2;
 
 
-resultado = suma(aa,bb,dd);
+resultado = suma(aa,bb);
+print(resultado);
 ?>
