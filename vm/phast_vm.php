@@ -28,10 +28,10 @@ if(!$file_handle){
     $globs = $source[0][0];
     array_shift($source); //GLOBS
 
-    $scops = $source[0][0];
+    $temps = $source[0][0];
     array_shift($source); //SCPS
 
-    $temps = $source[0][0];
+    $scops = $source[0][0];
     array_shift($source); //TMPS
 
     $EOF -= 5 + $ctes;
@@ -142,6 +142,8 @@ if(!$file_handle){
             $curr_reg++;
                 break;
         case 17:
+            if(!empty($instruccion[3]))
+                $return_var = $instruccion[3];
             $curr_reg = array_pop($call_stack);
                 break;
         default:
@@ -151,5 +153,6 @@ if(!$file_handle){
             die();
         }
     }
+    qprint_r($memoria);
 }
 ?> 
