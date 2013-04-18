@@ -41,6 +41,7 @@ if(!$file_handle){
     $curr_reg = $start;
 
     $memoria = array();
+    $params = array();
 
     $offset_stack = array(0); // stack de offsets para mapear memoria al modulo actual
     $last_mem_space_used = 0; // ultimo espacio de memoria ocupado
@@ -72,6 +73,7 @@ if(!$file_handle){
     while($curr_reg < $EOF)
     {
         $instruccion = $source[$curr_reg];
+        print_r($memoria);
         switch($instruccion[0])
         {
             #Flow Control instructions
@@ -101,22 +103,25 @@ if(!$file_handle){
             #Arithmetic instructions
         case 5: // SUM
             // echo "SUM ${instruccion[1]} ${instruccion[2]}\n";
-            $memoria[((int)$instruccion[3]) + end($offset_stack))] = $memoria[(int)$instruccion[1]] + $memoria[(int)$instruccion[2]];
+            // $memoria[((int)$instruccion[3] + end($offset_stack))] = $memoria[(int)$instruccion[1]] + $memoria[(int)$instruccion[2]];
+            $memoria[(int)$instruccion[3]] = $memoria[(int)$instruccion[1]] + $memoria[(int)$instruccion[2]];
             $curr_reg++;
                 break;
         case 6: // MUL
             // echo "MUL ${instruccion[1]} ${instruccion[2]}\n";
-            $memoria[((int)$instruccion[3]) + end($offset_stack))] = $memoria[(int)$instruccion[1]] * $memoria[(int)$instruccion[2]];
+            // $memoria[((int)$instruccion[3] + end($offset_stack))] = $memoria[(int)$instruccion[1]] * $memoria[(int)$instruccion[2]];
+            $memoria[(int)$instruccion[3]] = $memoria[(int)$instruccion[1]] * $memoria[(int)$instruccion[2]];
             $curr_reg++;
                 break;
         case 7: // DIV
             // echo "DIV ${instruccion[1]} ${instruccion[2]}\n";
-            $memoria[((int)$instruccion[3]) + end($offset_stack))] = $memoria[(int)$instruccion[1]] / $memoria[(int)$instruccion[2]];
+            // $memoria[((int)$instruccion[3] + end($offset_stack))] = $memoria[(int)$instruccion[1]] / $memoria[(int)$instruccion[2]];
+            $memoria[(int)$instruccion[3]] = $memoria[(int)$instruccion[1]] / $memoria[(int)$instruccion[2]];
             $curr_reg++;
                 break;
         case 8: // REST
             // echo "REST ${instruccion[1]} ${instruccion[2]}\n";
-            $memoria[((int)$instruccion[3]) + end($offset_stack))] = $memoria[(int)$instruccion[1]] - $memoria[(int)$instruccion[2]];
+            $memoria[((int)$instruccion[3] + end($offset_stack))] = $memoria[(int)$instruccion[1]] - $memoria[(int)$instruccion[2]];
             $curr_reg++;
                 break;
 
@@ -156,9 +161,26 @@ if(!$file_handle){
                 break;
         case 17:
             if(!empty($instruccion[3]))
-                $return_var = $instruccion[3];
+                $return_var = $memoria[(int)$instruccion[3]];
             $curr_reg = array_pop($call_stack);
                 break;
+        case 18:
+            echo $memoria[(int)$instruccion[3]];
+            $curr_reg++;
+            break;
+        case 19:
+            $param = array_shift($params);
+            $memoria[(int)$instruccion[3]] = $param;
+            $curr_reg++;
+            break;
+        case 20:
+            array_push($params,$memoria[(int)$instruccion[3]]);
+            $curr_reg++;
+            break;
+        case 21:
+            $memoria[(int)$instruccion[3]] = $return_var;
+            $curr_reg++;
+            break;
         default:
             echo "died at: ".$curr_reg."\n";
             die();
@@ -166,6 +188,6 @@ if(!$file_handle){
             die();
         }
     }
-    qprint_r($memoria);
+    print_r($memoria);
 }
 ?> 

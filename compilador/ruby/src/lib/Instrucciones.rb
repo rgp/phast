@@ -18,6 +18,9 @@ module Phast
     EQ = 16
     RET = 17
     PRT = 18
+    PAR = 19
+    ARG = 20
+    REV = 21
 
     def self.i_to_s(i)
         case

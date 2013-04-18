@@ -3,8 +3,10 @@ fun suma(a,b){
     total = a + b;
     return (total);
 }
+resultado = 1;
 aa = 1;
 bb = 2;
 
-suma(aa,bb);
+
+resultado = suma(aa,bb,dd);
 ?>

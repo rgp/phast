@@ -250,16 +250,18 @@ require_relative 'lib/Instrucciones'
         end
         cual = @function_to_call
         @function_to_call = nil
-        if(cual == "print")
-            genera(Phast::PRT,nil,nil,nil)
-            # p "PRT"
-        end
+        # if(cual == "print")
+        #     genera(Phast::PRT,nil,nil,nil)
+        # end
         @undeclared_funcs.push cual if !$declared_funcs.include? cual
         @call_quads.push genera(Phast::CALL,nil,nil,cual)
+        @tmp_var_id += 1
+        @operandos.push Var.new("t#{@tmp_var_id}",nil,nil,-1,-1)
+        genera(Phast::REV,nil,nil,@operandos.last)
     end
 
     def argument name
-        genera("ARG",nil,nil,name)
+        genera(Phast::ARG,nil,nil,name)
     end
 
     def return_quad var
@@ -271,7 +273,7 @@ require_relative 'lib/Instrucciones'
     end
     
     def param a
-        genera("PARAM",nil,nil,a)
+        genera(Phast::PAR,nil,nil,a)
     end
     
     def fun1(cual)
