@@ -9,5 +9,4 @@ bb = 2;
 
 
 resultado = suma(aa,bb);
-print(resultado);
 ?>

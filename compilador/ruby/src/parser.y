@@ -142,17 +142,6 @@ require_relative 'lib/Quad'
 require_relative 'lib/Var'
 require_relative 'lib/Instrucciones'
 
-class Array
-
-def to_s
-    print "["
-    self.each do |o|
-        print o.nombre+","
-    end
-    print "]\n"
-end
-end
-
 ---- inner ----
 
     def initialize(scanner)
@@ -183,7 +172,6 @@ end
         @call_quads = []
 
         @output[@llave_quads.last] = {}
-    
 
     end
 
