@@ -31,12 +31,7 @@ if(!$file_handle){
     $temps = $source[0][0];
     array_shift($source); //TMPS
 
-    //TODO QUITAR ESTO**********
-    $scops = $source[0][0];
-    array_shift($source); //SCPS
-    //**************************
-
-    $EOF -= 5 + $ctes;
+    $EOF -= 4 + $ctes;
 
     $curr_reg = $start;
 
@@ -68,7 +63,6 @@ if(!$file_handle){
         array_shift($source);
         $last_mem_space_used++;
     }
-
 
     while($curr_reg < $EOF)
     {
