@@ -1,72 +1,24 @@
 class Var
 
-    attr_accessor :nombre, :tipo, :scope, :direccion, :valor
+    attr_accessor :nombre, :tipoDato, :valor, :direccion_virtual, :linea_definicion
 
-    @@dir = {}
-    # -2 constantes
-    # -1 temporal
-    # 0 global
-    # 1 scope 1
-    # ...
-    # n scope n
-    @@mem_for_scopes = 0
-    @@mem_for_ctes = 0
-    @@mem_for_temp = 0
-    @@mem_for_global = 0
-
-    def initialize(nombre,tipo,valor,scope,line_at)
+    def initialize(nombre,tipoDato,valor,direccion_virtual,linea_definicion)
         @nombre = nombre
-        @tipo = tipo
-        @scope = scope
-        @declared_at = line_at
+        @tipoDato = tipoDato
         @valor = valor
-        if @@dir[scope] == nil
-            @@dir[scope] = 1
-        else
-            @@dir[scope] += 1
-        end
-        @direccion = @@dir[scope]
+        @direccion_virtual = direccion_virtual
+        @linea_definicion = linea_definicion
     end
 
-    def self.reset_scope n
-        tmp = @@dir[n]
-        @@dir[n] = 1
-        tmp
-    end
-
-    def declared_at
-        @declared_at
+    def definida_en?
+        @linea_definicion
     end
 
     def to_s
         if($debug)
-            @nombre
+            "[#{@nombre},#{@valor}]"
         else
-            "#{@direccion + @@dir[@scope]}"
+            "#{@direccion_virtual}"
         end
-    end
-
-    def self.map_mem
-        scope_dirs = @@dir.select {|k,v| k > 0}
-        @@mem_for_global = @@dir[0] if @@dir[0] != nil
-        tmp_mem_scps = scope_dirs.values.inject(:+)
-        @@mem_for_scopes = tmp_mem_scps if tmp_mem_scps != nil
-        @@mem_for_ctes = @@dir[-2] if @@dir[-2] != nil
-        @@mem_for_temp = @@dir[-1] if @@dir[-1] != nil
-
-        @@dir[-2] = 0
-        @@dir[-1] = @@mem_for_ctes + @@mem_for_global
-        @@dir[0] = @@mem_for_ctes
-        m = @@dir.max_by { |s, v| s }
-        m = m[0]
-        while m > 0
-            # @@dir[m] = @@dir[0] + @@mem_for_global
-            @@dir[m] = @@dir[-1] + @@mem_for_temp
-            m -= 1
-        end
-    end
-
-    def self.mem_info
-        [@@mem_for_ctes,@@mem_for_global,@@mem_for_scopes,@@mem_for_temp]
     end
 end

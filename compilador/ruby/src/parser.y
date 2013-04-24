@@ -33,14 +33,14 @@ rule
 phast :  PH_OT estatutos PH_CT {}
 estatutos: estatuto estatutos
          |
-estatuto : expresion ';' 
+estatuto : expresion ';' { vaciar_pOperandos } /* Vaciar pila y temporales */ 
          | bloque_while
          | bloque_do 
          | bloque_verbose
          | bloque_if
          | bloque_for
-         | { aumenta_scope } bloques_declarativos { disminuye_scope }
-         | WORD_RETURN expresion {return_quad @latest_var } ';'
+         | bloques_declarativos { disminuye_scope }
+         | WORD_RETURN expresion {return_quad } ';' { vaciar_pOperandos }
 bloques_declarativos: bloque_fun
                     | bloque_class
 
@@ -55,29 +55,29 @@ termino: factor {fun3 0} factor_aux
 factor_aux: op_fact {fun2} factor {fun3 0} factor_aux 
           | 
 factor: llamada 
-      | estatico {fun1 @curr_token[1]}
+      | estatico { fun1(llama_cte(@curr_token[1])) }
       | '('{fun4} expresion ')'{fun5}
 llamada: ID tipo_llamada 
 
-tipo_llamada: { llame_var @prev_token[1] }{ fun1 @prev_token[1] } vars 
+tipo_llamada: { fun1(llame_var(@prev_token[1])) } vars 
             | funcs
-funcs: { fun_prepare @prev_token[1] } '(' { @operandos.push "(" }  argumentos { clean_operandos } ')' { fun_call }
+funcs: { fun_prepare @prev_token[1] } '(' argumentos ')' { fun_call }
         /*| OP_INCREMENT*/
         /*| OP_DECREMENT*/
 vars: OP_ASIGN {fun2} expresion {fun3 3} 
     | '[' expresion ']'
     |
 estatico: numero
-        | STRING
+        | STRING { guarda_cte @curr_token[1], String(@curr_token[1]) , 4 }
         | arreglo
         /*| OP_INCREMENT ID {}*/
         /*| OP_DECREMENT ID {}*/
-        | WORD_TRUE
-        | WORD_FALSE
-        | WORD_NULL
-argumentos:  expresion { argument @latest_var } args_aux
+        | WORD_TRUE { guarda_cte @curr_token[1], true , 1 }
+        | WORD_FALSE { guarda_cte @curr_token[1], false , 1 }
+        | WORD_NULL { guarda_cte @curr_token[1], nil , 0 }
+argumentos:  expresion { argument } args_aux
           |
-args_aux: ',' expresion { argument @latest_var } args_aux
+args_aux: ',' expresion { argument } args_aux
         |
 op_comp: OP_EQUAL
        | OP_NOT_EQUAL  
@@ -116,131 +116,116 @@ bloque_while : WORD_WHILE {while_quad 1} '(' expresion ')' {while_quad 2} '{' es
 bloque_do : WORD_DO {do_while_quad 1} '{' estatutos '}' WORD_WHILE '(' expresion ')' {do_while_quad 2} ';' 
 bloque_verbose : VERBOSE_BLOCK
 bloque_for : WORD_FOR '('comparando ';' expresion ';' expresion ')' '{' estatutos '}'
-bloque_fun : WORD_FUN ID { nombre_scope } '(' params ')' '{' estatutos { end_fun } '}'
+bloque_fun : WORD_FUN ID { aumenta_scope @curr_token[1] } '(' params ')' '{' estatutos { end_fun } '}'
 
-bloque_class: WORD_CLASS ID class_extras '{' class_body '}'
+bloque_class: WORD_CLASS ID { aumenta_scope @curr_token[1] } class_extras '{' class_body '}'
 class_body: class_body_aux  class_body
            |
-class_body_aux: { aumenta_scope } bloque_fun { disminuye_scope }
+class_body_aux: /* NOMBRE COMPLETO  CLASE*/ bloque_fun { disminuye_scope }
            | ID { llame_var @curr_token[1] } class_def_var_aux ';'
 class_def_var_aux: OP_ASIGN 
                   |
 class_extras: WORD_EXTENDS ID
              |
 
-params: ID { llame_var @curr_token[1] } { param @latest_var } def_param params_aux
+params: ID { param(llame_var(@curr_token[1])) }  def_param params_aux
        |
-params_aux: ','  ID { llame_var @curr_token[1] } { param @latest_var } def_param params_aux
+params_aux: ','  ID { param(llame_var(@curr_token[1])) } def_param params_aux
            |
-def_param: '=' estatico
+def_param: '=' estatico { fun1(llama_cte(@curr_token[1])) }
           |
 end
 
 ---- header ----
 
 require_relative 'lib/Quad'
+require_relative 'lib/Scope'
 require_relative 'lib/Var'
 require_relative 'lib/Instrucciones'
 
 ---- inner ----
 
     def initialize(scanner)
+        #Lexico
         @scanner = scanner
+        @curr_token = nil #Token en análisis
+        @prev_token = nil #Token anterior
 
         #Scopes
-        @scope = 0
-        @scopes = [{}]
+        @scopes = {:global => Scope.new(nil), :constantes => Scope.new(nil)} #Hash de objetos Scope
+        @scope_actual = @scopes[:global]
         
-        #Quads
-        @quads = [[]]
-        @next_quad = 0
-
         #Pilas
-        @poper = []
-        @operandos = []
-        @psaltos = []
+        @pOper = [] #Pila de operadores
+        @pOperandos = [] #Pila de operandos (Vars)
+        @pSaltos = [] #Pila para saltos (if,else, etc.)
+        @pFnCall = [] #Pila de llamadas pendientes (Quads)
+
+
+
+        #Eliminar ?
+        @latest_var = nil #Ultima variable utilizada
         @output = {}
-        @undeclared_funcs = []
-        $declared_funcs = {}
-
-        @function_to_call = nil
-        @latest_var = nil
-        @tmp_var_id = 0
-        @ctes = {}
-        @llave_quads = [:main]
-        @curr_token = nil
-        @call_quads = []
-
-        @output[@llave_quads.last] = {}
 
     end
 
-    def parse
+    def parse #Parsea mami parsea
         do_parse
         process_output
     end
 
-    def next_token
+    def next_token  #Correr tokens
         @prev_token = @curr_token
         @curr_token = @scanner.next_token
     end
 
     def llame_var cual
-        if @scopes.last.include? cual
-            @latest_var = @scopes.last[cual]
+        if @scope_actual.variables.include? cual
+            @latest_var = @scope_actual.variables[cual]
         else
             @latest_var = guarda_var cual
         end
     end
 
-    def guarda_var(nombre)
-        var = Var.new(nombre,nil,nil,@scope,@lineno) #[Name,type,direccion,scope,declared_at]
-        @scopes.last[nombre] = var
-        return var
+    def guarda_var nombre
+        @scope_actual.variables[nombre] = Var.new(nombre,nil,nil,@scope_actual.variables.length,$lineno)
     end
 
     def guarda_cte(nombre,valor,tipo)
-        if !@ctes.include? nombre
-            @ctes[nombre] = Var.new(valor,tipo,valor,-2,@lineno)
+        if !@scopes[:constantes].variables.include? nombre
+            @scopes[:constantes].variables[nombre] = Var.new(valor,tipo,valor,@scopes[:constantes].variables.length,$lineno)
+        else
+            return @scopes[:constantes].variables[nombre]
         end
     end
 
-    def clean_operandos
-        while @operandos.last != "("
-            @operandos.pop
+    def llama_cte nombre
+        @scopes[:constantes].variables[nombre]
+    end
+
+    def vaciar_pOperandos
+        while !@pOperandos.empty?
+            @pOperandos.pop
         end
-        @operandos.pop
     end
 
-    def nombre_scope
-        @llave_quads.push @curr_token[1]
-    end
-
-    def aumenta_scope
-        @scopes.push Hash.new
-        @quads.push Array.new
-        @scope += 1
-        @next_quad = 0
+    def aumenta_scope nombre
+        nuevo_scope = Scope.new(@scope_actual)
+        @scope_actual = nuevo_scope
+        @scopes[nombre] = @scope_actual
     end
 
     def disminuye_scope
-        @output[@llave_quads.last] = {}
-        @output[@llave_quads.last][:quads] = @quads.pop
-        @output[@llave_quads.last][:var_info] = @scopes.pop
-        @output[@llave_quads.last][:mem_info] = Var.reset_scope(@scope)
-        @llave_quads.pop
-        @scope -= 1
+        @scope_actual = @scope_actual.papa
     end
     
-    def rellena(n)
-        incomplete_quad = @quads.last.delete_at n
-        @quads.last.insert(n, Quad.new(incomplete_quad.instruccion, incomplete_quad.op1, nil, @next_quad))
+    def rellena(quad)
+        quad.registro = @scope_actual.quads.length
     end
 
     def genera(w,x,y,z)
-        @next_quad += 1
         tmp = Quad.new(w,x,y,z)
-        @quads.last.push tmp
+        @scope_actual.quads.push tmp
         tmp
     end
 
@@ -257,119 +242,96 @@ require_relative 'lib/Instrucciones'
         cual = @function_to_call
         @function_to_call = nil
         if(cual == "print")
-            @output["print"] = {}
-            @output["print"][:mem_info] = nil
-            @output["print"][:quads] = {}
-            $declared_funcs["print"] = nil
             genera(Phast::PRT,nil,nil,nil)
         else
-            @undeclared_funcs.push cual if !$declared_funcs.include? cual
-            @call_quads.push genera(Phast::CALL,nil,nil,cual)
-            @tmp_var_id += 1
-            @operandos.push Var.new("t#{@tmp_var_id}",nil,nil,-1,-1)
-            genera(Phast::REV,nil,nil,@operandos.last)
+            @pFnCall.push genera(Phast::CALL,nil,nil,cual)
+            tmp = Var.new(nil,nil,nil,@scope_actual.temporales.length,nil)
+            @scope_actual.temporales.push tmp
+            @pOperandos.push tmp
+            genera(Phast::REV,nil,nil,tmp)
         end
     end
 
-    def argument name
-        genera(Phast::ARG,nil,nil,name)
+    def argument
+        genera(Phast::ARG,nil,nil,@pOperandos.pop)
     end
 
-    def return_quad var
-        genera(Phast::RET,nil,nil,var)
+    def return_quad
+        genera(Phast::RET,nil,nil,@pOperandos.last)
     end
 
     def end_fun
-        return_quad nil
+        return_quad
     end
     
-    def param a
-        genera(Phast::PAR,nil,nil,a)
+    def param variable
+        genera(Phast::PAR,nil,nil,variable)
     end
     
-    def fun1(cual)
-        # puts "Meter #{@curr_token[1]} a pila Operandos" 
-        if @scopes.last.include? cual
-            @latest_var = @scopes.last[cual]
-            @operandos.push @scopes.last[cual]
-        else #Constantes
-            @latest_var = @ctes[cual]
-            @operandos.push @ctes[cual]
-        end
+    def fun1 cual
+        @pOperandos.push cual
     end
 
     def fun2
-        # puts "Meter #{@curr_token[1]} a pila Operadores" 
-        @poper.push @curr_token[1]
+        @pOper.push Phast.op_to_inst(@curr_token[1])
     end
 
     def fun3(nivel)
         # puts "Checar el top de Poper tiene operador pendiente"
-        if !@poper.empty?
-            op = @poper.last
+        if !@pOper.empty?
+            op = @pOper.last
             case
             when nivel == 0
-                if(op == '*' || op == '/')
-                    @poper.pop
-                    oper = @operandos.pop
-                    oper1 = @operandos.pop
-                    @tmp_var_id += 1
-                    @operandos.push Var.new("t#{@tmp_var_id}",nil,nil,-1,-1)
-                    @latest_var = @operandos.last
-                    genera(Phast.op_to_inst(op), oper1, oper,@operandos.last)
+                if(op == Phast::MUL || op == Phast::DIV)
+                    fun3_aux
                 end
             when nivel == 1
-                if(op == '+' || op == '-')
-                    @poper.pop
-                    oper = @operandos.pop
-                    oper1 = @operandos.pop
-                    @tmp_var_id += 1
-                    @operandos.push Var.new("t#{@tmp_var_id}",nil,nil,-1,-1)
-                    @latest_var = @operandos.last
-                    genera(Phast.op_to_inst(op), oper1, oper, @operandos.last)
+                if(op == Phast::SUM || op == Phast::REST)
+                    fun3_aux
                 end
             when nivel == 2
-                if(op == "and" || op == "or" || op == "<" || op == ">" || op == "<=" || op == ">=")
-                    @poper.pop
-                    oper = @operandos.pop
-                    oper1 = @operandos.pop
-                    @tmp_var_id += 1
-                    @operandos.push Var.new("t#{@tmp_var_id}",nil,nil,-1,-1)
-                    @latest_var = @operandos.last
-                    genera(Phast.op_to_inst(op), oper1, oper, @operandos.last)
+                if(op == Phast::AND || op == Phast::OR || op == Phast::GT || op == Phast::LT || op == Phast::ELT || op == Phast::EGT)
+                    fun3_aux
                 end
             when nivel == 3
-                if(op == "=")
-                    @poper.pop
-                    oper = @operandos.pop
-                    oper1 = @operandos.pop
-                    @operandos.push oper1
-                    @latest_var = @operandos.last
-                    genera(Phast.op_to_inst(op), oper, nil, oper1)
+                if(op == Phast::ASIG)
+                    @pOper.pop
+                    oper = @pOperandos.pop
+                    oper1 = @pOperandos.last
+                    genera(op, oper, nil, oper1)
                 end
             end
         end
     end
 
+    def fun3_aux
+        op = @pOper.pop
+        oper = @pOperandos.pop
+        oper1 = @pOperandos.pop
+        tmp = Var.new(nil,nil,nil,@scope_actual.temporales.length,nil)
+        @scope_actual.temporales.push tmp
+        @pOperandos.push tmp
+
+        genera(op, oper1, oper, @pOperandos.last)
+    end
+
     def fun4
-        @poper.push "("
+        @pOper.push "("
     end
     def fun5
-        @poper.pop
+        @pOper.pop
     end
 
     def if_quad(step)
         case
         when step == 1
-            @psaltos.push @next_quad
-            condicion = @operandos.pop
-            genera(Phast::GOTOF, condicion, nil, nil)
+            condicion = @pOperandos.pop
+            @pSaltos.push genera(Phast::GOTOF, condicion, nil, nil)
         when step ==  2
-            rellena(@psaltos.pop)
+            rellena(@pSaltos.pop)
         when step == 3
-            f = @psaltos.pop
-            @psaltos.push @next_quad
-            genera(Phast::GOTO, nil, nil, nil)
+            f = @pSaltos.pop
+            @pSaltos.push genera(Phast::GOTO, nil, nil, nil)
             rellena(f)
         end
     end
@@ -377,15 +339,13 @@ require_relative 'lib/Instrucciones'
     def while_quad(step)
         case
         when step == 1
-            @psaltos.push @next_quad
+            @pSaltos.push @scope_actual.quads.length #Valor deshechable
         when step ==  2
-            condicion = @operandos.pop
-            @psaltos.push @next_quad
-            genera(Phast::GOTOF, condicion, nil, nil)
+            condicion = @pOperandos.pop
+            @pSaltos.push genera(Phast::GOTOF, condicion, nil, nil)
         when step == 3
-            f = @psaltos.pop
-            r = @psaltos.pop
-            genera(Phast::GOTO, nil, nil, r)
+            f = @pSaltos.pop
+            genera(Phast::GOTO, nil, nil, @pSaltos.pop)
             rellena(f)
         end
     end
@@ -393,59 +353,52 @@ require_relative 'lib/Instrucciones'
     def do_while_quad(step)
         case
         when step == 1
-            @psaltos.push @next_quad
+            @pSaltos.push @scope_actual.quads.length
         when step ==  2
-            condicion = @operandos.pop
-            genera(Phast::GOTOV, condicion, nil, @psaltos.pop)
+            condicion = @pOperandos.pop
+            genera(Phast::GOTOV, condicion, nil, @pSaltos.pop)
         end
     end
 
     def process_output
 
-        @salida = []
+        @reg_counter = 0 #TODO
+        @mem_offset = 0 #TODO
 
-        @output[@llave_quads.last][:quads] = @quads.pop
-        @output[@llave_quads.last][:var_info] = @scopes.pop
+        @salida = [0]
 
-        Var.map_mem
-        mems = Var.mem_info
-        if $debug 
-            @salida.push "CTS\t#{mems[0]}"
-            @salida.push "GLBL\t#{mems[1]}"
-            @salida.push "TMP\t#{mems[3]}"
-            @salida.push "SCPS\t#{mems[2]}"
-        else
-            @salida.push "#{mems[0]}"
-            @salida.push "#{mems[1]}"
-            @salida.push "#{mems[2]}"
-            @salida.push "#{mems[3]}"
-        end
-        @ctes.each do |k,c|
-            @salida.push "#{c}\t#{c.valor}\t#{c.tipo}"
+        @salida.push @scopes[:constantes].variables.length
+        @salida.push @scopes[:global].variables.length
+        @salida.push @scopes[:global].temporales.length
+
+        @scopes[:constantes].variables.each do |k,c|
+            @salida.push "#{c.direccion_virtual}\t#{c.valor}\t#{c.tipoDato}"
+            @mem_offset += 1
         end
 
-        @reg_counter = 0
-        main_quads = @output[:main]
-        @output.delete(:main)
-        @output.each do |key, value|
-            $declared_funcs[key] = @reg_counter
-            @undeclared_funcs.delete(key)
-            @salida.push "SOSM:\t#{key}" if $debug
-            print_quads value[:quads]
-            @salida.push "EOSM" if $debug
+        scope_global = @scopes.delete(:global)
+        scope_constantes = @scopes.delete(:constantes)
+        
+        @scopes.each do |key, s|
+            s.registro = @reg_counter
+            print_quads s.quads
         end
-        # if !@undeclared_funcs.empty?
-        #     raise ParseError, sprintf("Funcion #{@undeclared_funcs.last} no declarada")
-        # end
-        @salida.unshift @reg_counter
-        @salida.push "SOQ" if $debug
-        print_quads main_quads[:quads]
-        @salida.push "EOQ" if $debug
 
-        @call_quads.each do |q|
-            q.op1 = @output[q.registro][:mem_info].to_s
-            q.registro = $declared_funcs[q.registro]
+        @mem_offset = scope_constantes.variables.length
+        #Correr variables
+        scope_global.variables.each do |k,v|
+            v.direccion_virtual += @mem_offset
         end
+        
+        @salida[0] = @reg_counter
+        print_quads scope_global.quads
+
+        @pFnCall.each do |q|
+            q.op1 = @scopes[q.registro].variables.length
+            q.op2 = @scopes[q.registro].temporales.length
+            q.registro = @scopes[q.registro].registro
+        end
+
         puts @salida
 
     end
@@ -455,7 +408,6 @@ require_relative 'lib/Instrucciones'
         until quads.empty?
             quad = quads.shift
             quad.saltos reg_offset
-            # @salida.push "#{@reg_counter}: \t#{quad.imprime reg_offset}"
             @salida.push quad
             @reg_counter += 1
         end

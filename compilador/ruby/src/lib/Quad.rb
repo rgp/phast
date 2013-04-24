@@ -1,4 +1,5 @@
 require_relative 'Instrucciones.rb'
+
 class Quad
 
     attr_accessor :instruccion, :op1, :op2, :registro
@@ -13,7 +14,7 @@ class Quad
     def saltos i
         @registro += i if @registro.is_a? Integer
     end
-
+    
     def to_s
         if($debug)
             #Convierte a texto
