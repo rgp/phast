@@ -29,7 +29,7 @@ if(!$file_handle){
     array_shift($source); //GLOBS
 
     $temps = $source[0][0];
-    array_shift($source); //TMPS
+    array_shift($source); //TMPS GLOB
 
     $EOF -= 4 + $ctes;
 
@@ -39,21 +39,21 @@ if(!$file_handle){
     $params = array();
 
     $offset_stack = array(0); // stack de offsets para mapear memoria al modulo actual
-    $last_mem_space_used = 0; // ultimo espacio de memoria ocupado
+    $next_free_mem = 0; // ultimo espacio de memoria ocupado
 
     for ($i = 0; $i < $ctes; $i++)
     {
-        $type = $source[0][2];
+        $type = $source[0][1];
         switch($type)
         {
         case 2:
-            $memoria[$source[0][0]] = (int)$source[0][1];
+            $memoria[$source[0][0]] = (int)$source[0][2];
             break;
         case 3:
-            $memoria[$source[0][0]] = (float)$source[0][1];
+            $memoria[$source[0][0]] = (float)$source[0][2];
             break;
         case 4:
-            $memoria[$source[0][0]] = (string)$source[0][1];
+            $memoria[$source[0][0]] = (string)$source[0][2];
             break;
         default:
             echo "ERROR\n";
@@ -61,7 +61,7 @@ if(!$file_handle){
             break;
         }
         array_shift($source);
-        $last_mem_space_used++;
+        $next_free_mem++;
     }
 
     while($curr_reg < $EOF)
@@ -84,10 +84,10 @@ if(!$file_handle){
                 break;
         case 4: // CALL
             // meter al offset_stack la posicion donde se puede empezar a utilizar la memoria
-            array_push($offset_stack,$last_mem_space_used);
+            array_push($offset_stack,$next_free_mem);
             // actualizar la nueva posicion ocupada de memoria
-            $last_mem_space_used += (int)$instruccion[1]; //locales
-            $last_mem_space_used += (int)$instruccion[2]; //temporales
+            $next_free_mem += (int)$instruccion[1]; //locales
+            $next_free_mem += (int)$instruccion[2]; //temporales
             // guardar quad al que se va a regresar en el RETURN
             $call_stack[] = ++$curr_reg;
             // ir al quad correspondiente a la funcion llamada
