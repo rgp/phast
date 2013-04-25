@@ -153,6 +153,7 @@ require_relative 'lib/Instrucciones'
 
         #Scopes
         @scopes = {:global => Scope.new(nil), :constantes => Scope.new(nil)} #Hash de objetos Scope
+        @scopes[:constantes].variables[:lng_ver] = Var.new(1.0,3,1.0,0,-1)
         @scope_actual = @scopes[:global]
         
         #Pilas
@@ -372,7 +373,7 @@ require_relative 'lib/Instrucciones'
         @salida.push @scopes[:global].temporales.length
 
         @scopes[:constantes].variables.each do |k,c|
-            @salida.push "#{c.direccion_virtual}\t#{c.valor}\t#{c.tipoDato}"
+            @salida.push "#{c.direccion_virtual}\t#{c.tipoDato}\t#{c.valor}"
             @mem_offset += 1
         end
 
@@ -387,6 +388,10 @@ require_relative 'lib/Instrucciones'
         @mem_offset = scope_constantes.variables.length
         #Correr variables
         scope_global.variables.each do |k,v|
+            v.direccion_virtual += @mem_offset
+        end
+        @mem_offset += scope_global.variables.length
+        scope_global.temporales.each do |v|
             v.direccion_virtual += @mem_offset
         end
         

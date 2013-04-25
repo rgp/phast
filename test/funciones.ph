@@ -1,6 +1,7 @@
 <?
 fun suma(a,b){
     total = "A";
+    total = "a";
     total = a + b;
     return (total);
 }
