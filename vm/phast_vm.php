@@ -86,7 +86,8 @@ if(!$file_handle){
             // meter al offset_stack la posicion donde se puede empezar a utilizar la memoria
             array_push($offset_stack,$last_mem_space_used);
             // actualizar la nueva posicion ocupada de memoria
-            $last_mem_space_used += (int)$instruccion[1];
+            $last_mem_space_used += (int)$instruccion[1]; //locales
+            $last_mem_space_used += (int)$instruccion[2]; //temporales
             // guardar quad al que se va a regresar en el RETURN
             $call_stack[] = ++$curr_reg;
             // ir al quad correspondiente a la funcion llamada
@@ -182,5 +183,6 @@ if(!$file_handle){
             die();
         }
     }
+    print_r($memoria);
 }
 ?> 

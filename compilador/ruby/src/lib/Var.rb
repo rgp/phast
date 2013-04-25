@@ -18,7 +18,11 @@ class Var
         if($debug)
             "[#{@nombre},#{@valor}]"
         else
-            "#{@direccion_virtual}"
+            if @valor != nil
+                "#{-@direccion_virtual}"
+            else
+                "#{@direccion_virtual}"
+            end
         end
     end
 end
