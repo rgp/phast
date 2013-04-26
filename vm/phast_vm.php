@@ -78,6 +78,12 @@ function loadMemory()
         $type = $source[0][1];
         switch($type)
         {
+        case 0:
+            $memoria[$source[0][0]] = NULL;
+            break;
+        case 1:
+            $memoria[$source[0][0]] = strToLower($source[0][2]) == "false" ? false : true;
+            break;
         case 2:
             $memoria[$source[0][0]] = (int)$source[0][2];
             break;
@@ -212,6 +218,8 @@ while($curr_reg < $EOF)
         $op2 = $memoria[getRegistry((int)$instruccion[2])];
 
         $rtype = resultType($op1,$op2);
+        echo $rtype."\n";
+        echo $op1." * ".$op2." = ".($op1 * $op2)."\n";
 
         switch ($rtype)
         {
@@ -221,34 +229,83 @@ while($curr_reg < $EOF)
             case "boolean":
             case "integer":
             case "double":
-                $resultado = $op1*$op2;
+                $resultado = $op1 * $op2;
                 break;
             case "string":
                 $resultado = 0;
                 break;
         }
-
         $memoria[$saveTo] =  $resultado;
         $curr_reg++;
         break;
     case 7: // DIV
         $saveTo = getRegistry((int)$instruccion[3]);
-        $memoria[$saveTo] = $memoria[getRegistry((int)$instruccion[1])] / $memoria[getRegistry((int)$instruccion[2])];
+        $op1 = $memoria[getRegistry((int)$instruccion[1])];
+        $op2 = $memoria[getRegistry((int)$instruccion[2])];
+
+        $rtype = resultType($op1,$op2);
+
+        switch ($rtype)
+        {
+            case "NULL":
+                $resultado = 0;
+                break;
+            case "boolean":
+            case "integer":
+            case "double":
+                $resultado = $op1 / $op2;
+                break;
+            case "string":
+                $resultado = 0;
+                break;
+        }
+        $memoria[$saveTo] =  $resultado;
         $curr_reg++;
         break;
     case 8: // REST
         $saveTo = getRegistry((int)$instruccion[3]);
-        $memoria[$saveTo] = $memoria[getRegistry((int)$instruccion[1])] - $memoria[getRegistry((int)$instruccion[2])];
+        $op1 = $memoria[getRegistry((int)$instruccion[1])];
+        $op2 = $memoria[getRegistry((int)$instruccion[2])];
+
+        $rtype = resultType($op1,$op2);
+
+        switch ($rtype)
+        {
+            case "NULL":
+                $resultado = 0;
+                break;
+            case "boolean":
+            case "integer":
+            case "double":
+                $resultado = $op1 - $op2;
+                break;
+            case "string":
+                $resultado = 0;
+                break;
+        }
+        $memoria[$saveTo] =  $resultado;
         $curr_reg++;
         break;
 
         #Logical instructions
     case 9: // AND
-        echo "AND ${instruccion[1]} ${instruccion[2]}\n";
+        $saveTo = getRegistry((int)$instruccion[3]);
+        $op1 = $memoria[getRegistry((int)$instruccion[1])];
+        $op2 = $memoria[getRegistry((int)$instruccion[2])];
+
+        $resultado = ((int)($op1 && $op2)) ? true : false;
+
+        $memoria[$saveTo] =  $resultado;
         $curr_reg++;
         break;
     case 10: // OR
-        echo "OR ${instruccion[1]} ${instruccion[2]}\n";
+        $saveTo = getRegistry((int)$instruccion[3]);
+        $op1 = $memoria[getRegistry((int)$instruccion[1])];
+        $op2 = $memoria[getRegistry((int)$instruccion[2])];
+
+        $resultado = ((int)($op1 || $op2)) ? true : false;
+
+        $memoria[$saveTo] =  $resultado;
         $curr_reg++;
         break;
     case 11: // ASIGN
@@ -256,27 +313,54 @@ while($curr_reg < $EOF)
         $memoria[$saveTo] = $memoria[getRegistry((int)$instruccion[1])];
         $curr_reg++;
         break;
-    case 12:
-        echo "GT ${instruccion[1]} ${instruccion[2]}\n";
+    case 12: // GREATER THAN
+        $saveTo = getRegistry((int)$instruccion[3]);
+        $op1 = $memoria[getRegistry((int)$instruccion[1])];
+        $op2 = $memoria[getRegistry((int)$instruccion[2])];
+
+        $resultado = ((int)($op1 > $op2)) ? true : false;
+
+        $memoria[$saveTo] =  $resultado;
         $curr_reg++;
         break;
-    case 13:
-        echo "LT ${instruccion[1]} ${instruccion[2]}\n";
+    case 13: // LESS THAN 
+        $saveTo = getRegistry((int)$instruccion[3]);
+        $op1 = $memoria[getRegistry((int)$instruccion[1])];
+        $op2 = $memoria[getRegistry((int)$instruccion[2])];
+
+        $resultado = ((int)($op1 < $op2)) ? true : false;
+
+        $memoria[$saveTo] =  $resultado;
         $curr_reg++;
         break;
-    case 14:
-        echo "EGT ${instruccion[1]} ${instruccion[2]}\n";
+    case 14: // GREATER THAN OR EQUAL
+        $saveTo = getRegistry((int)$instruccion[3]);
+        $op1 = $memoria[getRegistry((int)$instruccion[1])];
+        $op2 = $memoria[getRegistry((int)$instruccion[2])];
+
+        $resultado = ((int)($op1 >= $op2)) ? true : false;
+
+        $memoria[$saveTo] =  $resultado;
         $curr_reg++;
         break;
-    case 15:
-        echo "ELT ${instruccion[1]} ${instruccion[2]}\n";
+    case 15: // LESS THAN OR EQUAL
+        $saveTo = getRegistry((int)$instruccion[3]);
+        $op1 = $memoria[getRegistry((int)$instruccion[1])];
+        $op2 = $memoria[getRegistry((int)$instruccion[2])];
+
+        $resultado = ((int)($op1 <= $op2)) ? true : false;
+
+        $memoria[$saveTo] =  $resultado;
         $curr_reg++;
         break;
     case 16: //EQ
-        $o1 = $memoria[getRegistry((int)$instruccion[1])];
-        $o2 = $memoria[getRegistry((int)$instruccion[2])];
         $saveTo = getRegistry((int)$instruccion[3]);
-        $memoria[$saveTo] = (bool)($o1 == $o2);
+        $op1 = $memoria[getRegistry((int)$instruccion[1])];
+        $op2 = $memoria[getRegistry((int)$instruccion[2])];
+
+        $resultado = ((int)($op1 == $op2)) ? true : false;
+
+        $memoria[$saveTo] = $resultado;
         $curr_reg++;
         break;
     case 17: //RET
