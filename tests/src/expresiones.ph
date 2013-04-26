@@ -1,7 +1,31 @@
 <?
-a;
+a = 3 * 1.2;
 println("a = ",a);
 
+a = null * 1.2;
+println("a = ",a);
+
+a = true * 1.2;
+println("a = ",a);
+
+a = true * false;
+println("a = ",a);
+
+a = 1 * 2 * 3 * fAlse;
+println("a = ",a);
+
+a = 3 < 4;
+println("a = ",a);
+
+a = 3 > 4;
+println("a = ",a);
+
+a = 3 >= 3;
+println("a = ",a);
+
+
+
+/*
 b = 4;
 println("b = ",b);
 
@@ -45,4 +69,5 @@ println("t = ",t);
 println("");
 c = b * (11 + a - (2 + 3)) + 6 * 2 / (a + a);
 println("c = ",c);
+*/
 ?>
