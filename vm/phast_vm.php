@@ -286,7 +286,6 @@ while($curr_reg < $EOF)
         // sacar del offset_stack la posicion donde se puede empezar a utilizar la memoria
         $clean = $next_free_mem;
         $next_free_mem = array_pop($offset_stack);
-        print_r("AA");
         for($i = $next_free_mem; $i <= $clean; $i++){
             unset($memoria[$i]);
         }
