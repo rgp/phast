@@ -1,47 +1,79 @@
 <?php 
-$dir = exec("pwd")."/";
-if(count($argv) <= 1)
-    die("Please specify a program to run\n");
-$file = $dir.$argv[1];
-if(!is_file($file))
-    die("Phast:\n Could not read file => $file\n");
 
-$file_handle = fopen($file, "r+");
-if(!$file_handle){
-    echo "Error reading program.\n";
-    die();
-}else{
-    $source = array();
-    $EOF = 0;
-    while ($line = fgets($file_handle)) {
-        $source[] = split("\t",str_replace("\n","",$line));
-        $EOF++;
+$source = array();
+$start = 0;
+$EOF = 0;
+
+$globals = 0;
+$temporals = 0;
+$constants = 0;
+
+#Iterators
+$curr_reg = $start;
+$next_free_mem = 0; // siguiente espacio en memoria disponible
+
+#Memory
+$memoria = array();
+
+#Stacks
+$offset_stack = array($next_free_mem); // stack de offsets para mapear memoria al modulo actual
+$params = array();
+$call_stack = array();
+
+
+
+function loadFile()
+{
+    global $argv, $EOF, $source;
+
+    $dir = exec("pwd")."/";
+    if(count($argv) <= 1)
+        die("Please specify a program to run\n");
+    $file = $dir.$argv[1];
+    if(!is_file($file))
+        die("Phast:\n Could not read file => $file\n");
+
+    $file_handle = fopen($file, "r+");
+    if(!$file_handle)
+    {
+        echo "Error reading program.\n";
+        die();
     }
-    fclose($file_handle);
+    else
+    {
+        while ($line = fgets($file_handle)) 
+        {
+            $source[] = split("\t",str_replace("\n","",$line));
+            $EOF++;
+        }
+        fclose($file_handle);
+    }
+}
+
+function readHeader()
+{
+    global $start, $source, $constants, $temporals, $globals, $EOF;
 
     $start = $source[0][0];
     array_shift($source); //START
 
-    $ctes = $source[0][0];
+    $constants = $source[0][0];
     array_shift($source); //CTES
 
-    $globs = $source[0][0];
+    $globals = $source[0][0];
     array_shift($source); //GLOBS
 
-    $temps = $source[0][0];
+    $temporals = $source[0][0];
     array_shift($source); //TMPS GLOB
 
-    $EOF -= 4 + $ctes;
+    $EOF -= 4 + $constants;
+}
 
-    $curr_reg = $start;
+function loadMemory()
+{
+    global $source, $memoria, $next_free_mem, $constants;
 
-    $memoria = array();
-    $params = array();
-
-    $offset_stack = array(0); // stack de offsets para mapear memoria al modulo actual
-    $next_free_mem = 0; // ultimo espacio de memoria ocupado
-
-    for ($i = 0; $i < $ctes; $i++)
+    for ($i = 0; $i < $constants; $i++)
     {
         $type = $source[0][1];
         switch($type)
@@ -64,125 +96,219 @@ if(!$file_handle){
         $next_free_mem++;
     }
 
-    while($curr_reg < $EOF)
+}
+
+function getRegistry($position)
+{
+    global $memoria, $offset_stack;
+
+    if($position < 0)
+        return (-1)*$position;
+    return end($offset_stack)+$position;
+}
+
+function resultType($o1,$o2)
+{
+    $o1 = gettype($o1);
+    $o2 = gettype($o2);
+
+    switch (true){
+        case $o1 == "string":
+        case $o2 == "string":
+            return "string";
+            break;
+        case $o1 == "double":
+        case $o2 == "double":
+            return "double";
+            break;
+        case $o1 == "integer":
+        case $o2 == "integer":
+            return "integer";
+            break;
+        case $o1 == "boolean":
+        case $o2 == "boolean":
+            return "boolean";
+            break;
+        case $o1 == "NULL":
+        case $o2 == "NULL":
+            return "NULL";
+            break;
+    }
+}
+
+loadFile();
+readHeader();
+loadMemory();
+
+$next_free_mem += $globals + $temporals;
+$offset_stack[] = $next_free_mem; // stack de offsets para mapear memoria al modulo actual
+
+$curr_reg = $start;
+
+while($curr_reg < $EOF)
+{
+    $instruccion = $source[$curr_reg];
+    switch($instruccion[0])
     {
-        $instruccion = $source[$curr_reg];
-        switch($instruccion[0])
-        {
-            #Flow Control instructions
-        case 1: // GOTO
+        #Flow Control instructions
+    case 1: // GOTO
+        $curr_reg = (int)$instruccion[3];
+        break;
+    case 2: // GOTOF
+        $comp = $memoria[getRegistry((int)$instruccion[1])];
+        if($comp == false){
             $curr_reg = (int)$instruccion[3];
-            echo "GOTO ${instruccion[3]}\n";
-                break;
-        case 2: // GOTOF
-            echo "GOTOF ${instruccion[3]}\n";
-            $curr_reg++; //TODO Quitar saltos
-                break;
-        case 3: // GOTOV
-            echo "GOTOV ${instruccion[3]}\n";
-            $curr_reg++; //TODO Quitar saltos
-                break;
-        case 4: // CALL
-            // meter al offset_stack la posicion donde se puede empezar a utilizar la memoria
-            array_push($offset_stack,$next_free_mem);
-            // actualizar la nueva posicion ocupada de memoria
-            $next_free_mem += (int)$instruccion[1]; //locales
-            $next_free_mem += (int)$instruccion[2]; //temporales
-            // guardar quad al que se va a regresar en el RETURN
-            $call_stack[] = ++$curr_reg;
-            // ir al quad correspondiente a la funcion llamada
-            $curr_reg = $instruccion[3]; 
-                break;
+        }
+        $curr_reg++; 
+        break;
+    case 3: // GOTOV
+        $comp = $memoria[getRegistry((int)$instruccion[1])];
+        if($comp == true){
+            $curr_reg = (int)$instruccion[3];
+        }
+        $curr_reg++; 
+        break;
+    case 4: // CALL
+        // meter al offset_stack la posicion donde se puede empezar a utilizar la memoria
+        array_push($offset_stack,$next_free_mem);
+        // actualizar la nueva posicion ocupada de memoria
+        $next_free_mem += (int)$instruccion[1]; //locales
+        $next_free_mem += (int)$instruccion[2]; //temporales
+        // guardar quad al que se va a regresar en el RETURN
+        $call_stack[] = ++$curr_reg;
+        // ir al quad correspondiente a la funcion llamada
+        $curr_reg = (int)$instruccion[3]; 
+        break;
 
-            #Arithmetic instructions
-        case 5: // SUM
-            // echo "SUM ${instruccion[1]} ${instruccion[2]}\n";
-            // $memoria[((int)$instruccion[3] + end($offset_stack))] = $memoria[(int)$instruccion[1]] + $memoria[(int)$instruccion[2]];
-            $memoria[(int)$instruccion[3]] = $memoria[(int)$instruccion[1]] + $memoria[(int)$instruccion[2]];
-            $curr_reg++;
-                break;
-        case 6: // MUL
-            // echo "MUL ${instruccion[1]} ${instruccion[2]}\n";
-            // $memoria[((int)$instruccion[3] + end($offset_stack))] = $memoria[(int)$instruccion[1]] * $memoria[(int)$instruccion[2]];
-            $memoria[(int)$instruccion[3]] = $memoria[(int)$instruccion[1]] * $memoria[(int)$instruccion[2]];
-            $curr_reg++;
-                break;
-        case 7: // DIV
-            // echo "DIV ${instruccion[1]} ${instruccion[2]}\n";
-            // $memoria[((int)$instruccion[3] + end($offset_stack))] = $memoria[(int)$instruccion[1]] / $memoria[(int)$instruccion[2]];
-            $memoria[(int)$instruccion[3]] = $memoria[(int)$instruccion[1]] / $memoria[(int)$instruccion[2]];
-            $curr_reg++;
-                break;
-        case 8: // REST
-            // echo "REST ${instruccion[1]} ${instruccion[2]}\n";
-            $memoria[((int)$instruccion[3] + end($offset_stack))] = $memoria[(int)$instruccion[1]] - $memoria[(int)$instruccion[2]];
-            $curr_reg++;
-                break;
+        #Arithmetic instructions
+    case 5: // SUM
+        $saveTo = getRegistry((int)$instruccion[3]);
+        $op1 = $memoria[getRegistry((int)$instruccion[1])];
+        $op2 = $memoria[getRegistry((int)$instruccion[2])];
 
-            #Logical instructions
-        case 9: // AND
-            echo "AND ${instruccion[1]} ${instruccion[2]}\n";
-            $curr_reg++;
+        $rtype = resultType($op1,$op2);
+
+        switch ($rtype)
+        {
+            case "NULL":
+                $resultado = 0;
                 break;
-        case 10: // OR
-            echo "OR ${instruccion[1]} ${instruccion[2]}\n";
-            $curr_reg++;
+            case "boolean":
+            case "integer":
+            case "float":
+                $resultado = $op1+$op2;
                 break;
-        case 11: // ASIGN
-            // echo "ASIGN ${instruccion[1]} ${instruccion[2]}\n";
-            $memoria[(int)$instruccion[3]] = $memoria[(int)$instruccion[1]];
-            $curr_reg++;
+            case "string":
+                $resultado = $op1.$op2;
                 break;
-        case 12:
-            echo "GT ${instruccion[1]} ${instruccion[2]}\n";
-            $curr_reg++;
+        }
+
+        $memoria[$saveTo] =  $resultado;
+        $curr_reg++;
+        break;
+    case 6: // MUL
+        $saveTo = getRegistry((int)$instruccion[3]);
+        $op1 = $memoria[getRegistry((int)$instruccion[1])];
+        $op2 = $memoria[getRegistry((int)$instruccion[2])];
+
+        $rtype = resultType($op1,$op2);
+
+        switch ($rtype)
+        {
+            case "NULL":
+                $resultado = 0;
                 break;
-        case 13:
-            echo "LT ${instruccion[1]} ${instruccion[2]}\n";
-            $curr_reg++;
+            case "boolean":
+            case "integer":
+            case "float":
+                $resultado = $op1*$op2;
                 break;
-        case 14:
-            echo "EGT ${instruccion[1]} ${instruccion[2]}\n";
-            $curr_reg++;
+            case "string":
+                $resultado = 0;
                 break;
-        case 15:
-            echo "ELT ${instruccion[1]} ${instruccion[2]}\n";
-            $curr_reg++;
-                break;
-        case 16:
-            echo "EQ ${instruccion[1]} ${instruccion[2]}\n";
-            $curr_reg++;
-                break;
-        case 17:
-            if(!empty($instruccion[3]))
-                $return_var = $memoria[(int)$instruccion[3]];
-            $curr_reg = array_pop($call_stack);
-                break;
-        case 18:
+        }
+
+        $memoria[$saveTo] =  $resultado;
+        $curr_reg++;
+        break;
+    case 7: // DIV
+        $saveTo = getRegistry((int)$instruccion[3]);
+        $memoria[$saveTo] = $memoria[getRegistry((int)$instruccion[1])] / $memoria[getRegistry((int)$instruccion[2])];
+        $curr_reg++;
+        break;
+    case 8: // REST
+        $saveTo = getRegistry((int)$instruccion[3]);
+        $memoria[$saveTo] = $memoria[getRegistry((int)$instruccion[1])] - $memoria[getRegistry((int)$instruccion[2])];
+        $curr_reg++;
+        break;
+
+        #Logical instructions
+    case 9: // AND
+        echo "AND ${instruccion[1]} ${instruccion[2]}\n";
+        $curr_reg++;
+        break;
+    case 10: // OR
+        echo "OR ${instruccion[1]} ${instruccion[2]}\n";
+        $curr_reg++;
+        break;
+    case 11: // ASIGN
+        $saveTo = getRegistry((int)$instruccion[3]);
+        $memoria[$saveTo] = $memoria[getRegistry((int)$instruccion[1])];
+        $curr_reg++;
+        break;
+    case 12:
+        echo "GT ${instruccion[1]} ${instruccion[2]}\n";
+        $curr_reg++;
+        break;
+    case 13:
+        echo "LT ${instruccion[1]} ${instruccion[2]}\n";
+        $curr_reg++;
+        break;
+    case 14:
+        echo "EGT ${instruccion[1]} ${instruccion[2]}\n";
+        $curr_reg++;
+        break;
+    case 15:
+        echo "ELT ${instruccion[1]} ${instruccion[2]}\n";
+        $curr_reg++;
+        break;
+    case 16:
+        $o1 = $memoria[getRegistry((int)$instruccion[1])];
+        $o2 = $memoria[getRegistry((int)$instruccion[2])];
+        $saveTo = getRegistry((int)$instruccion[3]);
+        $memoria[$saveTo] = (bool)$o1 == (bool)$o2;
+        $curr_reg++;
+        break;
+    case 17: //RET
+        if(!empty($instruccion[3]))
+            $return_var = $memoria[getRegistry((int)$instruccion[3])];
+        $curr_reg = array_pop($call_stack);
+        break;
+    case 18: //PRT
+        while(!empty($params))
+        {
             $param = array_shift($params);
             echo $param;
-            $curr_reg++;
-            break;
-        case 19:
-            $param = array_shift($params);
-            $memoria[(int)$instruccion[3]] = $param;
-            $curr_reg++;
-            break;
-        case 20:
-            array_push($params,$memoria[(int)$instruccion[3]]);
-            $curr_reg++;
-            break;
-        case 21:
-            $memoria[(int)$instruccion[3]] = $return_var;
-            $curr_reg++;
-            break;
-        default:
-            echo "died at: ".$curr_reg."\n";
-            die();
-            // echo "Unknown instruction:\n".implode("\t",$instruccion);
-            die();
         }
+        $curr_reg++;
+        break;
+    case 19: //ARG
+        $param = array_shift($params);
+        $memoria[getRegistry((int)$instruccion[3])] = $param;
+        $curr_reg++;
+        break;
+    case 20: //PARAM
+        array_push($params,$memoria[getRegistry((int)$instruccion[3])]);
+        $curr_reg++;
+        break;
+    case 21: //RVT
+        $memoria[getRegistry((int)$instruccion[3])] = $return_var;
+        $curr_reg++;
+        break;
+    default: //RANDOM ? WTF
+        echo "died at: ".$curr_reg."\n";
+        echo "Unknown instruction:\n".implode("\t",$instruccion);
+        die();
     }
-    print_r($memoria);
 }
 ?> 

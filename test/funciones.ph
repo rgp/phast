@@ -1,15 +1,6 @@
 <?
 fun suma(a,b){
-    total = "A";
-    total = "a";
-    total = a + b;
-    return (total);
+    return a+b;
 }
-resultado = "a";
-aa = 5;
-bb = 2;
-
-
-resultado = suma(aa,bb);
-print (resultado);
+resultado = 1 * suma(5,6);
 ?>

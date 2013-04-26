@@ -232,6 +232,7 @@ require_relative 'lib/Instrucciones'
 
     def fun_prepare cual
         @function_to_call = cual
+        @pOper.push "("
     end
         
 
@@ -251,6 +252,7 @@ require_relative 'lib/Instrucciones'
             @pOperandos.push tmp
             genera(Phast::REV,nil,nil,tmp)
         end
+        @pOper.pop
     end
 
     def argument
@@ -291,7 +293,7 @@ require_relative 'lib/Instrucciones'
                     fun3_aux
                 end
             when nivel == 2
-                if(op == Phast::AND || op == Phast::OR || op == Phast::GT || op == Phast::LT || op == Phast::ELT || op == Phast::EGT)
+                if(op == Phast::AND || op == Phast::OR || op == Phast::GT || op == Phast::LT || op == Phast::ELT || op == Phast::EGT || op == Phast::EQ)
                     fun3_aux
                 end
             when nivel == 3
@@ -374,7 +376,6 @@ require_relative 'lib/Instrucciones'
 
         @scopes[:constantes].variables.each do |k,c|
             @salida.push "#{c.direccion_virtual}\t#{c.tipoDato}\t#{c.valor}"
-            @mem_offset += 1
         end
 
         scope_global = @scopes.delete(:global)
@@ -382,6 +383,10 @@ require_relative 'lib/Instrucciones'
         
         @scopes.each do |key, s|
             s.registro = @reg_counter
+            @mem_offset = s.variables.length
+            s.temporales.each do |v|
+                v.direccion_virtual += @mem_offset
+            end
             print_quads s.quads
         end
 
