@@ -158,15 +158,17 @@ while($curr_reg < $EOF)
         $comp = $memoria[getRegistry((int)$instruccion[1])];
         if($comp == false){
             $curr_reg = (int)$instruccion[3];
+        }else{
+            $curr_reg++;
         }
-        $curr_reg++; 
         break;
     case 3: // GOTOV
         $comp = $memoria[getRegistry((int)$instruccion[1])];
         if($comp == true){
             $curr_reg = (int)$instruccion[3];
+        }else{
+            $curr_reg++;
         }
-        $curr_reg++; 
         break;
     case 4: // CALL
         // meter al offset_stack la posicion donde se puede empezar a utilizar la memoria
@@ -272,16 +274,23 @@ while($curr_reg < $EOF)
         echo "ELT ${instruccion[1]} ${instruccion[2]}\n";
         $curr_reg++;
         break;
-    case 16:
+    case 16: //EQ
         $o1 = $memoria[getRegistry((int)$instruccion[1])];
         $o2 = $memoria[getRegistry((int)$instruccion[2])];
         $saveTo = getRegistry((int)$instruccion[3]);
-        $memoria[$saveTo] = (bool)$o1 == (bool)$o2;
+        $memoria[$saveTo] = (bool)($o1 == $o2);
         $curr_reg++;
         break;
     case 17: //RET
         if(!empty($instruccion[3]))
             $return_var = $memoria[getRegistry((int)$instruccion[3])];
+
+        // sacar del offset_stack la posicion donde se puede empezar a utilizar la memoria
+        $clean = $next_free_mem;
+        $next_free_mem = array_pop($offset_stack);
+        for($i = $next_free_mem; $i <= $clean; $i++){
+            unset($memoria[$i]);
+        }
         $curr_reg = array_pop($call_stack);
         break;
     case 18: //PRT

@@ -161,6 +161,7 @@ require_relative 'lib/Instrucciones'
         @pOperandos = [] #Pila de operandos (Vars)
         @pSaltos = [] #Pila para saltos (if,else, etc.)
         @pFnCall = [] #Pila de llamadas pendientes (Quads)
+        @funToCall = []
 
 
 
@@ -231,18 +232,17 @@ require_relative 'lib/Instrucciones'
     end
 
     def fun_prepare cual
-        @function_to_call = cual
+        @funToCall.push cual
         @pOper.push "("
     end
         
 
     def fun_call
-        if @function_to_call == nil
+        if @funToCall.last == nil
             p "Compile Error"
             exit
         end
-        cual = @function_to_call
-        @function_to_call = nil
+        cual = @funToCall.pop
         if(cual == "print")
             genera(Phast::PRT,nil,nil,nil)
         else

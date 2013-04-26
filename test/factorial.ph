@@ -6,15 +6,9 @@ fun fac(n)
     {
         return 1;
     }
-    return n * fac(n - 1);
+    return n * fac(n-1);
 }
 
-if("a" == "b")
-{
-    // print("hola");
-}
-
-val = fac(5);
-print(val);
+print(fac(5));
 
 ?>
