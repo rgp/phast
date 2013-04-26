@@ -140,7 +140,6 @@ loadFile();
 readHeader();
 loadMemory();
 
-$next_free_mem += $globals + $temporals;
 $offset_stack[] = $next_free_mem; // stack de offsets para mapear memoria al modulo actual
 
 $curr_reg = $start;
@@ -197,14 +196,13 @@ while($curr_reg < $EOF)
                 break;
             case "boolean":
             case "integer":
-            case "float":
-                $resultado = $op1+$op2;
+            case "double":
+                $resultado = $op1 + $op2;
                 break;
             case "string":
                 $resultado = $op1.$op2;
                 break;
         }
-
         $memoria[$saveTo] =  $resultado;
         $curr_reg++;
         break;
@@ -222,7 +220,7 @@ while($curr_reg < $EOF)
                 break;
             case "boolean":
             case "integer":
-            case "float":
+            case "double":
                 $resultado = $op1*$op2;
                 break;
             case "string":
@@ -288,6 +286,7 @@ while($curr_reg < $EOF)
         // sacar del offset_stack la posicion donde se puede empezar a utilizar la memoria
         $clean = $next_free_mem;
         $next_free_mem = array_pop($offset_stack);
+        print_r("AA");
         for($i = $next_free_mem; $i <= $clean; $i++){
             unset($memoria[$i]);
         }
@@ -312,6 +311,15 @@ while($curr_reg < $EOF)
         break;
     case 21: //RVT
         $memoria[getRegistry((int)$instruccion[3])] = $return_var;
+        $curr_reg++;
+        break;
+    case 22: //PRTLN
+        while(!empty($params))
+        {
+            $param = array_shift($params);
+            echo $param;
+        }
+        echo "\n";
         $curr_reg++;
         break;
     default: //RANDOM ? WTF

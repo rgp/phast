@@ -245,6 +245,8 @@ require_relative 'lib/Instrucciones'
         cual = @funToCall.pop
         if(cual == "print")
             genera(Phast::PRT,nil,nil,nil)
+        elsif(cual == "println")
+            genera(Phast::PRTLN,nil,nil,nil)
         else
             @pFnCall.push genera(Phast::CALL,nil,nil,cual)
             tmp = Var.new(nil,nil,nil,@scope_actual.temporales.length,nil)
@@ -390,11 +392,11 @@ require_relative 'lib/Instrucciones'
             print_quads s.quads
         end
 
-        @mem_offset = scope_constantes.variables.length
+        @mem_offset = 0 #scope_constantes.variables.length
         #Correr variables
-        scope_global.variables.each do |k,v|
-            v.direccion_virtual += @mem_offset
-        end
+        # scope_global.variables.each do |k,v|
+        #     v.direccion_virtual += @mem_offset
+        # end
         @mem_offset += scope_global.variables.length
         scope_global.temporales.each do |v|
             v.direccion_virtual += @mem_offset

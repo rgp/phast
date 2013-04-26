@@ -23,7 +23,7 @@
                    case "$i"
                    in
                            -c)
-                                   ruby compilador/compiler $2
+                                   compilador/compiler $2
                                    shift;
                                    break;;
                            --)
