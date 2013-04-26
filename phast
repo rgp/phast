@@ -23,7 +23,7 @@
                    case "$i"
                    in
                            -c)
-                                   ruby compilador/ruby/driver.rb $2
+                                   ruby compilador/compiler $2
                                    shift;
                                    break;;
                            --)

@@ -1,3 +1,0 @@
-<?
-arreglo_llamada["lala"];
-?>
