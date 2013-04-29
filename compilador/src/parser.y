@@ -65,11 +65,11 @@ funcs: { fun_prepare @prev_token[1] } '(' argumentos ')' { fun_call }
         /*| OP_INCREMENT*/
         /*| OP_DECREMENT*/
 vars: OP_ASIGN {fun2} expresion {fun3 3} 
-    | '[' expresion ']'
+    | '[' int ']'
     |
 estatico: numero
         | STRING { guarda_cte @curr_token[1], String(@curr_token[1]) , 4 }
-        | arreglo
+        | arreglo { p "encontre arreglo" }
         /*| OP_INCREMENT ID {}*/
         /*| OP_DECREMENT ID {}*/
         | WORD_TRUE { guarda_cte @curr_token[1], true , 1 }
@@ -90,22 +90,20 @@ op_comp: OP_EQUAL
 
 op_term: OP_PLUS
        | OP_MINUS
-
 op_fact: OP_MULTIPLY
        | OP_DIVIDE
 
-numero : INT { guarda_cte @curr_token[1], Integer(@curr_token[1]) , 2 }
-       | FLOAT { guarda_cte @curr_token[1], Float(@curr_token[1]) , 3 }
+numero: int
+      | float
+int : INT { guarda_cte @curr_token[1], Integer(@curr_token[1]) , 2 }
+float: FLOAT { guarda_cte @curr_token[1], Float(@curr_token[1]) , 3 }
 arreglo: '[' arr_elems ']'
 arr_elems: arr_elem arr_elems_aux
           |
 arr_elems_aux: ',' arr_elem arr_elems_aux
           |
-arr_elem: arr_val arr_elem_aux
-arr_elem_aux: '=' '>' arr_val
-             |
-arr_val: expresion
-
+arr_elem: int '=' '>' arr_val
+        | expresion
 # Bloques
 bloque_if : WORD_IF  '(' expresion ')' {if_quad 1} '{' estatutos '}' else {if_quad 2} 
 else: WORD_ELSE {if_quad 3} aux_else
