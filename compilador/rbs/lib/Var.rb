@@ -18,7 +18,7 @@ class Var
         if($debug)
             "[#{@nombre},#{@valor}]"
         else
-            if @valor != nil
+            if @valor != nil or @tipoDato == 0
                 "#{-@direccion_virtual}"
             else
                 "#{@direccion_virtual}"
