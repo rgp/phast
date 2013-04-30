@@ -418,5 +418,5 @@ require_relative 'lib/Instrucciones'
     end
 
     def on_error(t,val,vstack)
-        raise ParseError, sprintf("\nError de sintaxis. Se encontro %s (%s) inesperado", val.inspect, token_to_str(t) || '?')
+        raise ParseError, sprintf("\nError de sintaxis. Se encontro %s (%s) inesperado en la linea #{$lineno}", val.inspect, token_to_str(t) || '?')
     end
