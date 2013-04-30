@@ -50,27 +50,28 @@ module_eval(<<'...end parser.y/module_eval...', 'parser.y', 146)
     end
 
     def openArreglo
-        p "ARR"
         tmp = Var.new(nil,nil,nil,@scope_actual.temporales.length,nil)
-        p "VAR : "+ tmp.to_s
-        p "POPER"
-        p @pOper
-        p "POPERANDS"
-        p @pOperandos.last.nombre
-        p "POPERANDSEND"
+        @pOperandos.push tmp
         @pArr.push tmp
     end
 
     def closeArreglo
-        p "ENDARR"
+        @pArr.pop
     end
 
     def llame_var cual
-        p cual
-        if @scope_actual.variables.include? cual
-            @scope_actual.variables[cual]
+        if @pArr.last != nil
+            if !@scope_actual.variables.include? cual
+                # TODO Usar constante null
+            else
+                # TODO Copiar valor de variable
+            end
         else
-            guarda_var cual
+            if @scope_actual.variables.include? cual
+                @scope_actual.variables[cual]
+            else
+                guarda_var cual
+            end
         end
     end
 
@@ -79,7 +80,6 @@ module_eval(<<'...end parser.y/module_eval...', 'parser.y', 146)
     end
 
     def guarda_cte(nombre,valor,tipo)
-        p nombre
         if !@scopes[:constantes].variables.include? nombre
             @scopes[:constantes].variables[nombre] = Var.new(valor,tipo,valor,@scopes[:constantes].variables.length,$lineno)
         else
@@ -88,6 +88,9 @@ module_eval(<<'...end parser.y/module_eval...', 'parser.y', 146)
     end
 
     def llama_cte nombre
+        if @pArr.last != nil
+            # TODO Copiar valor de constante a arreglo
+        end
         @scopes[:constantes].variables[nombre]
     end
 
