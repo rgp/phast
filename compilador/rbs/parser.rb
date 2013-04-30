@@ -10,12 +10,13 @@ require 'racc/parser.rb'
 require_relative 'lib/Quad'
 require_relative 'lib/Scope'
 require_relative 'lib/Var'
+require_relative 'lib/Arr'
 require_relative 'lib/Instrucciones'
 
 module Phast
   class Parser < Racc::Parser
 
-module_eval(<<'...end parser.y/module_eval...', 'parser.y', 146)
+module_eval(<<'...end parser.y/module_eval...', 'parser.y', 147)
 
     def initialize(scanner)
         #Lexico
@@ -50,21 +51,29 @@ module_eval(<<'...end parser.y/module_eval...', 'parser.y', 146)
     end
 
     def openArreglo
-        tmp = Var.new(nil,nil,nil,@scope_actual.temporales.length,nil)
-        @pOperandos.push tmp
+        tmp = ArrDefinition.new(Var.new(nil,nil,nil,@scope_actual.temporales.length,nil))
+        @pOperandos.push tmp.id
         @pArr.push tmp
     end
 
     def closeArreglo
-        @pArr.pop
+        arr = @pArr.pop
+        p arr
+    end
+
+    def copy_value de
+        @pArr.last.initQuads.push Quad.new(Phast::ASIG, de, nil, @pArr.last.length)
+        @pArr.last.length += 1
     end
 
     def llame_var cual
         if @pArr.last != nil
             if !@scope_actual.variables.include? cual
-                # TODO Usar constante null
+                de_donde = guarda_cte("NULL",nil,0)
+                copy_value de_donde
             else
-                # TODO Copiar valor de variable
+                de_donde = @scope_actual.variables[cual]
+                copy_value de_donde
             end
         else
             if @scope_actual.variables.include? cual
@@ -88,10 +97,11 @@ module_eval(<<'...end parser.y/module_eval...', 'parser.y', 146)
     end
 
     def llama_cte nombre
+        cte = @scopes[:constantes].variables[nombre]
         if @pArr.last != nil
-            # TODO Copiar valor de constante a arreglo
+            copy_value cte
         end
-        @scopes[:constantes].variables[nombre]
+        return cte
     end
 
     def vaciar_pOperandos
