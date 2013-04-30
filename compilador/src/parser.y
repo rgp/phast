@@ -55,7 +55,7 @@ termino: factor {fun3 0} factor_aux
 factor_aux: op_fact {fun2} factor {fun3 0} factor_aux 
           | 
 factor: llamada 
-      | estatico { fun1(llama_cte(@curr_token[1])) }
+      | estatico { fun1(llama_cte(@prev_token[1])) }
       | { openArreglo } arreglo { closeArreglo }
       | '('{fun4} expresion ')'{fun5}
 llamada: ID tipo_llamada 
@@ -103,8 +103,9 @@ arr_elems: arr_elem arr_elems_aux
           |
 arr_elems_aux: ',' arr_elem arr_elems_aux
           |
-arr_elem: int OP_KEYVAL expresion
-        | expresion
+arr_elem: arr_elem_wrapper { @pOperandos.pop }
+arr_elem_wrapper: int OP_KEYVAL expresion
+                | expresion
 # Bloques
 bloque_if : WORD_IF  '(' expresion ')' {if_quad 1} '{' estatutos '}' else {if_quad 2} 
 else: WORD_ELSE {if_quad 3} aux_else
@@ -179,17 +180,21 @@ require_relative 'lib/Instrucciones'
 
     def openArreglo
         tmp = ArrDefinition.new(Var.new(nil,nil,nil,@scope_actual.temporales.length,nil))
-        @pOperandos.push tmp.id
+        @scope_actual.temporales.push tmp.id
         @pArr.push tmp
     end
 
     def closeArreglo
         arr = @pArr.pop
-        p arr
+        genera(Phast::ARRDEC,arr.length,nil,arr.id)
+        arr.initQuads.each do |q|
+            @scope_actual.quads.push q
+        end
+        @pOperandos.push arr.id
     end
 
     def copy_value de
-        @pArr.last.initQuads.push Quad.new(Phast::ASIG, de, nil, @pArr.last.length)
+        @pArr.last.initQuads.push Quad.new(Phast::ARRINI, de, nil, @pArr.last.length)
         @pArr.last.length += 1
     end
 

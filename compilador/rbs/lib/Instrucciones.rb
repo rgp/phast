@@ -22,6 +22,8 @@ module Phast
     ARG = 20
     REV = 21
     PRTLN = 22
+    ARRDEC = 23
+    ARRINI = 24
 
     def self.i_to_s(i)
         case
