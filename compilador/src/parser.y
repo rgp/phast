@@ -56,6 +56,7 @@ factor_aux: op_fact {fun2} factor {fun3 0} factor_aux
           | 
 factor: llamada 
       | estatico { fun1(llama_cte(@curr_token[1])) }
+      | { openArreglo } arreglo { closeArreglo }
       | '('{fun4} expresion ')'{fun5}
 llamada: ID tipo_llamada 
 
@@ -64,12 +65,12 @@ tipo_llamada: { fun1(llame_var(@prev_token[1])) } vars
 funcs: { fun_prepare @prev_token[1] } '(' argumentos ')' { fun_call }
         /*| OP_INCREMENT*/
         /*| OP_DECREMENT*/
-vars: OP_ASIGN {fun2} expresion {fun3 3} 
-    | '[' int ']'
-    |
+vars: '[' int ']' asign
+    | asign
+asign: OP_ASIGN {fun2} expresion {fun3 3}  
+     |
 estatico: numero
         | STRING { guarda_cte @curr_token[1], String(@curr_token[1]) , 4 }
-        | arreglo { p "encontre arreglo" }
         /*| OP_INCREMENT ID {}*/
         /*| OP_DECREMENT ID {}*/
         | WORD_TRUE { guarda_cte @curr_token[1], true , 1 }
@@ -102,7 +103,7 @@ arr_elems: arr_elem arr_elems_aux
           |
 arr_elems_aux: ',' arr_elem arr_elems_aux
           |
-arr_elem: int '=' '>' arr_val
+arr_elem: int OP_KEYVAL expresion
         | expresion
 # Bloques
 bloque_if : WORD_IF  '(' expresion ')' {if_quad 1} '{' estatutos '}' else {if_quad 2} 
@@ -160,6 +161,8 @@ require_relative 'lib/Instrucciones'
         @pSaltos = [] #Pila para saltos (if,else, etc.)
         @pFnCall = [] #Pila de llamadas pendientes (Quads)
         @funToCall = []
+        
+        @pArr = []
 
     end
 
@@ -173,7 +176,24 @@ require_relative 'lib/Instrucciones'
         @curr_token = @scanner.next_token
     end
 
+    def openArreglo
+        p "ARR"
+        tmp = Var.new(nil,nil,nil,@scope_actual.temporales.length,nil)
+        p "VAR : "+ tmp.to_s
+        p "POPER"
+        p @pOper
+        p "POPERANDS"
+        p @pOperandos.last.nombre
+        p "POPERANDSEND"
+        @pArr.push tmp
+    end
+
+    def closeArreglo
+        p "ENDARR"
+    end
+
     def llame_var cual
+        p cual
         if @scope_actual.variables.include? cual
             @scope_actual.variables[cual]
         else
@@ -186,6 +206,7 @@ require_relative 'lib/Instrucciones'
     end
 
     def guarda_cte(nombre,valor,tipo)
+        p nombre
         if !@scopes[:constantes].variables.include? nombre
             @scopes[:constantes].variables[nombre] = Var.new(valor,tipo,valor,@scopes[:constantes].variables.length,$lineno)
         else
