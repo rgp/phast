@@ -147,6 +147,8 @@ module Phast
                 token = [:OP_EQUAL, match]
             when match = @scanner.scan(/!=/)
                 token = [:OP_NOT_EQUAL, match]
+            when match = @scanner.scan(/=>/)
+                token = [:OP_KEYVAL, match]
             when match = @scanner.scan(/=/)
                 token = [:OP_ASIGN, match]
             when match = @scanner.scan(/\+\+/)
