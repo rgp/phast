@@ -161,12 +161,6 @@ require_relative 'lib/Instrucciones'
         @pFnCall = [] #Pila de llamadas pendientes (Quads)
         @funToCall = []
 
-
-
-        #Eliminar ?
-        @latest_var = nil #Ultima variable utilizada
-        @output = {}
-
     end
 
     def parse #Parsea mami parsea
@@ -181,9 +175,9 @@ require_relative 'lib/Instrucciones'
 
     def llame_var cual
         if @scope_actual.variables.include? cual
-            @latest_var = @scope_actual.variables[cual]
+            @scope_actual.variables[cual]
         else
-            @latest_var = guarda_var cual
+            guarda_var cual
         end
     end
 
