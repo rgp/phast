@@ -55,7 +55,7 @@ termino: factor {fun3 0} factor_aux
 factor_aux: op_fact {fun2} factor {fun3 0} factor_aux 
           | 
 factor: llamada 
-      | estatico { fun1(llama_cte(@prev_token[1])) }
+      | estatico {fun1(llama_cte(@curr_token[1])) }
       | { openArreglo } arreglo { closeArreglo }
       | '('{fun4} expresion ')'{fun5}
 llamada: ID tipo_llamada 
@@ -102,10 +102,10 @@ arreglo: '[' arr_elems ']'
 arr_elems: arr_elem arr_elems_aux
           |
 arr_elems_aux: ',' arr_elem arr_elems_aux
-          |
-arr_elem: arr_elem_wrapper { @pOperandos.pop }
-arr_elem_wrapper: int OP_KEYVAL expresion
-                | expresion
+          | 
+arr_elem: arr_elem_wrapper { copy_value } 
+arr_elem_wrapper: expresion 
+              /*| int OP_KEYVAL expresion */
 # Bloques
 bloque_if : WORD_IF  '(' expresion ')' {if_quad 1} '{' estatutos '}' else {if_quad 2} 
 else: WORD_ELSE {if_quad 3} aux_else
@@ -193,23 +193,18 @@ require_relative 'lib/Instrucciones'
         @pOperandos.push arr.id
     end
 
-    def copy_value de
+    def copy_value
+        de = @pOperandos.pop
         @pArr.last.initQuads.push Quad.new(Phast::ARRINI, de, nil, @pArr.last.length)
         @pArr.last.length += 1
     end
 
     def llame_var cual
-        if @pArr.last != nil
-            if !@scope_actual.variables.include? cual
-                de_donde = guarda_cte("NULL",nil,0)
-                copy_value de_donde
-            else
-                de_donde = @scope_actual.variables[cual]
-                copy_value de_donde
-            end
+        if @scope_actual.variables.include? cual
+            @scope_actual.variables[cual]
         else
-            if @scope_actual.variables.include? cual
-                @scope_actual.variables[cual]
+            if @pArr.last != nil
+                guarda_cte("NULL",nil,0)
             else
                 guarda_var cual
             end
@@ -230,9 +225,6 @@ require_relative 'lib/Instrucciones'
 
     def llama_cte nombre
         cte = @scopes[:constantes].variables[nombre]
-        if @pArr.last != nil
-            copy_value cte
-        end
         return cte
     end
 
