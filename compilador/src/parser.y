@@ -195,7 +195,7 @@ require_relative 'lib/Instrucciones'
 
     def copy_value
         de = @pOperandos.pop
-        @pArr.last.initQuads.push Quad.new(Phast::ARRINI, de, nil, @pArr.last.length)
+        @pArr.last.initQuads.push Quad.new(Phast::ARRINI, de, @pArr.last.id, @pArr.last.length)
         @pArr.last.length += 1
     end
 
