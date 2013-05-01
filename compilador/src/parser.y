@@ -65,8 +65,10 @@ tipo_llamada: { fun1(llame_var(@prev_token[1])) } vars
 funcs: { fun_prepare @prev_token[1] } '(' argumentos ')' { fun_call }
         /*| OP_INCREMENT*/
         /*| OP_DECREMENT*/
-vars: '[' int ']' asign
+vars: arr_acc asign
     | asign
+arr_acc: '[' expresion { access_array_index } ']' arr_acc
+       |
 asign: OP_ASIGN {fun2} expresion {fun3 3}  
      |
 estatico: numero
@@ -176,6 +178,24 @@ require_relative 'lib/Instrucciones'
     def next_token  #Correr tokens
         @prev_token = @curr_token
         @curr_token = @scanner.next_token
+    end
+
+    def load_arr
+        arr_id = @pOperandos.pop
+        tmp = Var.new(nil,nil,nil,@scope_actual.temporales.length,nil)
+        @scope_actual.temporales.push tmp
+        @pOperandos.push tmp
+        genera(Phast::ARRLD,arr_id,nil,tmp)
+    end
+
+    def access_array_index
+        arr_index = @pOperandos.pop
+        arr_tmp = @pOperandos.last
+        genera(Phast::ARRVAL,arr_index,arr_tmp,nil) # VAL RNG
+        tmp = Var.new(nil,nil,nil,@scope_actual.temporales.length,nil)
+        @scope_actual.temporales.push tmp
+        genera(Phast::ARRIND,arr_tmp,arr_index,tmp)
+        @pOperandos.push tmp
     end
 
     def openArreglo

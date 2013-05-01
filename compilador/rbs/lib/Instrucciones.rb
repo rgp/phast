@@ -24,6 +24,9 @@ module Phast
     PRTLN = 22
     ARRDEC = 23
     ARRINI = 24
+    ARRLD = 25
+    ARRVAL = 26
+    ARRIND = 27
 
     def self.i_to_s(i)
         case
