@@ -405,10 +405,25 @@ while($curr_reg < $EOF)
         echo "\n";
         $curr_reg++;
         break;
+    case 23: //AR DEFINITION
+        $saveTo = getRegistry((int)$instruccion[3]);
+
+        $memoria[$saveTo] = new SplFixedArray((int)$instruccion[1]);
+        $curr_reg++;
+        break;
+    case 24: //ASIGN TO AR
+        $saveTo = getRegistry((int)$instruccion[2]);
+        $position = (int)$instruccion[3];
+
+        $memoria[$saveTo][$position] = $memoria[getRegistry((int)$instruccion[1])];
+        $curr_reg++;
+        print_r($memoria[getRegistry((int)$instruccion[2])]);
+        break;
     default: //RANDOM ? WTF
         echo "died at: ".$curr_reg."\n";
         echo "Unknown instruction:\n".implode("\t",$instruccion);
         die();
     }
 }
+print_r($memoria);
 ?> 
