@@ -1,5 +1,4 @@
-<?php 
-
+<?PHP 
 $source = array();
 $start = 0;
 $EOF = 0;
@@ -149,7 +148,6 @@ loadMemory();
 $offset_stack[] = $next_free_mem; // stack de offsets para mapear memoria al modulo actual
 
 $curr_reg = $start;
-
 while($curr_reg < $EOF)
 {
     $instruccion = $source[$curr_reg];
@@ -218,8 +216,8 @@ while($curr_reg < $EOF)
         $op2 = $memoria[getRegistry((int)$instruccion[2])];
 
         $rtype = resultType($op1,$op2);
-        echo $rtype."\n";
-        echo $op1." * ".$op2." = ".($op1 * $op2)."\n";
+        // echo $rtype."\n";
+        // echo $op1." * ".$op2." = ".($op1 * $op2)."\n";
 
         switch ($rtype)
         {
@@ -379,7 +377,10 @@ while($curr_reg < $EOF)
         while(!empty($params))
         {
             $param = array_shift($params);
-            echo $param;
+            if(gettype($param) == "object")
+                echo "Array";
+            else
+                echo $param;
         }
         $curr_reg++;
         break;
@@ -400,7 +401,10 @@ while($curr_reg < $EOF)
         while(!empty($params))
         {
             $param = array_shift($params);
-            echo $param;
+            if(gettype($param) == "object")
+                echo "Array";
+            else
+                echo $param;
         }
         echo "\n";
         $curr_reg++;
@@ -408,7 +412,8 @@ while($curr_reg < $EOF)
     case 23: //AR DEFINITION
         $saveTo = getRegistry((int)$instruccion[3]);
 
-        $memoria[$saveTo] = new SplFixedArray((int)$instruccion[1]);
+        // $memoria[$saveTo] = new SplFixedArray((int)$instruccion[1]);
+        $memoria[$saveTo] = array();
         $curr_reg++;
         break;
     case 24: //ASIGN TO AR
@@ -417,13 +422,37 @@ while($curr_reg < $EOF)
 
         $memoria[$saveTo][$position] = $memoria[getRegistry((int)$instruccion[1])];
         $curr_reg++;
-        print_r($memoria[getRegistry((int)$instruccion[2])]);
+        break;
+    case 25: //ARRLD Array Load .... carga un arreglo de memoria a un tempora para usarse
+        $saveTo = getRegistry((int)$instruccion[3]);
+        $load = getRegistry((int)$instruccion[1]);
+        $memoria[$saveTo] = &$memoria[$load];
+        $curr_reg++;
+        break;
+    case 26: //ARRVLD  ... valida que el índice esté dentro de rango
+        $addr = getRegistry((int)$instruccion[2]);
+        $ind = getRegistry((int)$instruccion[1]);
+        // if($memoria[$ind] < $memoria[$addr]->getSize() && $memoria[$ind] >= 0){
+        if($memoria[$ind] < count($memoria[$addr]) && $memoria[$ind] >= 0){
+            //all good
+        }else{
+            echo "Fatal error: Out of Bounds";
+            die();
+        }
+        $curr_reg++;
+        break;
+    case 27: //ARRIND ... carga una cajita del arreglo en una temporal para usarse
+        $saveTo = getRegistry((int)$instruccion[3]);
+        $index = $memoria[getRegistry((int)$instruccion[2])];
+        $load = getRegistry((int)$instruccion[1]);
+        $memoria[$saveTo] = &$memoria[$load][$index];
+        $curr_reg++;
         break;
     default: //RANDOM ? WTF
         echo "died at: ".$curr_reg."\n";
         echo "Unknown instruction:\n".implode("\t",$instruccion);
         die();
     }
+
 }
-print_r($memoria);
-?> 
+?>

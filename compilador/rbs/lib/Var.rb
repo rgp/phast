@@ -21,7 +21,7 @@ class Var
             if @valor != nil or @tipoDato == 0
                 "#{-@direccion_virtual}"
             else
-                "a#{@direccion_virtual}"
+                "#{@direccion_virtual}"
             end
         end
     end
