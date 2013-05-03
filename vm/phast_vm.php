@@ -448,11 +448,18 @@ while($curr_reg < $EOF)
         $memoria[$saveTo] = &$memoria[$load][$index];
         $curr_reg++;
         break;
+    case 28: //VERB verbose
+        $str = $memoria[getRegistry((int)$instruccion[3])];
+        eval($str);
+        $curr_reg++;
+        break;
+
     default: //RANDOM ? WTF
         echo "died at: ".$curr_reg."\n";
         echo "Unknown instruction:\n".implode("\t",$instruccion);
         die();
     }
+
 
 }
 ?>
