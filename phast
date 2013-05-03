@@ -1,34 +1,46 @@
 #!/bin/bash
+cFlag=0
+oFlag=0
+dFlag=0
 
-# if [ -z $1 ]; then
-#     echo "Se debe especificar un archivo para compilar o asi..."
-# else
-#     ruby compilador/ruby/driver.rb $1
-# fi
-#Manejo de opciones
-    args=`getopt c: $*`
-           # you should not use `getopt abo: "$@"` since that would parse
-           # the arguments differently from what the set command below does.
-           if [ $? != 0 ]
-           then
-                   echo 'Se debe especificar un archivo para ejecutar...'
-                   exit 2
-           fi
-           set -- $args
-           # You cannot use the set command with a backquoted getopt directly,
-           # since the exit code from getopt would be shadowed by those of set,
-           # which is zero by definition.
-           for i
-           do
-                   case "$i"
-                   in
-                           -c)
-                                   compilador/compiler $2
-                                   shift;
-                                   break;;
-                           --)
-                                   shift
-                                   php -f vm/phast_vm.php $@
-                                   shift; break;;
-                   esac
-           done
+while getopts "cdo:" opt; do
+   case $opt in
+       c)
+           cFlag=1
+           ;;
+       d)
+           dFlag=1
+           ;;
+       o)
+           oFlag=1
+           oFile=$OPTARG
+           ;;
+       --)
+           break;;
+       \?)
+           echo "Opcion inválida: -$OPTARG" >&2
+           exit 1
+           ;;
+       :)
+           echo "Option -$OPTARG requires an argument." >&2
+           exit 1
+           ;;
+   esac
+done
+
+shift $(( OPTIND - 1 ))
+
+if [ $cFlag -eq 1 ]
+then
+    if [ $oFlag -eq 1 ]
+    then
+        outFile="-o $oFile"
+    fi
+    if [ $dFlag -eq 1 ]
+    then
+        debug="-d"
+    fi
+    compilador/compiler $debug $outFile -- $@
+else
+    php -f vm/phast_vm.php $@
+fi
