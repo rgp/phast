@@ -67,7 +67,7 @@ funcs: { fun_prepare @prev_token[1] } '(' argumentos ')' { fun_call }
         /*| OP_DECREMENT*/
 vars: arr_acc asign
     | asign
-arr_acc: '[' expresion { access_array_index } ']' arr_acc
+arr_acc:  { load_arr } '[' expresion { access_array_index } ']' arr_acc
        |
 asign: OP_ASIGN {fun2} expresion {fun3 3}  
      |
