@@ -27,6 +27,7 @@ module Phast
     ARRLD = 25
     ARRVAL = 26
     ARRIND = 27
+    VERB = 28
 
     def self.i_to_s(i)
         case

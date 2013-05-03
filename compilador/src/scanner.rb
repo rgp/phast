@@ -46,25 +46,30 @@ module Phast
 
             when @scanner.scan(/verbose[ ]*\{/) #Begin Verbose
                 token = [:BLOCK_VERBOSE, "verbose"]
+                str = ""
+                cyre = ""
                 vbose_level = [1]
                 until vbose_level.empty?
+                    str += cyre
                     if @scanner.empty?
                         STDERR.puts "Incomplete Verbose Block at #{@scanner.rest} on line #{$lineno}"
                         exit 1
                     end
 
                     case
-                    when @scanner.scan(/\{/)
+                    when cyre = @scanner.scan(/\{/)
                         vbose_level.push 1
-                    when @scanner.scan(/\}/)
+                    when cyre = @scanner.scan(/\}/)
                         vbose_level.pop
-                    when @scanner.scan(/\n/)
+                    when cyre = @scanner.scan(/\n/)
                         $lineno += 1
-                    when @scanner.scan(/\s+/)
-                    when @scanner.scan(/./)
+                    when cyre = @scanner.scan(/\s+/)
+                    when cyre = @scanner.scan(/./)
+
                     else
                     end
                 end
+                token = [:BLOCK_VERBOSE, str]
 
                 #PH TAGS
             when @scanner.scan(/<\?/)
