@@ -116,7 +116,7 @@ aux_else: bloque_if
        | '{' estatutos '}'
 bloque_while : WORD_WHILE {while_quad 1} '(' expresion ')' {while_quad 2} '{' estatutos '}' {while_quad 3}
 bloque_do : WORD_DO {do_while_quad 1} '{' estatutos '}' WORD_WHILE '(' expresion ')' {do_while_quad 2} ';' 
-bloque_verbose : VERBOSE_BLOCK
+bloque_verbose :  {p @curr_token} BLOCK_VERBOSE  { verbose @curr_token[1] }
 bloque_for : WORD_FOR '('comparando ';' expresion ';' expresion ')' '{' estatutos '}'
 bloque_fun : WORD_FUN ID { aumenta_scope @curr_token[1] } '(' params ')' '{' estatutos { end_fun } '}'
 
@@ -167,6 +167,9 @@ require_relative 'lib/Instrucciones'
         @funToCall = []
         
         @pArr = []
+
+        @verboseCount = 0;
+
 
     end
 
@@ -440,6 +443,7 @@ require_relative 'lib/Instrucciones'
         # scope_global.variables.each do |k,v|
         #     v.direccion_virtual += @mem_offset
         # end
+
         @mem_offset += scope_global.variables.length
         scope_global.temporales.each do |v|
             v.direccion_virtual += @mem_offset
@@ -455,6 +459,7 @@ require_relative 'lib/Instrucciones'
         end
 
         puts @salida
+        # print @salida
 
     end
 
@@ -470,4 +475,10 @@ require_relative 'lib/Instrucciones'
 
     def on_error(t,val,vstack)
         raise ParseError, sprintf("\nError de sintaxis. Se encontro %s (%s) inesperado en la linea #{$lineno}", val.inspect, token_to_str(t) || '?')
+    end
+
+    def verbose (v)
+        genera(Phast::VERB, nil, nil, (-1)*@scopes[:constantes].variables.count)
+        guarda_cte "verbose"+String(@verboseCount), String(v), 4
+        @verboseCount += 1
     end
