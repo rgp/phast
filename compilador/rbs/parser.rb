@@ -18,7 +18,7 @@ module Phast
 
 module_eval(<<'...end parser.y/module_eval...', 'parser.y', 150)
 
-    def initialize(scanner)
+    def initialize(scanner,output = "bin.pho")
         #Lexico
         @scanner = scanner
         @curr_token = nil #Token en análisis
@@ -39,6 +39,7 @@ module_eval(<<'...end parser.y/module_eval...', 'parser.y', 150)
         @pArr = []
 
         @verboseCount = 0;
+        @outfile = output
 
 
     end
@@ -328,9 +329,10 @@ module_eval(<<'...end parser.y/module_eval...', 'parser.y', 150)
             q.registro = @scopes[q.registro].registro
         end
 
-        puts @salida
+        # puts @salida
         # print @salida
-
+        write_file @salida
+        puts "Compiled #{$lineno} lines."
     end
 
     def print_quads(quads)
@@ -341,6 +343,12 @@ module_eval(<<'...end parser.y/module_eval...', 'parser.y', 150)
             @salida.push quad
             @reg_counter += 1
         end
+    end
+
+    def write_file(lines)
+        fout = File.open(@outfile, 'w')
+        fout.puts lines
+        fout.close
     end
 
     def on_error(t,val,vstack)

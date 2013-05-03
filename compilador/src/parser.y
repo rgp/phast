@@ -148,7 +148,7 @@ require_relative 'lib/Instrucciones'
 
 ---- inner ----
 
-    def initialize(scanner)
+    def initialize(scanner,output = "bin.pho")
         #Lexico
         @scanner = scanner
         @curr_token = nil #Token en análisis
@@ -169,6 +169,7 @@ require_relative 'lib/Instrucciones'
         @pArr = []
 
         @verboseCount = 0;
+        @outfile = output
 
 
     end
@@ -458,9 +459,10 @@ require_relative 'lib/Instrucciones'
             q.registro = @scopes[q.registro].registro
         end
 
-        puts @salida
+        # puts @salida
         # print @salida
-
+        write_file @salida
+        puts "Compiled #{$lineno} lines."
     end
 
     def print_quads(quads)
@@ -471,6 +473,12 @@ require_relative 'lib/Instrucciones'
             @salida.push quad
             @reg_counter += 1
         end
+    end
+
+    def write_file(lines)
+        fout = File.open(@outfile, 'w')
+        fout.puts lines
+        fout.close
     end
 
     def on_error(t,val,vstack)
