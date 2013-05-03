@@ -13,6 +13,18 @@ else
     $debug = false
 end
 
+out = "bin.pho"
+if(ARGV.include? "-o")
+    o = ARGV.index("-o") + 1
+    out = ARGV[o]
+    ARGV.delete "-o"
+    ARGV.delete out
+end
+
+ARGV.shift
+
+# Por lo pronto solo funciona con el primer archivo de entrada
+#
 #Leemos el archivo de entrada
 file = File.new(ARGV.first, "r")
 str = ""
@@ -21,5 +33,5 @@ while (line = file.gets)
 end
 file.close
 
-parser = Phast::Parser.new(Phast::Scanner.new(str))
+parser = Phast::Parser.new(Phast::Scanner.new(str),out)
 parser.parse
