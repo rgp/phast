@@ -362,9 +362,9 @@ while($curr_reg < $EOF)
         $curr_reg++;
         break;
     case 17: //RET
-        if(!empty($instruccion[3]))
-            $return_var = $memoria[getRegistry((int)$instruccion[3])];
-
+        if(!is_null($instruccion[3]))
+            $dir = getRegistry((int)$instruccion[3]);
+            $return_var = $memoria[$dir];
         // sacar del offset_stack la posicion donde se puede empezar a utilizar la memoria
         $clean = $next_free_mem;
         $next_free_mem = array_pop($offset_stack);
