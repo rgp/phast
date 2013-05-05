@@ -202,8 +202,16 @@ require_relative 'lib/Instrucciones'
     end
 
     def post_affect (op)
-        var = @prev_token[1]
-        p var
+        uno = guarda_cte("1",1,2) # Guardamos la constante 1
+        val_actual = Var.new(nil,nil,nil,@scope_actual.temporales.length,nil)
+        @scope_actual.temporales.push val_actual
+        mas_uno = Var.new(nil,nil,nil,@scope_actual.temporales.length,nil)
+        @scope_actual.temporales.push mas_uno
+        var = @pOperandos.pop
+        @pOperandos.push val_actual
+        genera(Phast::ASIG, var, nil, val_actual)
+        genera(Phast.op_to_inst(op), var, uno, mas_uno) # incrementa/decrementa
+        genera(Phast::ASIG, mas_uno, nil, var)
     end
 
     def load_arr
