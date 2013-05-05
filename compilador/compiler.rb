@@ -21,7 +21,7 @@ if(ARGV.include? "-o")
     ARGV.delete out
 end
 
-ARGV.shift
+ARGV.delete "--"
 
 # Por lo pronto solo funciona con el primer archivo de entrada
 #

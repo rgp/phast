@@ -59,14 +59,15 @@ factor: llamada
       | { openArreglo } arreglo { closeArreglo }
       | '('{fun4} expresion ')'{fun5}
 llamada: ID tipo_llamada 
-
+       | OP_INCREMENT ID { pre_affect "+" }
+       | OP_DECREMENT ID { pre_affect "-" }
 tipo_llamada: { fun1(llame_var(@prev_token[1])) } vars 
             | funcs
 funcs: { fun_prepare @prev_token[1] } '(' argumentos ')' { fun_call }
-        /*| OP_INCREMENT*/
-        /*| OP_DECREMENT*/
 vars: arr_acc asign
     | asign
+    | { post_affect "+" } OP_INCREMENT
+    | { post_affect "-" } OP_DECREMENT
 arr_acc:  { load_arr } '[' expresion { access_array_index } ']' arr_acc
        |
 asign: OP_ASIGN {fun2} expresion {fun3 3}  
@@ -184,6 +185,27 @@ require_relative 'lib/Instrucciones'
         @curr_token = @scanner.next_token
     end
 
+    def pre_affect (op)
+        uno = guarda_cte("1",1,2) # Guardamos la constante 1
+        var = llame_var @curr_token[1]
+
+        # Partiendo de que ++a === (a=a+1) =>
+        fun4 # Metemos fondo falso
+        @pOperandos.push var # Metemos "a"
+        @pOper.push Phast.op_to_inst("=")  #fun2 metemos "="
+        fun1 var  # Metemos "a"
+        @pOper.push Phast.op_to_inst(op)  #fun2 metemos suma o resta
+        @pOperandos.push uno  # metemos el 1
+        fun3_aux # generamos cuádruplo de suma
+        fun3 3 # Generamos cuádruplo de asignación de resultado en var
+        fun5 # Quitamos fondo falso
+    end
+
+    def post_affect (op)
+        var = @prev_token[1]
+        p var
+    end
+
     def load_arr
         arr_id = @pOperandos.pop
         tmp = Var.new(nil,nil,nil,@scope_actual.temporales.length,nil)
@@ -294,6 +316,15 @@ require_relative 'lib/Instrucciones'
             genera(Phast::PRT,nil,nil,nil)
         elsif(cual == "println")
             genera(Phast::PRTLN,nil,nil,nil)
+        elsif(cual == "link")
+            genera(Phast::LNK,nil,nil,nil)
+        elsif(cual == "link_hard")
+            genera(Phast::LNKH,nil,nil,nil)
+        elsif(cual == "exists")
+            tmp = Var.new(nil,nil,nil,@scope_actual.temporales.length,nil)
+            @scope_actual.temporales.push tmp
+            @pOperandos.push tmp
+            genera(Phast::EXST,nil,nil,tmp)
         else
             @pFnCall.push genera(Phast::CALL,nil,nil,cual)
             tmp = Var.new(nil,nil,nil,@scope_actual.temporales.length,nil)

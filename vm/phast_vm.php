@@ -453,6 +453,37 @@ while($curr_reg < $EOF)
         eval($str);
         $curr_reg++;
         break;
+    case 29: //EXST exists
+        if(count($params) < 2){
+            echo "Function exists requires 2 params";
+            die();
+        }
+        $p1 = array_shift($params);
+        $p2 = array_shift($params);
+        $memoria[getRegistry((int)$instruccion[3])] = empty($p1) ? $p2 : $p1;
+        $curr_reg++;
+        break;
+    case 30: //LNK link file
+        if(count($params) < 1){
+            echo "Function exists requires 1 param";
+            die();
+        }
+        foreach($params as $p){
+            include($p);
+        }
+        $params = array();
+        break;
+    case 31: //LNKH link file
+        if(count($params) < 1){
+            echo "Function exists requires 1 param";
+            die();
+        }
+        foreach($params as $p){
+            require($p);
+        }
+        $params = array();
+        break;
+
 
     default: //RANDOM ? WTF
         echo "died at: ".$curr_reg."\n";
