@@ -117,7 +117,7 @@ aux_else: bloque_if
        | '{' estatutos '}'
 bloque_while : WORD_WHILE {while_quad 1} '(' expresion ')' {while_quad 2} '{' estatutos '}' {while_quad 3}
 bloque_do : WORD_DO {do_while_quad 1} '{' estatutos '}' WORD_WHILE '(' expresion ')' {do_while_quad 2} ';' 
-bloque_verbose :  {p @curr_token} BLOCK_VERBOSE  { verbose @curr_token[1] }
+bloque_verbose :  BLOCK_VERBOSE  { verbose @curr_token[1] }
 bloque_for : WORD_FOR '('comparando ';' expresion ';' expresion ')' '{' estatutos '}'
 bloque_fun : WORD_FUN ID { aumenta_scope @curr_token[1] } '(' params ')' '{' estatutos { end_fun } '}'
 

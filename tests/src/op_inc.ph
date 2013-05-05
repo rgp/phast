@@ -1,6 +1,6 @@
 <?
 a = 1;
-b = a + ++a;
+b = a + a++;
 println(a);
 println(b);
 // --a;
