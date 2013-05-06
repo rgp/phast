@@ -124,7 +124,7 @@ bloque_fun : WORD_FUN ID { aumenta_scope @curr_token[1] } '(' params ')' '{' est
 bloque_class: WORD_CLASS ID { aumenta_scope @curr_token[1] } class_extras '{' class_body '}'
 class_body: class_body_aux  class_body
            |
-class_body_aux: /* NOMBRE COMPLETO  CLASE*/ bloque_fun { disminuye_scope }
+class_body_aux: /* NOMBRE COMPLETO CLASE*/ bloque_fun { disminuye_scope }
            | ID { llame_var @curr_token[1] } class_def_var_aux ';'
 class_def_var_aux: OP_ASIGN 
                   |
