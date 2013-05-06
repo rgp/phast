@@ -19,18 +19,19 @@ $offset_stack = array($next_free_mem); // stack de offsets para mapear memoria a
 $params = array();
 $call_stack = array();
 
+$dir = exec("pwd")."/";
 
+if(count($argv) <= 1)
+    die("Please specify a program to run\n");
+
+$file = $dir.$argv[1];
+
+if(!is_file($file))
+    die("Phast:\n Could not read file => $file\n");
 
 function loadFile()
 {
-    global $argv, $EOF, $source;
-
-    $dir = exec("pwd")."/";
-    if(count($argv) <= 1)
-        die("Please specify a program to run\n");
-    $file = $dir.$argv[1];
-    if(!is_file($file))
-        die("Phast:\n Could not read file => $file\n");
+    global $argv, $source, $dir, $file;
 
     $file_handle = fopen($file, "r+");
     if(!$file_handle)
@@ -40,32 +41,47 @@ function loadFile()
     }
     else
     {
+        $str = "";
         while ($line = fgets($file_handle)) 
         {
-            $source[] = split("\t",str_replace("\n","",$line));
-            $EOF++;
+            $line = substr($line,0,-1);
+            $ech = substr($line, -1);
+
+            $str .= $line;
+            if(ord($ech) == 0){
+                $source[] = substr($str,0,-1);
+                $str = "";
+            }
+
         }
         fclose($file_handle);
     }
 }
 
+function readQuads()
+{
+    global $source, $EOF;
+    foreach($source as &$s){
+        $s = explode("\t",$s,4);
+        $EOF++;
+    }
+}
+
 function readHeader()
 {
-    global $start, $source, $constants, $temporals, $globals, $EOF;
+    global $start, $source, $constants, $temporals, $globals;
 
-    $start = $source[0][0];
+    $start = (int)$source[0];
     array_shift($source); //START
 
-    $constants = $source[0][0];
+    $constants = (int)$source[0];
     array_shift($source); //CTES
 
-    $globals = $source[0][0];
+    $globals = (int)$source[0];
     array_shift($source); //GLOBS
 
-    $temporals = $source[0][0];
+    $temporals = (int)$source[0];
     array_shift($source); //TMPS GLOB
-
-    $EOF -= 4 + $constants;
 }
 
 function loadMemory()
@@ -74,6 +90,7 @@ function loadMemory()
 
     for ($i = 0; $i < $constants; $i++)
     {
+        $source[0] = explode("\t",$source[0],3);
         $type = $source[0][1];
         switch($type)
         {
@@ -144,6 +161,7 @@ function resultType($o1,$o2)
 loadFile();
 readHeader();
 loadMemory();
+readQuads();
 
 $offset_stack[] = $next_free_mem; // stack de offsets para mapear memoria al modulo actual
 
@@ -486,7 +504,7 @@ while($curr_reg < $EOF)
 
 
     default: //RANDOM ? WTF
-        echo "died at: ".$curr_reg."\n";
+        echo "\ndied at: ".$curr_reg."\n";
         echo "Unknown instruction:\n".implode("\t",$instruccion);
         die();
     }

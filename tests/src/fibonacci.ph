@@ -1,4 +1,7 @@
 <?
+verbose{
+$start = microtime(true);
+}
 fun fib(n){
     if (n < 2) {
         return n;
@@ -8,5 +11,9 @@ fun fib(n){
     }
 }
 
-println(fib(6));
+println(fib(30));
+verbose{
+echo(microtime(true) - $start);
+echo("\n");
+}
 ?>

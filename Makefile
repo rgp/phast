@@ -1,7 +1,7 @@
 run: prepare
 	@echo "Execute VM....."
 	@./phast tests/bin/fibonacci.o
-prepare: clean
+prepare: 
 	@echo "Compiling ....."
 	@./phast -c tests/src/fibonacci.ph -o tests/bin/fibonacci.o	
 clean:

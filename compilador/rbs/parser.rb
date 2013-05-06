@@ -157,7 +157,7 @@ module_eval(<<'...end parser.y/module_eval...', 'parser.y', 151)
         end
     end
 
-    def aumenta_scope nombre
+    def aumenta_scope nombre, is_class = false
         nuevo_scope = Scope.new(@scope_actual)
         @scope_actual = nuevo_scope
         @scopes[nombre] = @scope_actual
@@ -385,7 +385,10 @@ module_eval(<<'...end parser.y/module_eval...', 'parser.y', 151)
 
     def write_file(lines)
         fout = File.open(@outfile, 'w')
-        fout.puts lines
+        # fout.puts lines
+        lines.each do |l|
+            fout.puts l.to_s + "\0"
+        end
         fout.close
     end
 
@@ -394,9 +397,9 @@ module_eval(<<'...end parser.y/module_eval...', 'parser.y', 151)
     end
 
     def verbose (v)
-        genera(Phast::VERB, nil, nil, (-1)*@scopes[:constantes].variables.count)
-        guarda_cte "verbose"+String(@verboseCount), String(v), 4
+        v_exec = guarda_cte "verbose"+String(@verboseCount), String(v), 4
         @verboseCount += 1
+        genera(Phast::VERB, nil, nil, v_exec)
     end
 ...end parser.y/module_eval...
 ##### State transition tables begin ###
