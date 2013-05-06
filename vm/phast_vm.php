@@ -324,16 +324,6 @@ while($curr_reg < $EOF)
         $memoria[$saveTo] =  $resultado;
         $curr_reg++;
         break;
-    case 32: // XOR
-        $saveTo = getRegistry((int)$instruccion[3]);
-        $op1 = $memoria[getRegistry((int)$instruccion[1])];
-        $op2 = $memoria[getRegistry((int)$instruccion[2])];
-
-        $resultado = ((int)($op1 Xor $op2)) ? true : false;
-
-        $memoria[$saveTo] =  $resultado;
-        $curr_reg++;
-        break;
     case 11: // ASIGN
         $saveTo = getRegistry((int)$instruccion[3]);
         $memoria[$saveTo] = $memoria[getRegistry((int)$instruccion[1])];
@@ -511,8 +501,25 @@ while($curr_reg < $EOF)
         }
         $params = array();
         break;
+    case 32: // XOR
+        $saveTo = getRegistry((int)$instruccion[3]);
+        $op1 = $memoria[getRegistry((int)$instruccion[1])];
+        $op2 = $memoria[getRegistry((int)$instruccion[2])];
 
+        $resultado = ((int)($op1 Xor $op2)) ? true : false;
 
+        $memoria[$saveTo] =  $resultado;
+        $curr_reg++;
+        break;
+    case 34: //NOT
+        $saveTo = getRegistry((int)$instruccion[3]);
+        $op = $memoria[getRegistry((int)$instruccion[1])];
+
+        $resultado = ((int)(!$op)) ? true : false;
+
+        $memoria[$saveTo] =  $resultado;
+        $curr_reg++;
+        break;
     default: //RANDOM ? WTF
         echo "\ndied at: ".$curr_reg."\n";
         echo "Unknown instruction:\n".implode("\t",$instruccion);

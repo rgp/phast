@@ -3,3 +3,4 @@ phast-compiler
 *.swo
 bison/*
 flex/*
+rbs/*

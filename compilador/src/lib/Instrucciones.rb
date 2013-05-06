@@ -33,6 +33,7 @@ module Phast
     LNKH = 31
     XOR = 32
     OBJ = 33
+    NOT = 34
 
     def self.i_to_s(i)
         case
@@ -63,6 +64,8 @@ module Phast
             OR
         when op == "xor"
             XOR
+        when op == "not" || op == "!"
+            NOT
         when op == ">"
             GT
         when op == "<"
