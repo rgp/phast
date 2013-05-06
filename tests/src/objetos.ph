@@ -10,8 +10,9 @@ Class Animal {
 
 }
 
-pato;
-ganso;
+pato = "oo" + 2;
+println(pato);
+ganso = "oo" ;
 goldy = new Animal();
 
 goldy.dueno = "Cyn";
@@ -21,6 +22,5 @@ goldy.color = "dorado/gris";
 goldy.apodos = ["gordi", "gorda", "gordinflona", 007];
 
 peluche = goldy;
-
 
 ?>

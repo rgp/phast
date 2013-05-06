@@ -6,7 +6,7 @@ class Objeto
         @quads = []
         @attributos = {}
         @papa = papa
-        @nombre = ""
+        @nombre = nombre
     end
 
 end

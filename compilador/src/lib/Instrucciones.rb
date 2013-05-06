@@ -34,6 +34,8 @@ module Phast
     XOR = 32
     OBJ = 33
     NOT = 34
+    ATTR = 35
+    ATTR_ACC = 36
 
     def self.i_to_s(i)
         case
