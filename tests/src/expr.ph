@@ -21,6 +21,9 @@ else
     println("0 and 1 es false ...");
 }
 */
+a = 12.4;
+
+println(a);
 if (true xor true)
 {
 println("jiji");

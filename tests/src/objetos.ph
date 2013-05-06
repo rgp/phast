@@ -2,7 +2,7 @@
 
 Class Animal {
 
-    dueño;
+    dueno;
     edad;
     raza;
     color;
@@ -10,9 +10,11 @@ Class Animal {
 
 }
 
+pato;
+ganso;
 goldy = new Animal();
 
-goldy.dueño = "Cyn";
+goldy.dueno = "Cyn";
 goldy.edad = 10;
 goldy.raza = "Yorkshire Terrier";
 goldy.color = "dorado/gris";

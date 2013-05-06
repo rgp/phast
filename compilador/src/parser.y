@@ -30,7 +30,9 @@ class Phast::Parser
 
 rule
 
-phast :  PH_OT estatutos PH_CT {}
+phast :  PH_OT class_decs estatutos PH_CT {}
+class_decs: bloque_class class_decs
+          |
 estatutos: estatuto estatutos
          |
 estatuto : expresion ';' { vaciar_pOperandos } /* Vaciar pila y temporales */ 
@@ -39,11 +41,8 @@ estatuto : expresion ';' { vaciar_pOperandos } /* Vaciar pila y temporales */
          | bloque_verbose
          | bloque_if
          | bloque_for
-         | bloques_declarativos { disminuye_scope }
+         | bloque_fun { disminuye_scope }
          | WORD_RETURN expresion {return_quad } ';' { vaciar_pOperandos }
-bloques_declarativos: bloque_fun
-                    | bloque_class
-
 # Expresiones
 expresion: comparando {fun3 2} comparando_aux
 comparando_aux: op_comp {fun2} comparando {fun3 2} comparando_aux
@@ -61,21 +60,20 @@ factor: llamada
 llamada: ID tipo_llamada 
        | OP_INCREMENT ID { pre_affect "+" }
        | OP_DECREMENT ID { pre_affect "-" }
+       | WORD_NEW CLASS_ID { crea_instancia } '(' ')'
 tipo_llamada: { fun1(llame_var(@prev_token[1])) } vars 
             | funcs
 funcs: { fun_prepare @prev_token[1] } '(' argumentos ')' { fun_call }
 vars: arr_acc asign
-    | asign
     | { post_affect "+" } OP_INCREMENT
     | { post_affect "-" } OP_DECREMENT
+    | { @inst = @prev_token[1] } '.' ID { llame_attr @curr_token[1] } asign
 arr_acc:  { load_arr } '[' expresion { access_array_index } ']' arr_acc
        |
 asign: OP_ASIGN {fun2} expresion {fun3 3}  
      |
 estatico: numero
         | STRING { guarda_cte @curr_token[1], String(@curr_token[1]) , 4 }
-        /*| OP_INCREMENT ID {}*/
-        /*| OP_DECREMENT ID {}*/
         | WORD_TRUE { guarda_cte @curr_token[1], true , 1 }
         | WORD_FALSE { guarda_cte @curr_token[1], false , 1 }
         | WORD_NULL { guarda_cte @curr_token[1], nil , 0 }
@@ -122,13 +120,15 @@ bloque_verbose :  BLOCK_VERBOSE  { verbose @curr_token[1] }
 bloque_for : WORD_FOR '('comparando ';' expresion ';' expresion ')' '{' estatutos '}'
 bloque_fun : WORD_FUN ID { aumenta_scope @curr_token[1] } '(' params ')' '{' estatutos { end_fun } '}'
 
-bloque_class: WORD_CLASS ID { aumenta_scope @curr_token[1] } class_extras '{' class_body '}'
+bloque_class: WORD_CLASS CLASS_ID { define_objeto @curr_token[1] } class_extras '{' class_body '}' { termina_objeto }
 class_body: class_body_aux  class_body
            |
-class_body_aux: /* NOMBRE COMPLETO CLASE*/ bloque_fun { disminuye_scope }
-           | ID { llame_var @curr_token[1] } class_def_var_aux ';'
-class_def_var_aux: OP_ASIGN 
+class_body_aux: /* NOMBRE COMPLETO CLASE*/ bloque_fun 
+           | ID { define_attr @curr_token[1] } class_def_var_aux ';'
+class_def_var_aux: OP_ASIGN pos_vars
                   |
+pos_vars: estatico
+        | arreglo
 class_extras: WORD_EXTENDS ID
              |
 
@@ -147,6 +147,7 @@ require_relative 'lib/Scope'
 require_relative 'lib/Var'
 require_relative 'lib/Arr'
 require_relative 'lib/Instrucciones'
+require_relative 'lib/Objeto'
 
 ---- inner ----
 
@@ -170,6 +171,9 @@ require_relative 'lib/Instrucciones'
         
         @pArr = []
 
+        @object_def = {}
+        @inst_defs = []
+
         @verboseCount = 0;
         @outfile = output
 
@@ -184,6 +188,48 @@ require_relative 'lib/Instrucciones'
     def next_token  #Correr tokens
         @prev_token = @curr_token
         @curr_token = @scanner.next_token
+    end
+
+    def crea_instancia
+        clase = @curr_token[1]
+        tmp = Var.new(nil,[:object,clase],Hash.new,@scope_actual.temporales.length,nil)
+        @scope_actual.temporales.push tmp
+        @inst_defs.push genera(Phast::OBJ, 0, nil, tmp)
+    end
+
+    def llame_attr cual
+        inst = @scope_actual.variables[@inst]
+        if !inst.tipoDato.kind_of?(Array)
+            p "Error, #{@inst} no es un objeto"
+            exit
+        end
+
+        class_def = @object_def[inst.valor]
+
+        if class_def.attributos.include? cual
+            class_def.attributos[cual]
+        else
+            p "Error objeto: #{@inst} no contiene atributo #{cual}"
+            exit
+        end
+    end
+
+    def define_objeto quien
+        if( @object_def.include? quien)
+            p "Error, clase #{quien} previamente definida"
+            exit
+        end
+        @obejota = Objeto.new(quien,@scope_actual)
+        @scope_actual = Scope.new(@scope_actual)
+    end
+
+    def define_attr nombre
+        @obejota.attributos[nombre] = Var.new(nombre,nil,nil,@obejota.attributos.length,$lineno)
+    end
+
+    def termina_objeto
+        @object_def[@obejota.nombre] = @obejota
+        @scope_actual = @scope_actual.papa
     end
 
     def pre_affect (op)
@@ -390,6 +436,9 @@ require_relative 'lib/Instrucciones'
                     @pOper.pop
                     oper = @pOperandos.pop
                     oper1 = @pOperandos.last
+                    if oper.tipoDato.kind_of?(Array)
+                        oper1.tipoDato = oper.tipoDato
+                    end
                     genera(op, oper, nil, oper1)
                 end
             end

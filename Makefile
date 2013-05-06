@@ -1,8 +1,9 @@
+f="expr"
 run: prepare
 	@echo "Execute VM....."
-	@./phast tests/bin/expr.pho
+	@./phast tests/bin/$(f).pho
 prepare: 
 	@echo "Compiling ....."
-	@./phast -c tests/src/expr.ph -o tests/bin/expr.pho	
+	@./phast -c tests/src/$(f).ph -o tests/bin/$(f).pho	
 clean:
 	@rm -Rf tests/bin/*

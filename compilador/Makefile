@@ -1,5 +1,5 @@
 run: compile
-	ruby compiler.rb $(f)
+	ruby compiler.rb ../tests/src/$(f).ph
 debug: compile
 	ruby compiler.rb -d $(f) 
 compile: clean rbs/parser.rb rbs/scanner.rb libs

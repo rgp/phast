@@ -90,7 +90,7 @@ module Phast
                 token = [:WORD_WHILE, match]
             when match = @scanner.scan(/for/)
                 token = [:WORD_FOR, match]
-            when match = @scanner.scan(/class/)
+            when match = @scanner.scan(/class/i)
                 token = [:WORD_CLASS, match]
             when match = @scanner.scan(/extends/)
                 token = [:WORD_EXTENDS, match]
@@ -122,21 +122,21 @@ module Phast
                 token = [:WORD_PRIVATE, match]
             when match = @scanner.scan(/protected/)
                 token = [:WORD_PROTECTED, match]
-            when match = @scanner.scan(/true|TRUE/)
+            when match = @scanner.scan(/true/i)
                 token = [:WORD_TRUE, match]
-            when match = @scanner.scan(/false|FALSE/)
+            when match = @scanner.scan(/false/i)
                 token = [:WORD_FALSE, match]
-            when match = @scanner.scan(/null|NULL/)
+            when match = @scanner.scan(/null/i)
                 token = [:WORD_NULL, match]
             when match = @scanner.scan(/new/)
                 token = [:WORD_NEW, match]
-            when match = @scanner.scan(/and/)
+            when match = @scanner.scan(/and/i)
                 token = [:WORD_AND, match]
-            when match = @scanner.scan(/or/)
+            when match = @scanner.scan(/or/i)
                 token = [:WORD_OR, match]
-            when match = @scanner.scan(/not/)
+            when match = @scanner.scan(/not/i)
                 token = [:WORD_NOT, match]
-            when match = @scanner.scan(/xor/)
+            when match = @scanner.scan(/xor/i)
                 token = [:WORD_XOR, match]
             when match = @scanner.scan(/try/)
                 token = [:WORD_TRY, match]
@@ -178,6 +178,9 @@ module Phast
                 token = [:OP_GREATER, match]
 
                 #REGEX
+            when match = @scanner.scan(/[A-Z][a-zA-Z_]*/)
+                token = [:CLASS_ID, match]
+
             when match = @scanner.scan(/[a-zA-Z_][a-zA-Z0-9_]*/)
                 token = [:ID, match]
             when match = @scanner.scan(/\d+\.\d+(e(\+|-)?\d+)?/)

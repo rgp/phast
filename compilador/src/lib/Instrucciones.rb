@@ -32,6 +32,7 @@ module Phast
     LNK = 30
     LNKH = 31
     XOR = 32
+    OBJ = 33
 
     def self.i_to_s(i)
         case

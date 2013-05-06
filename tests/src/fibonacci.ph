@@ -1,6 +1,6 @@
 <?
 verbose{
-$start = microtime(true);
+    $start = microtime(true);
 }
 fun fib(n){
     if (n < 2) {
@@ -11,9 +11,9 @@ fun fib(n){
     }
 }
 
-println(fib(30));
+println(fib(15));
 verbose{
-echo(microtime(true) - $start);
-echo("\n");
+    echo(microtime(true) - $start);
+    echo("\n");
 }
 ?>
