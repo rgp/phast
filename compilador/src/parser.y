@@ -56,7 +56,7 @@ factor_aux: op_fact {fun2} factor {fun3 0} factor_aux
           | 
 factor: llamada 
       | estatico {fun1(llama_cte(@curr_token[1])) }
-      | { openArreglo } arreglo { closeArreglo }
+      |  arreglo 
       | '('{fun4} expresion ')'{fun5}
 llamada: ID tipo_llamada 
        | OP_INCREMENT ID { pre_affect "+" }
@@ -101,7 +101,7 @@ numero: int
       | float
 int : INT { guarda_cte @curr_token[1], Integer(@curr_token[1]) , 2 }
 float: FLOAT { guarda_cte @curr_token[1], Float(@curr_token[1]) , 3 }
-arreglo: '[' arr_elems ']'
+arreglo: { openArreglo } '[' arr_elems ']' { closeArreglo }
 arr_elems: arr_elem arr_elems_aux
           |
 arr_elems_aux: ',' arr_elem arr_elems_aux
