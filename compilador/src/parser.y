@@ -126,11 +126,11 @@ bloque_class: WORD_CLASS CLASS_ID { define_objeto @curr_token[1] } class_extras 
 class_body: class_body_aux  class_body
            |
 class_body_aux: /* NOMBRE COMPLETO CLASE*/ bloque_fun 
-           | ID { define_attr @curr_token[1] } class_def_var_aux ';'
-class_def_var_aux: OP_ASIGN pos_vars
+           | ID { define_attr @curr_token[1] } class_def_var_aux ';' { vaciar_pOperandos }
+class_def_var_aux: OP_ASIGN {fun2} pos_vars {fun3 3}
                   |
-pos_vars: estatico
-        | arreglo
+pos_vars: estatico {fun1(llama_cte(@curr_token[1])) } { asign_attr }
+        | arreglo { asign_attr } 
 class_extras: WORD_EXTENDS ID
              |
 
@@ -222,16 +222,23 @@ require_relative 'lib/Objeto'
             exit
         end
         @obejota = Objeto.new(quien,@scope_actual)
-        @scope_actual = Scope.new(@scope_actual)
+        aumenta_scope quien
     end
 
     def define_attr nombre
-        @obejota.attributos[nombre] = Var.new(nombre,nil,nil,@obejota.attributos.length,$lineno)
+        guarda_var nombre
+        v = Var.new(nombre,nil,nil,@obejota.attributos.length,$lineno)
+        @pOperandos.push v
+        @obejota.attributos[nombre] = v
+    end
+
+    def asign_attr
+        p @pOperandos
     end
 
     def termina_objeto
         @object_def[@obejota.nombre] = @obejota
-        @scope_actual = @scope_actual.papa
+        disminuye_scope
     end
 
     def pre_affect (op)
@@ -338,6 +345,10 @@ require_relative 'lib/Objeto'
     end
 
     def aumenta_scope nombre, is_class = false
+        if( @scopes.include? nombre )
+            p "Error #{nombre} previamente definido"
+            exit
+        end
         nuevo_scope = Scope.new(@scope_actual)
         @scope_actual = nuevo_scope
         @scopes[nombre] = @scope_actual

@@ -2,8 +2,8 @@
 
 Class Animal {
 
-    dueno;
-    edad;
+    dueno = 2;
+    edad = [1,2];
     raza;
     color;
     apodos;  
