@@ -134,7 +134,7 @@ module Phast
                 token = [:WORD_AND, match]
             when match = @scanner.scan(/or/)
                 token = [:WORD_OR, match]
-            when match = @scanner.scan(/not/)
+            when match = @scanner.scan(/not|!/) # ****************
                 token = [:WORD_NOT, match]
             when match = @scanner.scan(/xor/)
                 token = [:WORD_XOR, match]

@@ -1,8 +1,8 @@
 run: prepare
 	@echo "Execute VM....."
-	@./phast tests/bin/expr.pho
+	@./phast tests/bin/op_logicos.pho
 prepare: 
 	@echo "Compiling ....."
-	@./phast -c tests/src/expr.ph -o tests/bin/expr.pho	
+	@./phast -c tests/src/op_logicos.ph -o tests/bin/op_logicos.pho	
 clean:
 	@rm -Rf tests/bin/*

@@ -51,9 +51,11 @@ comparando_aux: op_comp {fun2} comparando {fun3 2} comparando_aux
 comparando: termino {fun3 1} termino_aux
 termino_aux: op_term {fun2} termino {fun3 1} termino_aux
            | 
-termino: factor {fun3 0} factor_aux
-factor_aux: op_fact {fun2} factor {fun3 0} factor_aux 
+termino: factor_unary_operand {fun3 0} factor_aux
+factor_aux: op_fact {fun2} factor_unary_operand {fun3 0} factor_aux 
           | 
+factor_unary_operand: factor    
+             |  op_unary {@pOper.push Phast::NOT} factor {fun3 -1}
 factor: llamada 
       | estatico {fun1(llama_cte(@curr_token[1])) }
       |  arreglo 
@@ -90,14 +92,14 @@ op_comp: OP_EQUAL
        | OP_LESS  
        | OP_LESS_EQUAL
        | WORD_AND  
-       | WORD_OR {p "a ver si pasa por aqui \n"}
-       | WORD_XOR {p "paso por aqui \n"}
+       | WORD_OR
+       | WORD_XOR
 
 op_term: OP_PLUS
        | OP_MINUS
 op_fact: OP_MULTIPLY
        | OP_DIVIDE
-
+op_unary: WORD_NOT
 numero: int
       | float
 int : INT { guarda_cte @curr_token[1], Integer(@curr_token[1]) , 2 }
@@ -373,6 +375,10 @@ require_relative 'lib/Instrucciones'
         if !@pOper.empty?
             op = @pOper.last
             case
+            when nivel == -1
+                if(op == Phast::NOT)
+                    fun3_aux2
+                end
             when nivel == 0
                 if(op == Phast::MUL || op == Phast::DIV)
                     fun3_aux
@@ -405,6 +411,16 @@ require_relative 'lib/Instrucciones'
         @pOperandos.push tmp
 
         genera(op, oper1, oper, @pOperandos.last)
+    end
+
+    def fun3_aux2
+        op = @pOper.pop
+        oper = @pOperandos.pop
+        tmp = Var.new(nil,nil,nil,@scope_actual.temporales.length,nil)
+        @scope_actual.temporales.push tmp
+        @pOperandos.push tmp
+
+        genera(op, oper, nil, @pOperandos.last)
     end
 
     def fun4
