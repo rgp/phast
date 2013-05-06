@@ -18,7 +18,7 @@ goldy.raza = "Yorkshire Terrier";
 goldy.color = "dorado/gris";
 goldy.apodos = ["gordi", "gorda", "gordinflona", 007];
 
-Animal peluche = goldy;
+peluche = goldy;
 
 
 ?>

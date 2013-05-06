@@ -90,7 +90,8 @@ op_comp: OP_EQUAL
        | OP_LESS  
        | OP_LESS_EQUAL
        | WORD_AND  
-       | WORD_OR 
+       | WORD_OR {p "a ver si pasa por aqui \n"}
+       | WORD_XOR {p "paso por aqui \n"}
 
 op_term: OP_PLUS
        | OP_MINUS
@@ -381,7 +382,7 @@ require_relative 'lib/Instrucciones'
                     fun3_aux
                 end
             when nivel == 2
-                if(op == Phast::AND || op == Phast::OR || op == Phast::GT || op == Phast::LT || op == Phast::ELT || op == Phast::EGT || op == Phast::EQ)
+                if(op == Phast::AND || op == Phast::OR || op == Phast::XOR || op == Phast::GT || op == Phast::LT || op == Phast::ELT || op == Phast::EGT || op == Phast::EQ)
                     fun3_aux
                 end
             when nivel == 3

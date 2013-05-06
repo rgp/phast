@@ -31,6 +31,7 @@ module Phast
     EXST = 29
     LNK = 30
     LNKH = 31
+    XOR = 32
 
     def self.i_to_s(i)
         case
@@ -59,6 +60,8 @@ module Phast
             AND
         when op == "or"
             OR
+        when op == "xor"
+            XOR
         when op == ">"
             GT
         when op == "<"
