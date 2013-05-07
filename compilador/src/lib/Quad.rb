@@ -12,7 +12,9 @@ class Quad
     end
 
     def saltos i
-        @registro += i if @registro.is_a? Integer
+        if @registro.is_a? Integer and @instruccion != Phast::ARRINI
+            @registro += i 
+        end
     end
     
     def to_s

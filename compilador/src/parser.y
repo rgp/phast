@@ -69,8 +69,8 @@ funcs: { fun_prepare @prev_token[1] } '(' argumentos ')' { fun_call }
 vars: arr_acc asign
     | { post_affect "+" } OP_INCREMENT
     | { post_affect "-" } OP_DECREMENT
-    | { @inst = @prev_token[1] } '.' ID { llame_attr @curr_token[1] } asign
-arr_acc:  { load_arr } '[' expresion { access_array_index } ']' arr_acc
+    | { @inst = @prev_token[1] } '.' ID { llame_attr @curr_token[1] } arr_acc asign
+arr_acc:  { load_arr } '[' expresion { access_array_index } ']'  arr_acc
        |
 asign: OP_ASIGN {fun2} expresion {fun3 3}  
      |
@@ -220,7 +220,7 @@ require_relative 'lib/Objeto'
         inst = @pOperandos.pop
         tmp = Var.new(nil,nil,nil,@scope_actual.temporales.length,nil)
         @scope_actual.temporales.push tmp
-        genera(Phast::ATTR_ACC,inst,nil,tmp)
+        genera(Phast::ATTR_ACC,inst,class_def.attributos[cual],tmp)
         @pOperandos.push tmp
     end
 
@@ -232,6 +232,7 @@ require_relative 'lib/Objeto'
         @obejota = Objeto.new(quien,@scope_actual)
         aumenta_scope quien
         v = Var.new(nil,nil,nil,@scope_actual.temporales.length,nil)
+        @obejota.id = v
         @scope_actual.temporales.push v
         genera(Phast::OBJ,nil,nil,v)
     end
@@ -250,7 +251,7 @@ require_relative 'lib/Objeto'
         if oper.tipoDato.kind_of?(Array)
             oper1.tipoDato = oper.tipoDato
         end
-        genera(Phast::ATTR, oper, nil, oper1)
+        genera(Phast::ATTR, oper, @obejota.id, oper1)
     end
 
     def termina_objeto
@@ -298,7 +299,7 @@ require_relative 'lib/Objeto'
 
     def access_array_index
         arr_index = @pOperandos.pop
-        arr_tmp = @pOperandos.last
+        arr_tmp = @pOperandos.pop
         genera(Phast::ARRVAL,arr_index,arr_tmp,nil) # VAL RNG
         tmp = Var.new(nil,nil,nil,@scope_actual.temporales.length,nil)
         @scope_actual.temporales.push tmp
