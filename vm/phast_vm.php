@@ -7,6 +7,11 @@ $globals = 0;
 $temporals = 0;
 $constants = 0;
 
+$return_var = NULL;
+$mem = false;
+$params_hash = NULL;
+$memento = array();
+
 #Iterators
 $curr_reg = $start;
 $next_free_mem = 0; // siguiente espacio en memoria disponible
@@ -380,14 +385,20 @@ while($curr_reg < $EOF)
         $curr_reg++;
         break;
     case 17: //RET
-        if(!is_null($instruccion[3]))
+        if(!is_null($instruccion[3])){
             $dir = getRegistry((int)$instruccion[3]);
             $return_var = $memoria[$dir];
+        }
         // sacar del offset_stack la posicion donde se puede empezar a utilizar la memoria
         $clean = $next_free_mem;
         $next_free_mem = array_pop($offset_stack);
         for($i = $next_free_mem; $i <= $clean; $i++){
             unset($memoria[$i]);
+        }
+        if($mem == true){
+            $memento[$params_hash] = $return_var;
+            $mem = false;
+            $params_hash = NULL;
         }
         $curr_reg = array_pop($call_stack);
         break;
@@ -450,7 +461,6 @@ while($curr_reg < $EOF)
     case 26: //ARRVLD  ... valida que el índice esté dentro de rango
         $addr = getRegistry((int)$instruccion[2]);
         $ind = getRegistry((int)$instruccion[1]);
-        // if($memoria[$ind] < $memoria[$addr]->getSize() && $memoria[$ind] >= 0){
         if($memoria[$ind] < count($memoria[$addr]) && $memoria[$ind] >= 0){
             //all good
         }else{
@@ -537,12 +547,25 @@ while($curr_reg < $EOF)
         $memoria[$saveTo] = &$memoria[$inst][(int)$instruccion[2]];
         $curr_reg++;
         break;
+    case 37: // MEM
+        $params_hash = sha1(serialize($params));
+        if(array_key_exists($params_hash,$memento)){
+            $return_var = $memento[$params_hash];
+            $clean = $next_free_mem;
+            $next_free_mem = array_pop($offset_stack);
+            for($i = $next_free_mem; $i <= $clean; $i++){
+                unset($memoria[$i]);
+            }
+            $curr_reg = array_pop($call_stack);
+        }else{
+            $mem = true;
+            $curr_reg++;
+        }
+        break;
     default: //RANDOM ? WTF
         echo "\ndied at: ".$curr_reg."\n";
         echo "Unknown instruction:\n".implode("\t",$instruccion);
         die();
     }
-
-
 }
 ?>
