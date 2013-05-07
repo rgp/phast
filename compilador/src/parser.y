@@ -69,8 +69,8 @@ funcs: { fun_prepare @prev_token[1] } '(' argumentos ')' { fun_call }
 vars: arr_acc asign
     | { post_affect "+" } OP_INCREMENT
     | { post_affect "-" } OP_DECREMENT
-    | { @inst = @prev_token[1] } '.' ID { llame_attr @curr_token[1] } asign
-arr_acc:  { load_arr } '[' expresion { access_array_index } ']' arr_acc
+    | { @inst = @prev_token[1] } '.' ID { llame_attr @curr_token[1] } arr_acc asign
+arr_acc:  { load_arr } '[' expresion { access_array_index } ']'  arr_acc
        |
 asign: OP_ASIGN {fun2} expresion {fun3 3}  
      |
@@ -127,10 +127,10 @@ class_body: class_body_aux  class_body
            |
 class_body_aux: /* NOMBRE COMPLETO CLASE*/ bloque_fun 
            | ID { define_attr @curr_token[1] } class_def_var_aux ';' { vaciar_pOperandos }
-class_def_var_aux: OP_ASIGN {fun2} pos_vars {fun3 3}
+class_def_var_aux: OP_ASIGN {fun2} pos_vars { asign_attr }
                   |
-pos_vars: estatico {fun1(llama_cte(@curr_token[1])) } { asign_attr }
-        | arreglo { asign_attr } 
+pos_vars: estatico {fun1(llama_cte(@curr_token[1])) }
+        | arreglo 
 class_extras: WORD_EXTENDS ID
              |
 
@@ -194,9 +194,12 @@ require_relative 'lib/Objeto'
 
     def crea_instancia
         clase = @curr_token[1]
-        tmp = Var.new(nil,[:object,clase],Hash.new,@scope_actual.temporales.length,nil)
+
+        @pFnCall.push genera(Phast::CALL,nil,nil,clase)
+        tmp = Var.new(nil,[:object,clase],nil,@scope_actual.temporales.length,nil)
         @scope_actual.temporales.push tmp
-        @inst_defs.push genera(Phast::OBJ, 0, nil, tmp)
+        @pOperandos.push tmp
+        genera(Phast::REV,nil,nil,tmp)
     end
 
     def llame_attr cual
@@ -206,7 +209,7 @@ require_relative 'lib/Objeto'
             exit
         end
 
-        class_def = @object_def[inst.valor]
+        class_def = @object_def[inst.tipoDato[1]]
 
         if class_def.attributos.include? cual
             class_def.attributos[cual]
@@ -214,6 +217,11 @@ require_relative 'lib/Objeto'
             p "Error objeto: #{@inst} no contiene atributo #{cual}"
             exit
         end
+        inst = @pOperandos.pop
+        tmp = Var.new(nil,nil,nil,@scope_actual.temporales.length,nil)
+        @scope_actual.temporales.push tmp
+        genera(Phast::ATTR_ACC,inst,class_def.attributos[cual],tmp)
+        @pOperandos.push tmp
     end
 
     def define_objeto quien
@@ -223,6 +231,10 @@ require_relative 'lib/Objeto'
         end
         @obejota = Objeto.new(quien,@scope_actual)
         aumenta_scope quien
+        v = Var.new(nil,nil,nil,@scope_actual.temporales.length,nil)
+        @obejota.id = v
+        @scope_actual.temporales.push v
+        genera(Phast::OBJ,nil,nil,v)
     end
 
     def define_attr nombre
@@ -233,11 +245,18 @@ require_relative 'lib/Objeto'
     end
 
     def asign_attr
-        p @pOperandos
+        @pOper.pop
+        oper = @pOperandos.pop
+        oper1 = @pOperandos.last
+        if oper.tipoDato.kind_of?(Array)
+            oper1.tipoDato = oper.tipoDato
+        end
+        genera(Phast::ATTR, oper, @obejota.id, oper1)
     end
 
     def termina_objeto
         @object_def[@obejota.nombre] = @obejota
+        genera(Phast::RET,nil,nil,@scope_actual.temporales.first)
         disminuye_scope
     end
 
@@ -280,7 +299,7 @@ require_relative 'lib/Objeto'
 
     def access_array_index
         arr_index = @pOperandos.pop
-        arr_tmp = @pOperandos.last
+        arr_tmp = @pOperandos.pop
         genera(Phast::ARRVAL,arr_index,arr_tmp,nil) # VAL RNG
         tmp = Var.new(nil,nil,nil,@scope_actual.temporales.length,nil)
         @scope_actual.temporales.push tmp
@@ -530,8 +549,8 @@ require_relative 'lib/Objeto'
 
     def process_output
 
-        @reg_counter = 0 #TODO
-        @mem_offset = 0 #TODO
+        @reg_counter = 0 
+        @mem_offset = 0
 
         @salida = [0]
 
@@ -555,12 +574,7 @@ require_relative 'lib/Objeto'
             print_quads s.quads
         end
 
-        @mem_offset = 0 #scope_constantes.variables.length
-        #Correr variables
-        # scope_global.variables.each do |k,v|
-        #     v.direccion_virtual += @mem_offset
-        # end
-
+        @mem_offset = 0
         @mem_offset += scope_global.variables.length
         scope_global.temporales.each do |v|
             v.direccion_virtual += @mem_offset
@@ -570,6 +584,10 @@ require_relative 'lib/Objeto'
         print_quads scope_global.quads
 
         @pFnCall.each do |q|
+            if( @scopes[q.registro] == nil)
+                p "Funcion #{q.registro} indefinida"
+                exit
+            end
             q.op1 = @scopes[q.registro].variables.length
             q.op2 = @scopes[q.registro].temporales.length
             q.registro = @scopes[q.registro].registro

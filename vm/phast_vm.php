@@ -511,6 +511,11 @@ while($curr_reg < $EOF)
         $memoria[$saveTo] =  $resultado;
         $curr_reg++;
         break;
+    case 33: // OBJ
+        $saveTo = getRegistry((int)$instruccion[3]);
+        $memoria[$saveTo] = array();
+        $curr_reg++;
+        break;
     case 34: //NOT
         $saveTo = getRegistry((int)$instruccion[3]);
         $op = $memoria[getRegistry((int)$instruccion[1])];
@@ -518,6 +523,18 @@ while($curr_reg < $EOF)
         $resultado = ((int)(!$op)) ? true : false;
 
         $memoria[$saveTo] =  $resultado;
+        $curr_reg++;
+        break;
+    case 35: // ATTR
+        $read = getRegistry((int)$instruccion[1]);
+        $saveTo = getRegistry((int)$instruccion[2]);
+        $memoria[$saveTo][$instruccion[3]] = $memoria[$read];
+        $curr_reg++;
+        break;
+    case 36: // ATTR_ACC
+        $inst = getRegistry((int)$instruccion[1]);
+        $saveTo = getRegistry((int)$instruccion[3]);
+        $memoria[$saveTo] = &$memoria[$inst][(int)$instruccion[2]];
         $curr_reg++;
         break;
     default: //RANDOM ? WTF

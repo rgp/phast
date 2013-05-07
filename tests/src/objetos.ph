@@ -10,9 +10,11 @@ Class Animal {
 
 }
 
-pato;
-ganso;
+pato = 1 + 2;
+// println(pato);
+ganso = "oo" ;
 goldy = new Animal();
+// println("GOOG");
 
 goldy.dueno = "Cyn";
 goldy.edad = 10;
@@ -22,5 +24,8 @@ goldy.apodos = ["gordi", "gorda", "gordinflona", 007];
 
 peluche = goldy;
 
+// println("RESUTLADOS");
+// println(peluche.dueno);
+println(peluche.apodos[1]);
 
 ?>
