@@ -2,7 +2,7 @@
 verbose{
     $start = microtime(true);
 }
-fun fib(n){
+fun mem fib(n){
     if (n < 2) {
         return n;
     }

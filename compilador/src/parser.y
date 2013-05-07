@@ -65,7 +65,7 @@ llamada: ID tipo_llamada
        | WORD_NEW CLASS_ID { crea_instancia } '(' ')'
 tipo_llamada: { fun1(llame_var(@prev_token[1])) } vars 
             | funcs
-funcs: { fun_prepare @prev_token[1] } '(' argumentos ')' { fun_call }
+funcs: { fun_prepare @prev_token[1] } '(' { @args_aux.push [] } argumentos { args_write }  ')' { fun_call }
 vars: arr_acc asign
     | { post_affect "+" } OP_INCREMENT
     | { post_affect "-" } OP_DECREMENT
@@ -120,8 +120,9 @@ bloque_while : WORD_WHILE {while_quad 1} '(' expresion ')' {while_quad 2} '{' es
 bloque_do : WORD_DO {do_while_quad 1} '{' estatutos '}' WORD_WHILE '(' expresion ')' {do_while_quad 2} ';' 
 bloque_verbose :  BLOCK_VERBOSE  { verbose @curr_token[1] }
 bloque_for : WORD_FOR '('comparando ';' expresion ';' expresion ')' '{' estatutos '}'
-bloque_fun : WORD_FUN ID { aumenta_scope @curr_token[1] } '(' params ')' '{' estatutos { end_fun } '}'
-
+bloque_fun : WORD_FUN fun_mem ID { aumenta_scope @curr_token[1] } { memento } '(' params ')' '{' estatutos { end_fun } '}'
+fun_mem: {@mem = true } WORD_MEM
+       |
 bloque_class: WORD_CLASS CLASS_ID { define_objeto @curr_token[1] } class_extras '{' class_body '}' { termina_objeto }
 class_body: class_body_aux  class_body
            |
@@ -172,12 +173,14 @@ require_relative 'lib/Objeto'
         @funToCall = []
         
         @pArr = []
+        @args_aux = []
 
         @object_def = {}
         @inst_defs = []
 
         @verboseCount = 0;
         @outfile = output
+        @mem = false
 
 
     end
@@ -422,8 +425,18 @@ require_relative 'lib/Objeto'
         @pOper.pop
     end
 
+    def args_write
+        @scope_actual.quads.concat @args_aux.pop
+    end
+
     def argument
-        genera(Phast::ARG,nil,nil,@pOperandos.pop)
+        @args_aux.last.unshift Quad.new(Phast::ARG,nil,nil,@pOperandos.pop)
+    end
+
+    def memento
+        if @mem
+            genera(Phast::MEM,nil,nil,nil)
+        end
     end
 
     def return_quad
@@ -431,6 +444,7 @@ require_relative 'lib/Objeto'
     end
 
     def end_fun
+        @mem = false
         return_quad
     end
     

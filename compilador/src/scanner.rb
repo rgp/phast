@@ -110,6 +110,8 @@ module Phast
                 token = [:WORD_CONTINUE, match]
             when match = @scanner.scan(/fun/)
                 token = [:WORD_FUN, match]
+            when match = @scanner.scan(/mem/)
+                token = [:WORD_MEM, match]
             when match = @scanner.scan(/return/)
                 token = [:WORD_RETURN, match]
             when match = @scanner.scan(/static/)

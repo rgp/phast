@@ -36,6 +36,7 @@ module Phast
     NOT = 34
     ATTR = 35
     ATTR_ACC = 36
+    MEM = 37
 
     def self.i_to_s(i)
         case

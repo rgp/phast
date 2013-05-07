@@ -4,3 +4,4 @@ phast-compiler
 bison/*
 flex/*
 rbs/*
+bin.pho
