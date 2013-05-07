@@ -165,7 +165,7 @@ module Phast
                 token = [:OP_DECREMENT, match]
             when match = @scanner.scan(/\+/)
                 token = [:OP_PLUS, match]
-            when match = @scanner.scan(/-/)
+            when match = @scanner.scan(/-[^\d]/)
                 token = [:OP_MINUS, match]
             when match = @scanner.scan(/\*/)
                 token = [:OP_MULTIPLY, match]
@@ -186,9 +186,9 @@ module Phast
 
             when match = @scanner.scan(/[a-zA-Z_][a-zA-Z0-9_]*/)
                 token = [:ID, match]
-            when match = @scanner.scan(/\d+\.\d+(e(\+|-)?\d+)?/)
+            when match = @scanner.scan(/-?\d+\.\d+(e(\+|-)?\d+)?/)
                 token = [:FLOAT, match]
-            when match = @scanner.scan(/\d+/)
+            when match = @scanner.scan(/-?\d+/)
                 token = [:INT, match]
             when match = @scanner.scan(/"(\\.|[^"])*"/)
                 token = [:STRING, match[1..-2]]
