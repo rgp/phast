@@ -65,7 +65,7 @@ llamada: ID tipo_llamada
        | WORD_NEW CLASS_ID { crea_instancia } '(' ')'
 tipo_llamada: { fun1(llame_var(@prev_token[1])) } vars 
             | funcs
-funcs: { fun_prepare @prev_token[1] } '(' { @args_aux.push [] } argumentos { args_write }  ')' { fun_call }
+funcs: { fun_prepare @prev_token[1] } {@pArgs.push []} '(' argumentos ')' { fun_call }
 vars: arr_acc asign
     | { post_affect "+" } OP_INCREMENT
     | { post_affect "-" } OP_DECREMENT
@@ -173,7 +173,7 @@ require_relative 'lib/Objeto'
         @funToCall = []
         
         @pArr = []
-        @args_aux = []
+        @pArgs = []
 
         @object_def = {}
         @inst_defs = []
@@ -401,6 +401,7 @@ require_relative 'lib/Objeto'
             p "Compile Error"
             exit
         end
+        @scope_actual.quads.concat @pArgs.pop
         cual = @funToCall.pop
         if(cual == "print")
             genera(Phast::PRT,nil,nil,nil)
@@ -425,12 +426,8 @@ require_relative 'lib/Objeto'
         @pOper.pop
     end
 
-    def args_write
-        @scope_actual.quads.concat @args_aux.pop
-    end
-
     def argument
-        @args_aux.last.unshift Quad.new(Phast::ARG,nil,nil,@pOperandos.pop)
+        @pArgs.last.push Quad.new(Phast::ARG,nil,nil,@pOperandos.pop)
     end
 
     def memento
