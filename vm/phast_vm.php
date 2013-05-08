@@ -399,7 +399,7 @@ while($curr_reg < $EOF)
         $curr_reg++;
         break;
     case 17: //RET
-        if(!is_null($instruccion[3])){
+        if(!empty($instruccion[3]) && $instruccion[3] != 0){
             $dir = getRegistry((int)$instruccion[3]);
             $return_var = $memoria[$dir];
         }
