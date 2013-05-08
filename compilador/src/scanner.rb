@@ -10,6 +10,7 @@ module Phast
         @src = source
         @scanner = StringScanner.new source
         $lineno = 1
+        @prev_token = []
     end
 
     def rest
@@ -169,7 +170,20 @@ module Phast
             when match = @scanner.scan(/\+/)
                 token = [:OP_PLUS, match]
             when match = @scanner.scan(/-/)
-                token = [:OP_MINUS, match]
+                if(@prev_token[0] != [:ID] and
+                   @prev_token[0] != [:FLOAT] and
+                   @prev_token[0] != [:INT])
+                   @scanner.unscan
+                   if(match = @scanner.scan(/-?\d+\.\d+(e(\+|-)?\d+)?/))
+                       token = [:FLOAT, match]
+                   elsif( match = @scanner.scan(/-?\d+/))
+                       token = [:INT, match]
+                   else
+                       STDERR.puts "Unkown input at #{@scanner.rest}... on line #{$lineno}"
+                   end
+                else
+                    token = [:OP_MINUS, match]
+                end
             when match = @scanner.scan(/\*/)
                 token = [:OP_MULTIPLY, match]
             when match = @scanner.scan(/\//)
@@ -208,7 +222,7 @@ module Phast
                 exit 1
             end
         end
-        token
+        @prev_token = token
     end
   end
 end
