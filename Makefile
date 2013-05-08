@@ -11,10 +11,11 @@ clean:
 compile: clean_rbs rbs/parser.rb rbs/scanner.rb libs
 
 rbs/scanner.rb:
-	cp compilador/src/scanner.rb compilador/rbs/scanner.rb
+	@cp compilador/src/scanner.rb compilador/rbs/scanner.rb
 rbs/parser.rb:
-	racc -o compilador/rbs/parser.rb compilador/src/parser.y
+	@racc -o compilador/rbs/parser.rb compilador/src/parser.y
 libs:
-	cp -R compilador/src/lib/ compilador/rbs/lib/
+	@cp -R compilador/src/lib/ compilador/rbs/lib/
 clean_rbs:
-	rm -Rf compilador/rbs/*
+	@rm -Rf compilador/rbs/*.rb
+	@rm -Rf compilador/rbs/lib/*.rb
