@@ -136,7 +136,12 @@ module Phast
                 token = [:WORD_AND, match]
             when match = @scanner.scan(/or/i)
                 token = [:WORD_OR, match]
-            when match = @scanner.scan(/not/i)
+
+                # **** SPECIAL CASE ****
+            when match = @scanner.scan(/!=/)
+                token = [:OP_NOT_EQUAL, match]
+                # **** ************ ****
+                
             when match = @scanner.scan(/not|!/i) # ****************
                 token = [:WORD_NOT, match]
             when match = @scanner.scan(/xor/i)
@@ -153,8 +158,6 @@ module Phast
                 token = [:OP_IDENTICAL, match]
             when match = @scanner.scan(/==/)
                 token = [:OP_EQUAL, match]
-            when match = @scanner.scan(/!=/)
-                token = [:OP_NOT_EQUAL, match]
             when match = @scanner.scan(/=>/)
                 token = [:OP_KEYVAL, match]
             when match = @scanner.scan(/=/)

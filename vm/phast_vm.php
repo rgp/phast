@@ -562,6 +562,16 @@ while($curr_reg < $EOF)
             $curr_reg++;
         }
         break;
+    case 38: //NOT EQ
+        $saveTo = getRegistry((int)$instruccion[3]);
+        $op1 = $memoria[getRegistry((int)$instruccion[1])];
+        $op2 = $memoria[getRegistry((int)$instruccion[2])];
+
+        $resultado = ((int)($op1 != $op2)) ? true : false;
+
+        $memoria[$saveTo] = $resultado;
+        $curr_reg++;
+        break;
     default: //RANDOM ? WTF
         echo "\ndied at: ".$curr_reg."\n";
         echo "Unknown instruction:\n".implode("\t",$instruccion);

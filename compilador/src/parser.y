@@ -475,7 +475,7 @@ require_relative 'lib/Objeto'
                     fun3_aux
                 end
             when nivel == 2
-                if(op == Phast::AND || op == Phast::OR || op == Phast::XOR || op == Phast::GT || op == Phast::LT || op == Phast::ELT || op == Phast::EGT || op == Phast::EQ)
+                if(op == Phast::AND || op == Phast::OR || op == Phast::XOR || op == Phast::GT || op == Phast::LT || op == Phast::ELT || op == Phast::EGT || op == Phast::EQ || op == Phast::NOTEQ)
                     fun3_aux
                 end
             when nivel == 3

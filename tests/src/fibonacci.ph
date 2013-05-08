@@ -2,16 +2,18 @@
 verbose{
     $start = microtime(true);
 }
-fun fib(n){
-    if (n < 2) {
-        return n;
+fun fibonacci(n){
+    ant = 1;
+    antant = 1;
+    for (i = 2; i < n; i++) {
+        temp = ant;
+        ant = ant + antant;
+        antant = temp;
     }
-    else {
-        return fib(n-1)+fib(n-2);
-    }
+    return ant;
 }
 
-println(fib(30));
+println(fibonacci(1));
 verbose{
     echo(microtime(true) - $start);
     echo("\n");

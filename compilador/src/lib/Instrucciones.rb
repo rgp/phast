@@ -37,6 +37,7 @@ module Phast
     ATTR = 35
     ATTR_ACC = 36
     MEM = 37
+    NOTEQ = 38
 
     def self.i_to_s(i)
         case
@@ -81,6 +82,8 @@ module Phast
             ASIG
         when op == "=="
             EQ
+        when op == "!="
+            NOTEQ
         end
     end
 

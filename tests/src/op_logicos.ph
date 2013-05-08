@@ -1,67 +1,28 @@
 <?
 
-a = 1;
-println("a=",a);
+println(1 AND 1);
+println(true AND false);
+println(1 and 11);
+println(1 aNd TrUE);
+println(3 < 4);
+println(5 >= 43434);
+println(5 == 5);
+println("hola");
+println(6 != 5);
+println(5 != 5);
+println(0 or 0 Or 0 OR 0);
+println(1 and 1 and trUE);
+println (faLSE oR FalsE);
+println(!"hello");
+println(2 xor 2);
+println(2 xor 0);
 
-b = 0;
-println("b=",b);
+i = -5;
 
-c = truE;
-println("c=",c);
-
-d = 113;
-println("d=",d);
-
-e = "hello";
-println("e=", e);
-
-if (a > b)
+while(i <= 10)
 {
-println("1.si debe entrar");
-println("a is grater than b");
+    i = i + 2;
+    println(i);
 }
-
-if (!(a >= b))
-{
-println("no debe entrar");
-println("a is not greater than or equal than b");
-}
-
-if (1 AND (3 < (5-1)))
-{
-println("2.si debe entrar");
-}
-
-if (c AND 1)
-{
-println("3.si debe entrar");
-println("true AND 1 is true");
-}
-
-if (d OR b)
-{
-println("4.si debe entrar");
-println("d OR b is true");
-}
-
-if (e)
-{
-println("5.si debe entrar");
-println("e is true");
-}
-
-if (! e)
-{
-println("no debe entrar");
-println("e is false");
-}
-
-if (not a)
-{
-println("no debe entrar");
-println("a is false");
-}
-
-println("se deben imprimir 5 condiciones");
 
 ?>

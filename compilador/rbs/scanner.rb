@@ -136,7 +136,12 @@ module Phast
                 token = [:WORD_AND, match]
             when match = @scanner.scan(/or/i)
                 token = [:WORD_OR, match]
-            when match = @scanner.scan(/not/i)
+
+                # **** SPECIAL CASE ****
+            when match = @scanner.scan(/!=/)
+                token = [:OP_NOT_EQUAL, match]
+                # **** ************ ****
+                
             when match = @scanner.scan(/not|!/i) # ****************
                 token = [:WORD_NOT, match]
             when match = @scanner.scan(/xor/i)
@@ -153,8 +158,6 @@ module Phast
                 token = [:OP_IDENTICAL, match]
             when match = @scanner.scan(/==/)
                 token = [:OP_EQUAL, match]
-            when match = @scanner.scan(/!=/)
-                token = [:OP_NOT_EQUAL, match]
             when match = @scanner.scan(/=>/)
                 token = [:OP_KEYVAL, match]
             when match = @scanner.scan(/=/)
@@ -165,7 +168,7 @@ module Phast
                 token = [:OP_DECREMENT, match]
             when match = @scanner.scan(/\+/)
                 token = [:OP_PLUS, match]
-            when match = @scanner.scan(/-/)
+            when match = @scanner.scan(/-[^\d]/)
                 token = [:OP_MINUS, match]
             when match = @scanner.scan(/\*/)
                 token = [:OP_MULTIPLY, match]
@@ -186,9 +189,9 @@ module Phast
 
             when match = @scanner.scan(/[a-zA-Z_][a-zA-Z0-9_]*/)
                 token = [:ID, match]
-            when match = @scanner.scan(/\d+\.\d+(e(\+|-)?\d+)?/)
+            when match = @scanner.scan(/-?\d+\.\d+(e(\+|-)?\d+)?/)
                 token = [:FLOAT, match]
-            when match = @scanner.scan(/\d+/)
+            when match = @scanner.scan(/-?\d+/)
                 token = [:INT, match]
             when match = @scanner.scan(/"(\\.|[^"])*"/)
                 token = [:STRING, match[1..-2]]
