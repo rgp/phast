@@ -5,3 +5,4 @@ bison/*
 flex/*
 rbs/*
 bin.pho
+compilador/rbs/*
