@@ -621,7 +621,7 @@ require_relative 'lib/Objeto'
         # puts @salida
         # print @salida
         write_file @salida
-        puts "Compiled #{$lineno} lines."
+        # puts "Compiled #{$lineno} lines."
     end
 
     def print_quads(quads)
