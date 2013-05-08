@@ -115,7 +115,7 @@ function loadMemory()
             $memoria[$source[0][0]] = (string)$source[0][2];
             break;
         default:
-            echo "ERROR\n";
+            echo "Unknown type error\n";
             echo $type."\n";
             break;
         }
@@ -508,7 +508,7 @@ while($curr_reg < $EOF)
         break;
     case 30: //LNK link file
         if(count($params) < 1){
-            echo "Function exists requires 1 param";
+            echo "Function link requires 1 param";
             die();
         }
         foreach($params as $p){
@@ -518,7 +518,7 @@ while($curr_reg < $EOF)
         break;
     case 31: //LNKH link file
         if(count($params) < 1){
-            echo "Function exists requires 1 param";
+            echo "Function link_hard requires 1 param";
             die();
         }
         foreach($params as $p){
@@ -598,8 +598,7 @@ while($curr_reg < $EOF)
         $curr_reg++;
         break;
     default: //RANDOM ? WTF
-        echo "\ndied at: ".$curr_reg."\n";
-        echo "Unknown instruction:\n".implode("\t",$instruccion);
+        echo "Fatal error: Unknown instruction ".$instruccion[0]." died at ($curr_reg)\n";
         die();
     }
 }
