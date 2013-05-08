@@ -1,19 +1,18 @@
 <?
-fun bubbleSort(arr){
+fun bubbleSort(a){
     n = 9;
-    while (n > 0){
-        newr = 0;
-        i = 1;
-        while(i < n-1){
-            if(arr[i-1] > arr[i]){
-                tmp = arr[i];
-                arr[i] = arr[i-1];
-                arr[i-1] = tmp;
-                newr = i;
+    i = 0;
+    while (i < n){
+        j = 1;
+        while( j < (n - i) ){
+            if(a[j-1] > a[j]){
+                t = a[j-1];
+                a[j-1]=a[j];
+                a[j]=t;
             }
-            i = i + 1;
+            j++; 
         }
-        n = newr;
+        i++;
     }
 }
 

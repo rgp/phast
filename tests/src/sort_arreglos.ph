@@ -14,7 +14,7 @@ fun bubbleSort(arr)
                 tmp = arr[x];
                 arr[x] = arr[x + 1];
                 arr[x + 1] = tmp;
-                println(arr);
+                printrec(arr);
             }
             x++;
         }
