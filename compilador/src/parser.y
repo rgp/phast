@@ -70,7 +70,7 @@ vars: arr_acc asign
     | { post_affect "+" } OP_INCREMENT
     | { post_affect "-" } OP_DECREMENT
     | { @inst = @prev_token[1] } '.' ID { llame_attr @curr_token[1] } arr_acc asign
-arr_acc:  { load_arr } '[' expresion { access_array_index } ']'  arr_acc
+arr_acc:  { load_arr } '[' { @pOper.push '(' } expresion { @pOper.pop}  { access_array_index } ']' arr_acc
        |
 asign: OP_ASIGN {fun2} expresion {fun3 3}  
      |
