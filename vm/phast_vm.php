@@ -387,7 +387,7 @@ while($curr_reg < $EOF)
             $dir = getRegistry((int)$instruccion[3]);
             $return_var = $memoria[$dir];
         }
-        if(!is_null($instruccion[1])){
+        if(!empty($instruccion[1])){
             $params_hash = $memoria[getRegistry((int)$instruccion[1])];
             $memento[$params_hash] = $return_var;
             $params_hash = NULL;
