@@ -15,6 +15,6 @@ describe "Elda" do
         %x[make spec f=elda/busqueda_arreglos].should == "2\n"
     end
     it 'Sort para un Vector' do
-        %x[make spec f=elda/sort_arreglos].should == "Array\n(\n    [0] => 1\n    [1] => 2\n    [2] => 3\n    [3] => 4\n    [4] => 5\n    [5] => 6\n    [6] => 7\n    [7] => 8\n    [8] => 9\n)\n\n"
+        %x[make spec f=elda/sort_arreglos].should == "[1,2,3,4,5,6,7,8,9]\n"
     end
 end

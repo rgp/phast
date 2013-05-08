@@ -409,6 +409,8 @@ require_relative 'lib/Objeto'
             genera(Phast::PRT,nil,nil,nil)
         elsif(cual == "println")
             genera(Phast::PRTLN,nil,nil,nil)
+        elsif(cual == "printrec")
+            genera(Phast::PRTREC,nil,nil,nil)
         elsif(cual == "link")
             genera(Phast::LNK,nil,nil,nil)
         elsif(cual == "link_hard")

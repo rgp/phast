@@ -19,6 +19,6 @@ fun bubbleSort(arr){
 
 arr = [6,2,8,3,5,9,1,4,7];
 arr_sorteado = bubbleSort(arr);
-println(arr_sorteado);
+printrec(arr_sorteado);
 
 ?>
