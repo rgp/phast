@@ -13,7 +13,7 @@ fun busqueda_lineal (a, n)
     }
     else
     {
-        return 100;
+        return -1;
     }
 }
 
