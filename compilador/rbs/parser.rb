@@ -36,6 +36,8 @@ module_eval(<<'...end parser.y/module_eval...', 'parser.y', 156)
         @pSaltos = [] #Pila para saltos (if,else, etc.)
         @pFnCall = [] #Pila de llamadas pendientes (Quads)
         @funToCall = []
+
+        @mems = []
         
         @pArr = []
         @pArgs = []
@@ -297,17 +299,21 @@ module_eval(<<'...end parser.y/module_eval...', 'parser.y', 156)
 
     def memento
         if @mem
-            genera(Phast::MEM,nil,nil,nil)
+            @mem_temp = Var.new(nil,nil,nil,@scope_actual.temporales.length,nil)
+            @scope_actual.temporales.push @mem_temp
+            @mems.push genera(Phast::MEM,@curr_token[1],@mem_temp,nil)
+        else
+            @mem_temp = nil
         end
     end
 
     def return_quad
-        genera(Phast::RET,nil,nil,@pOperandos.last)
+        genera(Phast::RET,@mem_temp,nil,@pOperandos.pop)
     end
 
     def end_fun
         @mem = false
-        return_quad
+        return_quad 
     end
     
     def param variable
@@ -467,6 +473,14 @@ module_eval(<<'...end parser.y/module_eval...', 'parser.y', 156)
             q.op1 = @scopes[q.registro].variables.length
             q.op2 = @scopes[q.registro].temporales.length
             q.registro = @scopes[q.registro].registro
+        end
+
+        @mems.each do |q|
+            if( @scopes[q.op1] == nil)
+                p "Funcion #{q.op1} indefinida"
+                exit
+            end
+            q.op1 = @scopes[q.op1].registro
         end
 
         # puts @salida

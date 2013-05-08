@@ -13,10 +13,7 @@ class Quad
 
     def saltos i
         case @instruccion 
-        when Phast::GOTO
-        when Phast::GOTOF
-        when Phast::GOTOV
-        when Phast::CALL
+        when Phast::GOTO, Phast::GOTOF, Phast::GOTOV, Phast::CALL
             @registro += i if @registro.is_a? Integer
         end
     end

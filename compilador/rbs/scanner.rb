@@ -186,9 +186,9 @@ module Phast
 
             when match = @scanner.scan(/[a-zA-Z_][a-zA-Z0-9_]*/)
                 token = [:ID, match]
-            when match = @scanner.scan(/\d+\.\d+(e(\+|-)?\d+)?/)
+            when match = @scanner.scan(/-?\d+\.\d+(e(\+|-)?\d+)?/)
                 token = [:FLOAT, match]
-            when match = @scanner.scan(/\d+/)
+            when match = @scanner.scan(/-?\d+/)
                 token = [:INT, match]
             when match = @scanner.scan(/"(\\.|[^"])*"/)
                 token = [:STRING, match[1..-2]]
