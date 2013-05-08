@@ -170,9 +170,9 @@ module Phast
             when match = @scanner.scan(/\+/)
                 token = [:OP_PLUS, match]
             when match = @scanner.scan(/-/)
-                if(@prev_token[0] != [:ID] and
-                   @prev_token[0] != [:FLOAT] and
-                   @prev_token[0] != [:INT])
+                if(@prev_token[0] != :ID and
+                   @prev_token[0] != :FLOAT and
+                   @prev_token[0] != :INT)
                    @scanner.unscan
                    if(match = @scanner.scan(/-?\d+\.\d+(e(\+|-)?\d+)?/))
                        token = [:FLOAT, match]
