@@ -14,6 +14,7 @@ fun bubbleSort(a){
         }
         i++;
     }
+    return a;
 }
 
 arr = [6,2,8,3,5,9,1,4,7];
