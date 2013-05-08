@@ -239,8 +239,6 @@ while($curr_reg < $EOF)
         $op2 = $memoria[getRegistry((int)$instruccion[2])];
 
         $rtype = resultType($op1,$op2);
-        // echo $rtype."\n";
-        // echo $op1." * ".$op2." = ".($op1 * $op2)."\n";
 
         switch ($rtype)
         {
@@ -389,16 +387,16 @@ while($curr_reg < $EOF)
             $dir = getRegistry((int)$instruccion[3]);
             $return_var = $memoria[$dir];
         }
+        if(!is_null($instruccion[1])){
+            $params_hash = $memoria[getRegistry((int)$instruccion[1])];
+            $memento[$params_hash] = $return_var;
+            $params_hash = NULL;
+        }
         // sacar del offset_stack la posicion donde se puede empezar a utilizar la memoria
         $clean = $next_free_mem;
         $next_free_mem = array_pop($offset_stack);
         for($i = $next_free_mem; $i <= $clean; $i++){
             unset($memoria[$i]);
-        }
-        if($mem == true){
-            $memento[$params_hash] = $return_var;
-            $mem = false;
-            $params_hash = NULL;
         }
         $curr_reg = array_pop($call_stack);
         break;
@@ -548,8 +546,9 @@ while($curr_reg < $EOF)
         $curr_reg++;
         break;
     case 37: // MEM
-        $params_hash = sha1(serialize($params));
-        if(array_key_exists($params_hash,$memento)){
+        $params_hash = $instruccion[1].serialize($params);
+        if(isset($memento[$params_hash])){
+            $params = array();
             $return_var = $memento[$params_hash];
             $clean = $next_free_mem;
             $next_free_mem = array_pop($offset_stack);
@@ -558,7 +557,7 @@ while($curr_reg < $EOF)
             }
             $curr_reg = array_pop($call_stack);
         }else{
-            $mem = true;
+            $memoria[(int)getRegistry($instruccion[2])] = $params_hash;
             $curr_reg++;
         }
         break;
