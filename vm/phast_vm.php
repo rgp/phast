@@ -163,6 +163,21 @@ function resultType($o1,$o2)
     }
 }
 
+function imp_rec($param){
+    if(gettype($param) == "array"){
+        $str = "[";
+        foreach($param as $p){
+            $str .= imp_rec($p);
+            $str .= ",";
+        }
+        $str = substr($str,0,-1);
+        $str .= "]";
+    }else{
+        $str = $param;
+    }
+    return $str;
+}
+
 loadFile();
 readHeader();
 loadMemory();
@@ -430,7 +445,7 @@ while($curr_reg < $EOF)
         {
             $param = array_shift($params);
             if(gettype($param) == "array")
-                print_r($param);
+                echo "Array";
             else
                 echo $param;
         }
@@ -571,6 +586,15 @@ while($curr_reg < $EOF)
         $resultado = ((int)($op1 != $op2)) ? true : false;
 
         $memoria[$saveTo] = $resultado;
+        $curr_reg++;
+        break;
+    case 39: //PRT REC
+        while(!empty($params))
+        {
+            $param = array_shift($params);
+            echo imp_rec($param);
+        }
+        echo "\n";
         $curr_reg++;
         break;
     default: //RANDOM ? WTF

@@ -38,6 +38,7 @@ module Phast
     ATTR_ACC = 36
     MEM = 37
     NOTEQ = 38
+    PRTREC = 39
 
     def self.i_to_s(i)
         case
