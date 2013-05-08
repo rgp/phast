@@ -169,6 +169,7 @@ loadMemory();
 readQuads();
 
 $offset_stack[] = $next_free_mem; // stack de offsets para mapear memoria al modulo actual
+$next_free_mem += $globals + $temporals;
 
 $curr_reg = $start;
 while($curr_reg < $EOF)
@@ -428,8 +429,8 @@ while($curr_reg < $EOF)
         while(!empty($params))
         {
             $param = array_shift($params);
-            if(gettype($param) == "object")
-                echo "Array";
+            if(gettype($param) == "array")
+                print_r($param);
             else
                 echo $param;
         }
@@ -462,7 +463,8 @@ while($curr_reg < $EOF)
         if($memoria[$ind] < count($memoria[$addr]) && $memoria[$ind] >= 0){
             //all good
         }else{
-            echo "Fatal error: Out of Bounds";
+            $i = $memoria[$ind];
+            echo "Fatal error:\nOut of Bounds $i \n";
             die();
         }
         $curr_reg++;
