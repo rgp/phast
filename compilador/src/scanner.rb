@@ -165,7 +165,7 @@ module Phast
                 token = [:OP_DECREMENT, match]
             when match = @scanner.scan(/\+/)
                 token = [:OP_PLUS, match]
-            when match = @scanner.scan(/-[^\d]/)
+            when match = @scanner.scan(/-/)
                 token = [:OP_MINUS, match]
             when match = @scanner.scan(/\*/)
                 token = [:OP_MULTIPLY, match]
